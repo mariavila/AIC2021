@@ -1,4 +1,4 @@
-package demoplayer;
+package viperplayer;
 
 import aic2021.user.UnitController;
 import aic2021.user.UnitType;
