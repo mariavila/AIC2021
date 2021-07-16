@@ -34,6 +34,7 @@ public class Worker extends MyUnit {
         // Explore for resources
         if (state == "EXPLORE"){
             state = "GATHER";
+
         }
         // Gather
         if (state == "GATHER"){
