@@ -11,6 +11,8 @@ public class Worker extends MyUnit {
     Team myTeam = uc.getTeam();
     Location baseLocation;
     Location resourceLocation = null;
+    boolean followingDeer = false;
+    boolean boxesResearched = false;
 
     String state = "INI";
 
@@ -28,6 +30,9 @@ public class Worker extends MyUnit {
         ResourceInfo[] resources = uc.senseResources();
 
         if(resources.length > 0){
+            if(resources[0].resourceType == Resource.FOOD){
+                followingDeer = true;
+            }
             resourceLocation = resources[0].location;
             state = "GOTORESOURCE";
         }
@@ -37,14 +42,43 @@ public class Worker extends MyUnit {
     }
 
     void goToResource(){
+        if (followingDeer){
+            ResourceInfo[] resources = uc.senseResources();
+            if(resources.length > 0){
+                if(resources[0].resourceType != Resource.FOOD){
+                    followingDeer = false;
+                }
+                resourceLocation = resources[0].location;
+                state = "GOTORESOURCE";
+            }
+            else{
+                state = "EXPLORE";
+                explore();
+            }
+        }
         move.moveTo(resourceLocation, false);
-        if(resourceLocation.distanceSquared(uc.getLocation())<=1){
+        if(resourceLocation.distanceSquared(uc.getLocation())<=1){ //check que no sigui food
             state = "GATHER";
         }
-        else{
-            move.moveTo(resourceLocation, false);
-        }
     }
+/*
+    void gather(){
+        if (uc.canGatherResources()){
+            uc.gatherResources();
+        }
+        if (boxesResearched){
+            int gatheredResource = uc.getResourcesCarried(); // max of list
+            if (gatheredResource == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+                state = "DEPOSIT";
+            }
+        }
+        else{
+            if (uc.getResourcesCarried() >= GameConstants.MAX_RESOURCE_CAPACITY) //TODO
+                state = "DEPOSIT";
+        }
+
+    }
+    */
 
     void playRound(){
         UnitInfo myInfo = uc.getInfo();
@@ -64,7 +98,7 @@ public class Worker extends MyUnit {
         }
         // Gather
         if (state == "GATHER"){
-            state = "DEPOSIT";
+            //gather();
         }
         // Return base and deposit resources
         if (state == "DEPOSIT"){
