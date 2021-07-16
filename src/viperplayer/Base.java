@@ -17,27 +17,13 @@ public class Base extends MyUnit {
 
         if(uc.getRound() == 1) senseInitialWater();
 
-        UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
-        Location baseLoc = uc.getLocation();
-
-        baseAttack(enemies, baseLoc);
+        attack.genericTryAttack();
 
         if (workers < 5){
             if (spawnRandom(UnitType.WORKER)) ++workers;
         }
         if (explorers < 1 && workers > 2) {
             if (spawnRandom(UnitType.EXPLORER)) ++explorers;
-        }
-    }
-
-    private void baseAttack(UnitInfo[] enemies, Location baseLoc){
-
-        for (int i = 0; i < enemies.length; i++) {
-            Location locEnemy = enemies[i].getLocation();
-
-            if (baseLoc.distanceSquared(locEnemy) <= UnitType.BASE.attackRange) {
-                if (uc.canAttack(locEnemy)) uc.attack(locEnemy);
-            }
         }
     }
 
