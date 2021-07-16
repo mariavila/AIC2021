@@ -47,5 +47,7 @@ public class Worker extends MyUnit {
         if (state == "DEPOSIT"){
             state = "EXPLORE";
         }
+
+        attack.genericTryAttack();
     }
 }
