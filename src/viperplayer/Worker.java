@@ -10,22 +10,44 @@ public class Worker extends MyUnit {
 
     Team myTeam = uc.getTeam();
     Location baseLocation;
+    Location resourceLocation = null;
 
     String state = "INI";
 
     Location getBaseLocation(){
         UnitInfo[] units = uc.senseUnits(2, myTeam);
         for (UnitInfo unit:units){
-            if (unit.getType()==UnitType.BASE){
+            if (unit.getType()==UnitType.BASE || unit.getType()==UnitType.SETTLEMENT){
                 return unit.getLocation();
             }
         }
-        return new Location(-1, -1);
+        return null;
+    }
+
+    void explore(){
+        ResourceInfo[] resources = uc.senseResources();
+
+        if(resources.length > 0){
+            resourceLocation = resources[0].location;
+            state = "GOTORESOURCE";
+        }
+        else{
+            move.explore(false);
+        }
+    }
+
+    void goToResource(){
+        move.moveTo(resourceLocation, false);
+        if(resourceLocation.distanceSquared(uc.getLocation())<=1){
+            state = "GATHER";
+        }
+        else{
+            move.moveTo(resourceLocation, false);
+        }
     }
 
     void playRound(){
         UnitInfo myInfo = uc.getInfo();
-        uc.println("--------------------------");
 
         // Get base location
         if (state == "INI"){
@@ -34,10 +56,11 @@ public class Worker extends MyUnit {
         }
         // Explore for resources
         if (state == "EXPLORE"){
-            move.explore(false);
-
-            //state = "GATHER";
-
+            explore();
+        }
+        //Go to resource
+        if (state == "GOTORESOURCE"){
+            goToResource();
         }
         // Gather
         if (state == "GATHER"){
