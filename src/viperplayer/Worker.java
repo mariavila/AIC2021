@@ -25,6 +25,7 @@ public class Worker extends MyUnit {
 
     void playRound(){
         UnitInfo myInfo = uc.getInfo();
+        uc.println("--------------------------");
 
         // Get base location
         if (state == "INI"){
@@ -33,7 +34,9 @@ public class Worker extends MyUnit {
         }
         // Explore for resources
         if (state == "EXPLORE"){
-            state = "GATHER";
+            move.explore(false);
+
+            //state = "GATHER";
 
         }
         // Gather

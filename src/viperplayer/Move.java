@@ -128,4 +128,11 @@ public class Move {
         if (uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)) uc.move(dir);
     }
 
+    void explore(boolean reckless){
+        int randomX = (int)(uc.getRandomDouble()*50);
+        int randomY = (int)(uc.getRandomDouble()*50);
+        moveTo(new Location(randomX, randomY), false);
+        return;
+    }
+
 }
