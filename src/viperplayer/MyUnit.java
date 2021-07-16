@@ -8,10 +8,12 @@ public abstract class MyUnit {
 
     UnitController uc;
     Move move;
+    Attack attack;
 
     MyUnit(UnitController uc){
         this.uc = uc;
         this.move = new Move(uc);
+        this.attack = new Attack(uc);
     }
 
     abstract void playRound();
