@@ -22,6 +22,8 @@ public class Move {
     }
 
     void moveTo(Location target, boolean reckless, Function<Direction, Boolean> conditions){
+        Location[] traps = uc.senseTraps();
+
         //No target? ==> bye!
         if (target == null || !uc.canMove()) return;
 
@@ -47,7 +49,7 @@ public class Move {
         //I rotate clockwise or counterclockwise (depends on 'rotateRight'). If I try to go out of the map I change the orientation
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         for (int i = 0; i < 16; ++i){
-            if (conditions.apply(dir) && safeLocation(myLoc.add(dir),reckless)){
+            if (conditions.apply(dir) && safeLocation(myLoc.add(dir),traps,reckless)){
                 uc.move(dir);
                 return;
             }
@@ -63,7 +65,7 @@ public class Move {
             }
         }
 
-        if (conditions.apply(dir) && safeLocation(myLoc.add(dir),reckless)) uc.move(dir);
+        if (conditions.apply(dir) && safeLocation(myLoc.add(dir),traps,reckless)) uc.move(dir);
     }
 
     //clear some of the previous data
@@ -72,14 +74,22 @@ public class Move {
         minDistToEnemy = INF;
     }
 
-    private boolean safeLocation(Location loc, boolean reckless) {
+    private boolean safeLocation(Location loc, Location[] traps, boolean reckless) {
         boolean isSafe = true;
 
         if (reckless) return true;
+
+        for(int i=0; i<traps.length; i++) {
+            if (loc.isEqual(traps[i])) isSafe = false;
+            break;
+        }
+
         return isSafe;
     }
 
     void moveToLimited(Location target, boolean reckless){
+        Location[] traps = uc.senseTraps();
+
         //No target? ==> bye!
         if (target == null || !uc.canMove()) return;
 
@@ -106,7 +116,7 @@ public class Move {
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         int dirchange = 0;
         for (int i = 0; i < 16; ++i){
-            if (uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)){
+            if (uc.canMove(dir) && safeLocation(myLoc.add(dir),traps,reckless)){
                 uc.move(dir);
                 return;
             }
@@ -125,7 +135,7 @@ public class Move {
             if (dirchange >= 3 || dirchange <= -3) return;
         }
 
-        if (uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)) uc.move(dir);
+        if (uc.canMove(dir) && safeLocation(myLoc.add(dir),traps,reckless)) uc.move(dir);
     }
 
     void explore(boolean reckless){
