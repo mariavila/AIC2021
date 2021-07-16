@@ -8,29 +8,41 @@ public class Worker extends MyUnit {
         super(uc);
     }
 
-    boolean torchLighted = false;
-    boolean smoke = false;
+    Team myTeam = uc.getTeam();
+    Location baseLocation;
+
+    String state = "INI";
+
+    Location getBaseLocation(){
+        UnitInfo[] units = uc.senseUnits(2, myTeam);
+        for (UnitInfo unit:units){
+            if (unit.getType()==UnitType.BASE){
+                return unit.getLocation();
+            }
+        }
+        return new Location(-1, -1);
+    }
 
     void playRound(){
         UnitInfo myInfo = uc.getInfo();
-        if (uc.getRound() > 300 + myInfo.getID()%200 && !smoke){
-            if (uc.canMakeSmokeSignal()){
-                uc.makeSmokeSignal(0);
-                smoke = true;
-            }
-        }
 
-        moveRandom();
-        if (!torchLighted && myInfo.getTorchRounds() <= 0){
-            lightTorch();
+        // Get base location
+        if (state == "INI"){
+            baseLocation = getBaseLocation();
+            state = "EXPLORE";
         }
-        myInfo = uc.getInfo();
-        if (myInfo.getTorchRounds() < 70){
-            randomThrow();
+        // Explore for resources
+        if (state == "EXPLORE"){
+            state = "GATHER";
+
         }
-        int[] signals = uc.readSmokeSignals();
-        if (signals.length > 0){
-            uc.drawPointDebug(uc.getLocation(), 0, 0, 0);
+        // Gather
+        if (state == "GATHER"){
+            state = "DEPOSIT";
+        }
+        // Return base and deposit resources
+        if (state == "DEPOSIT"){
+            state = "EXPLORE";
         }
     }
 }
