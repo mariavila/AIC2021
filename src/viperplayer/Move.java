@@ -5,10 +5,9 @@ import aic2021.user.*;
 import java.util.function.Function;
 
 public class Move {
-    private Injection in;
-
-    public Move(Injection in) {
-        this.in = in;
+    UnitController uc;
+    public Move(UnitController uc) {
+        this.uc = uc;
     }
 
     final int INF = 1000000;
@@ -19,18 +18,18 @@ public class Move {
     Location prevTarget = null; //previous target
 
     void moveTo(Location target, boolean reckless) {
-        moveTo(target, reckless, (Direction dir)->in.uc.canMove(dir));
+        moveTo(target, reckless, (Direction dir)->uc.canMove(dir));
     }
 
     void moveTo(Location target, boolean reckless, Function<Direction, Boolean> conditions){
         //No target? ==> bye!
-        if (target == null || !in.uc.canMove()) return;
+        if (target == null || !uc.canMove()) return;
 
         //different target? ==> previous data does not help!
         if (prevTarget == null || !target.isEqual(prevTarget)) resetPathfinding();
 
         //If I'm at a minimum distance to the target, I'm free!
-        Location myLoc = in.uc.getLocation();
+        Location myLoc = uc.getLocation();
         int d = myLoc.distanceSquared(target);
         if (d <= minDistToEnemy) resetPathfinding();
 
@@ -49,11 +48,11 @@ public class Move {
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         for (int i = 0; i < 16; ++i){
             if (conditions.apply(dir) && safeLocation(myLoc.add(dir),reckless)){
-                in.uc.move(dir);
+                uc.move(dir);
                 return;
             }
             Location newLoc = myLoc.add(dir);
-            if (in.uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
+            if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
                 //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
             else lastObstacleFound = myLoc.add(dir);
             if (rotateRight) {
@@ -64,7 +63,7 @@ public class Move {
             }
         }
 
-        if (conditions.apply(dir) && safeLocation(myLoc.add(dir),reckless)) in.uc.move(dir);
+        if (conditions.apply(dir) && safeLocation(myLoc.add(dir),reckless)) uc.move(dir);
     }
 
     //clear some of the previous data
@@ -82,13 +81,13 @@ public class Move {
 
     void moveToLimited(Location target, boolean reckless){
         //No target? ==> bye!
-        if (target == null || !in.uc.canMove()) return;
+        if (target == null || !uc.canMove()) return;
 
         //different target? ==> previous data does not help!
         if (prevTarget == null || !target.isEqual(prevTarget)) resetPathfinding();
 
         //If I'm at a minimum distance to the target, I'm free!
-        Location myLoc = in.uc.getLocation();
+        Location myLoc = uc.getLocation();
         int d = myLoc.distanceSquared(target);
         if (d <= minDistToEnemy) resetPathfinding();
 
@@ -101,18 +100,18 @@ public class Move {
         if (lastObstacleFound != null) dir = myLoc.directionTo(lastObstacleFound);
 
         //This should not happen for a single unit, but whatever
-        if (in.uc.canMove(dir)) resetPathfinding();
+        if (uc.canMove(dir)) resetPathfinding();
 
         //I rotate clockwise or counterclockwise (depends on 'rotateRight'). If I try to go out of the map I change the orientation
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         int dirchange = 0;
         for (int i = 0; i < 16; ++i){
-            if (in.uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)){
-                in.uc.move(dir);
+            if (uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)){
+                uc.move(dir);
                 return;
             }
             Location newLoc = myLoc.add(dir);
-            if (in.uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
+            if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
                 //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
             else lastObstacleFound = myLoc.add(dir);
             if (rotateRight) {
@@ -126,7 +125,7 @@ public class Move {
             if (dirchange >= 3 || dirchange <= -3) return;
         }
 
-        if (in.uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)) in.uc.move(dir);
+        if (uc.canMove(dir) && safeLocation(myLoc.add(dir),reckless)) uc.move(dir);
     }
 
 }

@@ -19,6 +19,7 @@ public class Worker extends MyUnit {
                 smoke = true;
             }
         }
+
         moveRandom();
         if (!torchLighted && myInfo.getTorchRounds() <= 0){
             lightTorch();

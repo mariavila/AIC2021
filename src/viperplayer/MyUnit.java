@@ -7,9 +7,11 @@ public abstract class MyUnit {
     Direction[] dirs = Direction.values();
 
     UnitController uc;
+    Move move;
 
     MyUnit(UnitController uc){
         this.uc = uc;
+        this.move = new Move(uc);
     }
 
     abstract void playRound();
