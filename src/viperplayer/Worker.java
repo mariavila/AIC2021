@@ -105,6 +105,15 @@ public class Worker extends MyUnit {
             state = "EXPLORE";
         }
 
-        attack.genericTryAttack();
+        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        trySpawn();
+    }
+
+    void trySpawn(){
+        if (uc.getRound() < 430) {
+            spawnRandom(UnitType.FARM);
+            spawnRandom(UnitType.SAWMILL);
+            spawnRandom(UnitType.QUARRY);
+        }
     }
 }

@@ -22,10 +22,9 @@ public class Attack {
         return true;
     }
 
-    public boolean genericTryAttack()  {
+    public boolean genericTryAttack(UnitInfo[] units)  {
         if (!uc.canAttack()) return false;
-        UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
-        if (enemies.length == 0) return false;
+        if (units.length == 0) return false;
 
         int myAttack = getMyAttack();
 
@@ -42,7 +41,7 @@ public class Attack {
         int bestTargetEnemy = 10000;
         Location bestEnemyLoc = null;
 
-        for (UnitInfo unit : enemies) {
+        for (UnitInfo unit : units) {
             Location target = unit.getLocation();
 
             if (uc.canAttack(target)) {
