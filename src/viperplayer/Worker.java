@@ -9,14 +9,23 @@ public class Worker extends MyUnit {
     }
 
     Team myTeam = uc.getTeam();
+    Team[] teams = Team.values();
+
     Location baseLocation;
     Location resourceLocation = null;
+
     boolean followingDeer = false;
     boolean boxesResearched = false;
 
+    ResourceInfo[] resources;
+    UnitInfo[] deer;
+
+    int torchTurn = 0;
+    int round = 0;
+
     String state = "INI";
 
-    Location getBaseLocation(){
+    private Location getBaseLocation(){
         UnitInfo[] units = uc.senseUnits(2, myTeam);
         for (UnitInfo unit:units){
             if (unit.getType()==UnitType.BASE || unit.getType()==UnitType.SETTLEMENT){
@@ -26,62 +35,69 @@ public class Worker extends MyUnit {
         return null;
     }
 
-    void explore(){
+    private void explore(){
         ResourceInfo[] resources = uc.senseResources();
+        UnitInfo[] deer = uc.senseUnits(teams[2]);
 
         if(resources.length > 0){
-            if(resources[0].resourceType == Resource.FOOD){
-                followingDeer = true;
-            }
-            resourceLocation = resources[0].location;
+            resourceLocation = resources[0].getLocation();
             state = "GOTORESOURCE";
-        }
-        else{
+        } else if(deer.length > 0){
+            followingDeer = true;
+            state = "GOTORESOURCE";
+        } else{
             move.explore(false);
         }
     }
 
-    void goToResource(){
+    private void goToResource(){
+        ResourceInfo[] resources = uc.senseResources();
+        UnitInfo[] deer = uc.senseUnits(teams[2]);
+
         if (followingDeer){
-            ResourceInfo[] resources = uc.senseResources();
-            if(resources.length > 0){
-                if(resources[0].resourceType != Resource.FOOD){
-                    followingDeer = false;
-                }
-                resourceLocation = resources[0].location;
-                state = "GOTORESOURCE";
+            if(deer.length > 0){
+                resourceLocation = deer[0].getLocation();
             }
             else{
                 state = "EXPLORE";
-                explore();
+                followingDeer = false;
             }
         }
         move.moveTo(resourceLocation, false);
-        if(resourceLocation.distanceSquared(uc.getLocation())<=1){ //check que no sigui food
+        if(!followingDeer && resourceLocation.distanceSquared(uc.getLocation())<=2){
             state = "GATHER";
         }
     }
-/*
+
     void gather(){
         if (uc.canGatherResources()){
             uc.gatherResources();
         }
+
+        int[] gatheredResources = uc.getResourcesCarried();
+        int total_res = 0;
+
+        for (int res: gatheredResources) {
+            total_res += res;
+        }
+
         if (boxesResearched){
-            int gatheredResource = uc.getResourcesCarried(); // max of list
-            if (gatheredResource == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+            if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                 state = "DEPOSIT";
             }
         }
-        else{
-            if (uc.getResourcesCarried() >= GameConstants.MAX_RESOURCE_CAPACITY) //TODO
-                state = "DEPOSIT";
+        else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
+            state = "DEPOSIT";
         }
-
     }
-    */
 
     void playRound(){
-        UnitInfo myInfo = uc.getInfo();
+        round = uc.getRound();
+
+        if (torchTurn < round && uc.canLightTorch()) {
+            torchTurn = round + GameConstants.TORCH_DURATION;
+            uc.lightTorch();
+        }
 
         // Get base location
         if (state == "INI"){
@@ -98,7 +114,7 @@ public class Worker extends MyUnit {
         }
         // Gather
         if (state == "GATHER"){
-            //gather();
+            gather();
         }
         // Return base and deposit resources
         if (state == "DEPOSIT"){
@@ -109,7 +125,7 @@ public class Worker extends MyUnit {
         trySpawn();
     }
 
-    void trySpawn(){
+    private void trySpawn(){
         if (uc.getRound() < 430) {
             spawnRandom(UnitType.FARM);
             spawnRandom(UnitType.SAWMILL);

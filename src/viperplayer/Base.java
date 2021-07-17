@@ -4,6 +4,10 @@ import aic2021.user.*;
 
 public class Base extends MyUnit {
 
+    Base(UnitController uc){
+        super(uc);
+    }
+
     int workers = 0;
     int explorers = 0;
     int waterTiles = 0;
@@ -14,10 +18,6 @@ public class Base extends MyUnit {
     Boolean VOCABULARYresearched = false;
     Boolean EUGENICSresearched = false;
     Boolean SCHOOLSresearched = false;
-
-    Base(UnitController uc){
-        super(uc);
-    }
 
     void playRound(){
         if(uc.getRound() == 1) senseInitialWater();
