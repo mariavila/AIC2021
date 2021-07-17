@@ -9,9 +9,8 @@ public class Worker extends MyUnit {
     }
 
     Team myTeam = uc.getTeam();
-    Team[] teams = Team.values();
 
-    Location baseLocation;
+    Location baseLocation = null;
     Location resourceLocation = null;
 
     boolean followingDeer = false;
@@ -36,8 +35,8 @@ public class Worker extends MyUnit {
     }
 
     private void explore(){
-        ResourceInfo[] resources = uc.senseResources();
-        UnitInfo[] deer = uc.senseUnits(teams[2]);
+        resources = uc.senseResources();
+        deer = uc.senseUnits(Team.NEUTRAL);
 
         if(resources.length > 0){
             resourceLocation = resources[0].getLocation();
@@ -51,10 +50,8 @@ public class Worker extends MyUnit {
     }
 
     private void goToResource(){
-        ResourceInfo[] resources = uc.senseResources();
-        UnitInfo[] deer = uc.senseUnits(teams[2]);
-
         if (followingDeer){
+            deer = uc.senseUnits(Team.NEUTRAL);
             if(deer.length > 0){
                 resourceLocation = deer[0].getLocation();
             }
@@ -64,30 +61,45 @@ public class Worker extends MyUnit {
             }
         }
         move.moveTo(resourceLocation, false);
-        if(!followingDeer && resourceLocation.distanceSquared(uc.getLocation())<=2){
+        if(!followingDeer && resourceLocation.isEqual(uc.getLocation())){
             state = "GATHER";
         }
     }
 
     void gather(){
-        if (uc.canGatherResources()){
-            uc.gatherResources();
-        }
+        Location myLoc = uc.getLocation();
+        resources = uc.senseResources();
 
-        int[] gatheredResources = uc.getResourcesCarried();
-        int total_res = 0;
+        if (resources.length > 0 && resources[0].getLocation().isEqual(myLoc)) {
+            if (uc.canGatherResources()){
+                uc.gatherResources();
+            }
 
-        for (int res: gatheredResources) {
-            total_res += res;
-        }
+            int[] gatheredResources = uc.getResourcesCarried();
+            int total_res = 0;
 
-        if (boxesResearched){
-            if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+            for (int res: gatheredResources) {
+                total_res += res;
+            }
+
+            if (boxesResearched){
+                if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+                    state = "DEPOSIT";
+                }
+            }
+            else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
             }
+        } else {
+            state = "EXPLORE";
         }
-        else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
-            state = "DEPOSIT";
+    }
+
+    void deposit(){
+        move.moveTo(baseLocation, false);
+        if (uc.canDeposit()) {
+            uc.deposit();
+            state = "GOTORESOURCE";
         }
     }
 
@@ -99,37 +111,33 @@ public class Worker extends MyUnit {
             uc.lightTorch();
         }
 
-        // Get base location
         if (state == "INI"){
             baseLocation = getBaseLocation();
             state = "EXPLORE";
         }
-        // Explore for resources
         if (state == "EXPLORE"){
             explore();
         }
-        //Go to resource
         if (state == "GOTORESOURCE"){
             goToResource();
         }
-        // Gather
         if (state == "GATHER"){
             gather();
         }
-        // Return base and deposit resources
         if (state == "DEPOSIT"){
-            state = "EXPLORE";
+            deposit();
         }
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
         trySpawn();
     }
 
     private void trySpawn(){
         if (uc.getRound() < 430) {
-            spawnRandom(UnitType.FARM);
-            spawnRandom(UnitType.SAWMILL);
-            spawnRandom(UnitType.QUARRY);
+            spawnEmpty(UnitType.FARM);
+            spawnEmpty(UnitType.SAWMILL);
+            spawnEmpty(UnitType.QUARRY);
         }
     }
 }

@@ -28,6 +28,33 @@ public abstract class MyUnit {
         return false;
     }
 
+    boolean spawnEmpty(UnitType t){
+        ResourceInfo[] res;
+        Location myLoc = uc.getLocation();
+        Boolean hasResource;
+
+        for (Direction dir : dirs){
+            if (dir == Direction.ZERO) continue;
+
+            Location target = myLoc.add(dir);
+
+            if (uc.canSenseLocation(target)) {
+                res = uc.senseResourceInfo(target);
+                hasResource = false;
+
+                if (res[0] != null) hasResource = true;
+                if (res[1] != null) hasResource = true;
+                if (res[2] != null) hasResource = true;
+
+                if (!hasResource && uc.canSpawn(t, dir)){
+                    uc.spawn(t, dir);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     boolean moveRandom(){
         int tries = 10;
         while (uc.canMove() && tries-- > 0){

@@ -36,7 +36,7 @@ public class Trapper extends MyUnit {
             move.moveTo(baseLocation.add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST), false, this::moveCircle);
             Location myNewLoc = uc.getLocation();
             if (uc.getLocation().distanceSquared(baseLocation) > 18) {
-                Location trapPos = myNewLoc.addDirection(baseLocation.directionTo(myNewLoc));
+                Location trapPos = myNewLoc.add(baseLocation.directionTo(myNewLoc));
                 if(uc.canAttack(trapPos)) uc.attack(trapPos);
             }
         }

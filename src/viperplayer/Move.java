@@ -62,9 +62,6 @@ public class Move {
             if (rotateRight) {
                 dir = dir.rotateRight();
             }
-            else {
-                dir = dir.rotateLeft();
-            }
         }
 
         if (conditions.apply(dir) && safeLocation(myLoc.add(dir),traps,reckless)) uc.move(dir);
