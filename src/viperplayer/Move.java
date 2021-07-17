@@ -17,7 +17,7 @@ public class Move {
     int minDistToEnemy = INF; //minimum distance I've been to the enemy while going around an obstacle
     Location prevTarget = null; //previous target
 
-    Location exploringLocation = null;
+    Direction exploringDir = null;
 
     void moveTo(Location target, boolean reckless) {
         moveTo(target, reckless, (Direction dir)->uc.canMove(dir));
@@ -137,13 +137,25 @@ public class Move {
         if (uc.canMove(dir) && safeLocation(myLoc.add(dir),traps,reckless)) uc.move(dir);
     }
 
-    void explore(boolean reckless){
-        if (exploringLocation == null || exploringLocation.isEqual(uc.getLocation())){
-            int randomX = (int)(uc.getRandomDouble()*30)-15;
-            int randomY = (int)(uc.getRandomDouble()*30)-15;
-            exploringLocation = uc.getLocation().add(randomX, randomY);
-        }
-        moveTo(exploringLocation, false);
-    }
+    void explore(){
+        Direction[] dirs = Direction.values();
+        int moved = 0;
 
+        if (exploringDir != null) {
+            if (uc.canMove(exploringDir)) {
+                uc.move(exploringDir);
+                return;
+            }
+        }
+
+        while (moved < 10) {
+            int index = (int)(uc.getRandomDouble()*(dirs.length - 1));
+
+            if (uc.canMove(dirs[index])) {
+                exploringDir = dirs[index];
+                uc.move(dirs[index]);
+            }
+            moved++;
+        }
+    }
 }

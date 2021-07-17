@@ -45,7 +45,7 @@ public class Worker extends MyUnit {
             followingDeer = true;
             state = "GOTORESOURCE";
         } else{
-            move.explore(false);
+            move.explore();
         }
     }
 

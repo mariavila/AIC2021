@@ -33,7 +33,7 @@ public class Explorer extends MyUnit {
         }
         // Explore for resources
         if (state == "EXPLORE") {
-            move.explore(false);
+            move.explore();
             Location myNewLoc = uc.getLocation();
             if (myNewLoc.isEqual(lastLoc)) {
                 turnsStopped++;
