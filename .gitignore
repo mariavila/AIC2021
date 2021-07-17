@@ -3,7 +3,7 @@
 
 # Log file
 *.log
-*.logs
+logs/
 
 # BlueJ files
 *.ctxt
@@ -27,7 +27,7 @@ hs_err_pid*
 *.idea
 
 # Games
-*.games
+games/
 
 # config
 *.defaults
