@@ -141,13 +141,12 @@ public class Move {
     }
 
     void explore(boolean reckless){
-        if (exploringLocation == null || exploringLocation == uc.getLocation()){
+        if (exploringLocation == null || exploringLocation.isEqual(uc.getLocation())){
             int randomX = (int)(uc.getRandomDouble()*10)-5;
             int randomY = (int)(uc.getRandomDouble()*10)-5;
             exploringLocation = uc.getLocation().add(randomX, randomY);
         }
         moveTo(exploringLocation, false);
-        return;
     }
 
 }
