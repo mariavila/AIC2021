@@ -9,8 +9,6 @@ public class Trapper extends MyUnit {
     }
 
     String state = "INI";
-    int turnsStopped = 0;
-    Location lastLoc;
 
     Team myTeam = uc.getTeam();
     Location baseLocation;
@@ -29,7 +27,7 @@ public class Trapper extends MyUnit {
     void playRound(){
         round = uc.getRound();
         lightTorch();
-        //move.moveTo(enemyBaseLoc, false, this::moveCircle);
+
         if (state == "INI"){
             baseLocation = getBaseLocation();
             uc.lightTorch();
@@ -60,8 +58,9 @@ public class Trapper extends MyUnit {
                 else {
                     trapPos = myLoc.add(baseLocation.directionTo(myLoc).rotateRight());
                     if (canSetTrap(trapPos, traps)) uc.attack(trapPos);
-                    else
+                    else {
                         move.moveTo(baseLocation.add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST), false, this::moveCircle);
+                    }
                 }
             }
         }
