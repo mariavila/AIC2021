@@ -24,8 +24,10 @@ public abstract class MyUnit {
         int index = 0;
 
         for (Direction dir: dirs) {
-            if (uc.canSpawn(t, dir)) myDirs[index] = dir;
-            index++;
+            if (uc.canSpawn(t, dir)) {
+                myDirs[index] = dir;
+                index++;
+            }
         }
 
         if (myDirs[0] == null) return false;
@@ -71,14 +73,6 @@ public abstract class MyUnit {
                 uc.move(dirs[random]);
                 return true;
             }
-        }
-        return false;
-    }
-
-    boolean lightTorch(){
-        if (uc.canLightTorch()){
-            uc.lightTorch();
-            return true;
         }
         return false;
     }

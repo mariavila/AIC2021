@@ -185,8 +185,10 @@ public class Move {
         int index = 0;
 
         for (Direction dir: dirs) {
-            if (uc.canMove(dir)) myDirs[index] = dir;
-            index++;
+            if (dir != Direction.ZERO && uc.canMove(dir)) {
+                myDirs[index] = dir;
+                index++;
+            }
         }
 
         if (myDirs[0] == null) return;

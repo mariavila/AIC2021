@@ -105,32 +105,41 @@ public class Worker extends MyUnit {
 
     void playRound(){
         round = uc.getRound();
+        lightTorch();
 
-        if (torchTurn < round && uc.canLightTorch()) {
-            torchTurn = round + GameConstants.TORCH_DURATION;
-            uc.lightTorch();
-        }
-
-        if (state == "INI"){
-            baseLocation = getBaseLocation();
-            state = "EXPLORE";
-        }
-        if (state == "EXPLORE"){
-            explore();
-        }
-        if (state == "GOTORESOURCE"){
-            goToResource();
-        }
-        if (state == "GATHER"){
-            gather();
-        }
-        if (state == "DEPOSIT"){
-            deposit();
-        }
+        tryJob();
+        trySpawn();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
-        trySpawn();
+    }
+
+    private void tryJob() {
+        if (state.equals("INI")){
+            baseLocation = getBaseLocation();
+            state = "EXPLORE";
+        }
+        if (state.equals("EXPLORE")){
+            explore();
+        }
+        if (state.equals("GOTORESOURCE")){
+            goToResource();
+        }
+        if (state.equals("GATHER")){
+            gather();
+        }
+        if (state.equals("DEPOSIT")){
+            deposit();
+        }
+    }
+
+    private void lightTorch() {
+        if (torchTurn -1 == round) randomThrow();
+
+        if ((torchTurn == 0 || torchTurn -1 == round) && uc.canLightTorch()) {
+            torchTurn = round + GameConstants.TORCH_DURATION;
+            uc.lightTorch();
+        }
     }
 
     private void trySpawn(){
