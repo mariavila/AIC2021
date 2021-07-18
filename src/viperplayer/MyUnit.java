@@ -21,26 +21,6 @@ public abstract class MyUnit {
 
     abstract void playRound();
 
-    boolean spawnRandom(UnitType t){
-        Direction[] dirs = Direction.values();
-        Direction[] myDirs = new Direction[9];
-        int index = 0;
-
-        for (Direction dir: dirs) {
-            if (uc.canSpawn(t, dir)) {
-                myDirs[index] = dir;
-                index++;
-            }
-        }
-
-        if (myDirs[0] == null) return false;
-
-        int random = (int)(uc.getRandomDouble()*index);
-
-        uc.spawn(t, myDirs[random]);
-        return true;
-    }
-
     boolean spawnEmpty(UnitType t){
         ResourceInfo[] res;
         Location myLoc = uc.getLocation();
