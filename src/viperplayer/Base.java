@@ -19,8 +19,9 @@ public class Base extends MyUnit {
     boolean EUGENICSresearched = false;
     boolean SCHOOLSresearched = false;
     boolean isBaseClose = false;
-    boolean isBaseObstructed = true;
-    Location baseLoc;
+    Location baseLoc = null;
+    Location myLoc = uc.getLocation();
+    Direction[] safeSpawn = new Direction[8];
 
     void playRound(){
         if(uc.getRound() == 1) init();
@@ -40,13 +41,37 @@ public class Base extends MyUnit {
         if (units.length > 0) {
             isBaseClose = true;
             baseLoc = units[0].getLocation();
-            if (!uc.isObstructed(uc.getLocation(), baseLoc)) isBaseObstructed = false;
+        }
+
+        if (!isBaseClose) {
+            safeSpawn = Direction.values();
+        } else {
+            int index = 0;
+            int range = UnitType.BASE.getAttackRange();
+            Direction[] myDirs = Direction.values();
+            Direction[] tempDirs = new Direction[9];
+            for (Direction dir: myDirs) {
+                Location target = myLoc.add(dir);
+                if (target.distanceSquared(baseLoc) > range || uc.isObstructed(target, baseLoc)) {
+                    tempDirs[index] = dir;
+                    index++;
+                }
+            }
+
+            safeSpawn = new Direction[index];
+
+            index = 0;
+            for (Direction dir: tempDirs) {
+                if (dir == null) break;
+                safeSpawn[index] = dir;
+                index++;
+            }
         }
     }
 
     private void trySpawn(){
         if (workers < 1 && COINresearched){
-            if (spawnRandom(UnitType.WORKER)) ++workers;
+            if (spawnSafe(UnitType.WORKER)) ++workers;
         }
     }
 
@@ -87,6 +112,25 @@ public class Base extends MyUnit {
         for(int i=0; i<initialWaterTiles.length; i++) {
             this.waterTiles++;
         }
+    }
+
+    private boolean spawnSafe(UnitType t){
+        Direction[] myDirs = new Direction[8];
+        int index = 0;
+
+        for (Direction dir: safeSpawn) {
+            if (uc.canSpawn(t, dir)) {
+                myDirs[index] = dir;
+                index++;
+            }
+        }
+
+        if (myDirs[0] == null) return false;
+
+        int random = (int)(uc.getRandomDouble()*index);
+
+        uc.spawn(t, myDirs[random]);
+        return true;
     }
 
 }
