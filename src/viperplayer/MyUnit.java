@@ -32,11 +32,10 @@ public abstract class MyUnit {
 
         if (myDirs[0] == null) return false;
 
-        int random = (int)(uc.getRandomDouble()*(index - 1));
+        int random = (int)(uc.getRandomDouble()*index);
 
-        uc.spawn(t, dirs[random]);
+        uc.spawn(t, myDirs[random]);
         return true;
-
     }
 
     boolean spawnEmpty(UnitType t){

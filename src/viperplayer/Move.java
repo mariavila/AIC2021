@@ -193,7 +193,7 @@ public class Move {
 
         if (myDirs[0] == null) return;
 
-        int random = (int)(uc.getRandomDouble()*(index - 1));
+        int random = (int)(uc.getRandomDouble()*index);
 
         if (uc.canMove(myDirs[random])) {
             exploringDir = myDirs[random];
