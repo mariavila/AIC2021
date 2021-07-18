@@ -31,7 +31,7 @@ public abstract class MyUnit {
     boolean spawnEmpty(UnitType t){
         ResourceInfo[] res;
         Location myLoc = uc.getLocation();
-        Boolean hasResource;
+        boolean hasResource;
 
         for (Direction dir : dirs){
             if (dir == Direction.ZERO) continue;
@@ -40,9 +40,8 @@ public abstract class MyUnit {
 
             if (uc.canSenseLocation(target)) {
                 res = uc.senseResourceInfo(target);
-                hasResource = false;
 
-                if (res[0] != null) hasResource = true;
+                hasResource = res[0] != null;
                 if (res[1] != null) hasResource = true;
                 if (res[2] != null) hasResource = true;
 

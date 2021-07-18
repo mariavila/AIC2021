@@ -19,19 +19,28 @@ public abstract class MyUnit {
     abstract void playRound();
 
     boolean spawnRandom(UnitType t){
-        for (Direction dir : dirs){
-            if (uc.canSpawn(t, dir)){
-                uc.spawn(t, dir);
-                return true;
-            }
+        Direction[] dirs = Direction.values();
+        Direction[] myDirs = new Direction[9];
+        int index = 0;
+
+        for (Direction dir: dirs) {
+            if (uc.canSpawn(t, dir)) myDirs[index] = dir;
+            index++;
         }
-        return false;
+
+        if (myDirs[0] == null) return false;
+
+        int random = (int)(uc.getRandomDouble()*(index - 1));
+
+        uc.spawn(t, dirs[random]);
+        return true;
+
     }
 
     boolean spawnEmpty(UnitType t){
         ResourceInfo[] res;
         Location myLoc = uc.getLocation();
-        Boolean hasResource;
+        boolean hasResource;
 
         for (Direction dir : dirs){
             if (dir == Direction.ZERO) continue;
@@ -40,9 +49,8 @@ public abstract class MyUnit {
 
             if (uc.canSenseLocation(target)) {
                 res = uc.senseResourceInfo(target);
-                hasResource = false;
 
-                if (res[0] != null) hasResource = true;
+                hasResource = res[0] != null;
                 if (res[1] != null) hasResource = true;
                 if (res[2] != null) hasResource = true;
 

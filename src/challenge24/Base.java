@@ -14,13 +14,13 @@ public class Base extends MyUnit {
     int workers = 0;
     int explorers = 0;
     int waterTiles = 0;
-    Boolean COINresearched = false;
-    Boolean BOXESresearched = false;
-    Boolean ROCK_ARTresearched = false;
-    Boolean JOBSresearched = false;
-    Boolean VOCABULARYresearched = false;
-    Boolean EUGENICSresearched = false;
-    Boolean SCHOOLSresearched = false;
+    boolean COINresearched = false;
+    boolean BOXESresearched = false;
+    boolean ROCK_ARTresearched = false;
+    boolean JOBSresearched = false;
+    boolean VOCABULARYresearched = false;
+    boolean EUGENICSresearched = false;
+    boolean SCHOOLSresearched = false;
 
     void playRound(){
         if(uc.getRound() == 1) senseInitialWater();

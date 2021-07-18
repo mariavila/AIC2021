@@ -16,6 +16,7 @@ public class Move {
     Location lastObstacleFound = null; //latest obstacle I've found in my way
     int minDistToEnemy = INF; //minimum distance I've been to the enemy while going around an obstacle
     Location prevTarget = null; //previous target
+    Location[] dangerLocs;
 
     Direction exploringDir = null;
 
@@ -25,6 +26,7 @@ public class Move {
 
     void moveTo(Location target, boolean reckless, Function<Direction, Boolean> conditions){
         Location[] traps = uc.senseTraps();
+        dangerLocs = dangerousLocations();
 
         //No target? ==> bye!
         if (target == null || !uc.canMove()) return;
@@ -85,7 +87,38 @@ public class Move {
             }
         }
 
+        for(Location danger: dangerLocs) {
+            if (loc.isEqual(danger)) {
+                isSafe = false;
+                break;
+            }
+        }
+
         return isSafe;
+    }
+
+    private Location[] dangerousLocations(){
+        UnitInfo[] units = uc.senseUnits(uc.getTeam().getOpponent());
+        Direction[] dirs = Direction.values();
+        Location myLoc = uc.getLocation();
+        Location[] dangerLocs = new Location[9];
+        int index = 0;
+
+        for (Direction dir: dirs) {
+            for (UnitInfo unit: units) {
+                UnitType unitType = unit.getType();
+                int maxRange = unitType.getAttackRange();
+                int minRange = unitType.getMinAttackRange();
+                Location target = myLoc.add(dir);
+                int dist = unit.getLocation().distanceSquared(target);
+                if (dist <= maxRange && dist >= minRange) {
+                    dangerLocs[index] = target;
+                    break;
+                }
+            }
+            index++;
+        }
+        return dangerLocs;
     }
 
     void moveToLimited(Location target, boolean reckless){
@@ -156,7 +189,7 @@ public class Move {
             index++;
         }
 
-        if (index == 0) return;
+        if (myDirs[0] == null) return;
 
         int random = (int)(uc.getRandomDouble()*(index - 1));
 

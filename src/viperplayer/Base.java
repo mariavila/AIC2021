@@ -11,20 +11,37 @@ public class Base extends MyUnit {
     int workers = 0;
     int explorers = 0;
     int waterTiles = 0;
-    Boolean COINresearched = false;
-    Boolean BOXESresearched = false;
-    Boolean ROCK_ARTresearched = false;
-    Boolean JOBSresearched = false;
-    Boolean VOCABULARYresearched = false;
-    Boolean EUGENICSresearched = false;
-    Boolean SCHOOLSresearched = false;
+    boolean COINresearched = false;
+    boolean BOXESresearched = false;
+    boolean ROCK_ARTresearched = false;
+    boolean JOBSresearched = false;
+    boolean VOCABULARYresearched = false;
+    boolean EUGENICSresearched = false;
+    boolean SCHOOLSresearched = false;
+    boolean isBaseClose = false;
+    boolean isBaseObstructed = true;
+    Location baseLoc;
 
     void playRound(){
-        if(uc.getRound() == 1) senseInitialWater();
+        if(uc.getRound() == 1) init();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         trySpawn();
         tryResearch();
+    }
+
+    void init() {
+        senseBase();
+        senseInitialWater();
+    }
+
+    void senseBase(){
+        UnitInfo[] units = uc.senseUnits(uc.getTeam().getOpponent());
+        if (units.length > 0) {
+            isBaseClose = true;
+            baseLoc = units[0].getLocation();
+            if (!uc.isObstructed(uc.getLocation(), baseLoc)) isBaseObstructed = false;
+        }
     }
 
     private void trySpawn(){
