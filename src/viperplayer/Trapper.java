@@ -14,6 +14,7 @@ public class Trapper extends MyUnit {
 
     Team myTeam = uc.getTeam();
     Location baseLocation;
+    UnitInfo myInfo;
 
     Location getBaseLocation(){
         UnitInfo[] units = uc.senseUnits(2, myTeam);
@@ -26,23 +27,60 @@ public class Trapper extends MyUnit {
     }
 
     void playRound(){
+        round = uc.getRound();
+        lightTorch();
         //move.moveTo(enemyBaseLoc, false, this::moveCircle);
         if (state == "INI"){
             baseLocation = getBaseLocation();
+            uc.lightTorch();
+            myInfo = uc.getInfo();
             state = "PERIMETER";
         }
         // Explore for resources
         if (state == "PERIMETER") {
-            move.moveTo(baseLocation.add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST), false, this::moveCircle);
-            Location myNewLoc = uc.getLocation();
-            if (uc.getLocation().distanceSquared(baseLocation) > 18) {
-                Location trapPos = myNewLoc.add(baseLocation.directionTo(myNewLoc));
-                if(uc.canAttack(trapPos)) uc.attack(trapPos);
+            if (uc.getLocation().distanceSquared(baseLocation) < 13) {
+                move.moveTo(baseLocation.add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST), false, this::moveCircle);
+            }
+
+            if (uc.getLocation().distanceSquared(baseLocation) >= 12) {
+                Location[] traps = uc.senseTraps(2);
+                setTraps(traps);
             }
         }
     }
 
-    boolean moveCircle(Direction dir) {
-        return uc.canMove(dir) && uc.getLocation().add(dir).distanceSquared(baseLocation) <= (10 + uc.getRound() / 10);
+    void setTraps(Location[] traps) {
+        Location myLoc = uc.getLocation();
+        Location trapPos = myLoc.add(baseLocation.directionTo(myLoc));
+        if (uc.canAttack()) {
+            if (canSetTrap(trapPos, traps)) uc.attack(trapPos);
+            else {
+                trapPos = myLoc.add(baseLocation.directionTo(myLoc).rotateLeft());
+                if (canSetTrap(trapPos, traps)) uc.attack(trapPos);
+                else {
+                    trapPos = myLoc.add(baseLocation.directionTo(myLoc).rotateRight());
+                    if (canSetTrap(trapPos, traps)) uc.attack(trapPos);
+                    else
+                        move.moveTo(baseLocation.add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST).add(Direction.EAST), false, this::moveCircle);
+                }
+            }
+        }
     }
+
+    boolean canSetTrap(Location trapPos, Location[] traps) {
+        boolean trapPlaced = false;
+        uc.println(traps.length);
+        uc.println(trapPos);
+        for(int i=0; i<traps.length; i++) {
+            uc.println(traps[i]);
+            if (traps[i].isEqual(trapPos)) trapPlaced = true;
+        }
+        uc.println(uc.canAttack(trapPos) && trapPos.distanceSquared(baseLocation) > 18 && !trapPlaced);
+        return uc.canAttack(trapPos) && trapPos.distanceSquared(baseLocation) > 18 && !trapPlaced;
+    }
+
+    boolean moveCircle(Direction dir) {
+        return uc.canMove(dir) && uc.getLocation().add(dir).distanceSquared(baseLocation) <= 18;
+    }
+
 }

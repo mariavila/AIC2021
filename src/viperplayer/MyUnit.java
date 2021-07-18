@@ -10,6 +10,9 @@ public abstract class MyUnit {
     Move move;
     Attack attack;
 
+    int torchTurn = 0;
+    int round = 0;
+
     MyUnit(UnitController uc){
         this.uc = uc;
         this.move = new Move(uc);
@@ -84,5 +87,14 @@ public abstract class MyUnit {
             return true;
         }
         return false;
+    }
+
+    void lightTorch() {
+        if (torchTurn -1 == round) randomThrow();
+
+        if ((torchTurn == 0 || torchTurn -1 <= round) && uc.canLightTorch()) {
+            torchTurn = round + GameConstants.TORCH_DURATION;
+            uc.lightTorch();
+        }
     }
 }

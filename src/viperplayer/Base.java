@@ -10,6 +10,7 @@ public class Base extends MyUnit {
 
     int workers = 0;
     int explorers = 0;
+    int trappers = 0;
     int waterTiles = 0;
     boolean COINresearched = false;
     boolean BOXESresearched = false;
@@ -45,6 +46,9 @@ public class Base extends MyUnit {
     }
 
     private void trySpawn(){
+        /*if (trappers < 1) {
+            if (spawnRandom(UnitType.TRAPPER)) ++trappers;
+        }*/
         if (workers < 1 && COINresearched){
             if (spawnRandom(UnitType.WORKER)) ++workers;
         }

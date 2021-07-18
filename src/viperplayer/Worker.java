@@ -19,9 +19,6 @@ public class Worker extends MyUnit {
     ResourceInfo[] resources;
     UnitInfo[] deer;
 
-    int torchTurn = 0;
-    int round = 0;
-
     String state = "INI";
 
     private Location getBaseLocation(){
@@ -130,15 +127,6 @@ public class Worker extends MyUnit {
         }
         if (state.equals("DEPOSIT")){
             deposit();
-        }
-    }
-
-    private void lightTorch() {
-        if (torchTurn -1 == round) randomThrow();
-
-        if ((torchTurn == 0 || torchTurn -1 == round) && uc.canLightTorch()) {
-            torchTurn = round + GameConstants.TORCH_DURATION;
-            uc.lightTorch();
         }
     }
 
