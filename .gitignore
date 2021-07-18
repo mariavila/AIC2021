@@ -28,6 +28,3 @@ hs_err_pid*
 
 # Games
 games/
-
-# config
-*.defaults
