@@ -74,13 +74,15 @@ public class Move {
     }
 
     private boolean safeLocation(Location loc, Location[] traps, boolean reckless) {
-        boolean isSafe = true;
-
         if (reckless) return true;
 
-        for(int i=0; i<traps.length; i++) {
-            if (loc.isEqual(traps[i])) isSafe = false;
-            break;
+        boolean isSafe = true;
+
+        for(Location trap: traps) {
+            if (loc.isEqual(trap)) {
+                isSafe = false;
+                break;
+            }
         }
 
         return isSafe;
@@ -138,9 +140,6 @@ public class Move {
     }
 
     void explore(){
-        Direction[] dirs = Direction.values();
-        int moved = 0;
-
         if (exploringDir != null) {
             if (uc.canMove(exploringDir)) {
                 uc.move(exploringDir);
@@ -148,14 +147,22 @@ public class Move {
             }
         }
 
-        while (moved < 10) {
-            int index = (int)(uc.getRandomDouble()*(dirs.length - 1));
+        Direction[] dirs = Direction.values();
+        Direction[] myDirs = new Direction[9];
+        int index = 0;
 
-            if (uc.canMove(dirs[index])) {
-                exploringDir = dirs[index];
-                uc.move(dirs[index]);
-            }
-            moved++;
+        for (Direction dir: dirs) {
+            if (uc.canMove(dir)) myDirs[index] = dir;
+            index++;
+        }
+
+        if (index == 0) return;
+
+        int random = (int)(uc.getRandomDouble()*(index - 1));
+
+        if (uc.canMove(myDirs[random])) {
+            exploringDir = myDirs[random];
+            uc.move(myDirs[random]);
         }
     }
 }
