@@ -60,12 +60,11 @@ public class Move {
             if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
                 //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
             else lastObstacleFound = myLoc.add(dir);
-            if (rotateRight) {
-                dir = dir.rotateRight();
-            }
+            if (rotateRight) dir = dir.rotateRight();
+            else dir = dir.rotateLeft();
         }
 
-        if (conditions.apply(dir) && safeLocation(myLoc.add(dir), dangerLocs, trapLocs, reckless)) uc.move(dir);
+        if (conditions.apply(dir)) uc.move(dir);
     }
 
     //clear some of the previous data

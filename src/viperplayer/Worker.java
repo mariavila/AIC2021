@@ -131,7 +131,7 @@ public class Worker extends MyUnit {
     }
 
     private void trySpawn(){
-        if (uc.getRound() < 410) {
+        if (uc.getRound() < 430) {
             spawnEmpty(UnitType.FARM);
             spawnEmpty(UnitType.SAWMILL);
             spawnEmpty(UnitType.QUARRY);
