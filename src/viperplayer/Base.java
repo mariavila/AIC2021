@@ -20,6 +20,7 @@ public class Base extends MyUnit {
     boolean EUGENICSresearched = false;
     boolean SCHOOLSresearched = false;
     boolean isBaseClose = false;
+    boolean enemyExplorer = false;
     Location baseLoc = null;
     Location myLoc = uc.getLocation();
     Direction[] safeSpawn = new Direction[8];
@@ -28,6 +29,7 @@ public class Base extends MyUnit {
         if(uc.getRound() == 1) init();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        if(!enemyExplorer) senseExplorers();
         trySpawn();
         tryResearch();
     }
@@ -71,9 +73,9 @@ public class Base extends MyUnit {
     }
 
     private void trySpawn(){
-        /*if (trappers < 1) {
-            if (spawnRandom(UnitType.TRAPPER)) ++trappers;
-        }*/
+        if (trappers < 1 && enemyExplorer) {
+            if (spawnSafe(UnitType.TRAPPER)) ++trappers;
+        }
         if (workers < 1 && COINresearched){
             if (spawnSafe(UnitType.WORKER)) ++workers;
         }
@@ -115,6 +117,15 @@ public class Base extends MyUnit {
         Location[] initialWaterTiles = uc.senseWater(uc.getType().getVisionRange());
         for(int i=0; i<initialWaterTiles.length; i++) {
             this.waterTiles++;
+        }
+    }
+
+    private void senseExplorers() {
+        UnitInfo[] units = uc.senseUnits(uc.getTeam().getOpponent());
+        if (units.length > 0) {
+            for (int i=0; i<units.length; i++) {
+                if (units[i].getType() == UnitType.EXPLORER) enemyExplorer = true;
+            }
         }
     }
 
