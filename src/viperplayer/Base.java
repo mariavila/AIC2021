@@ -20,13 +20,18 @@ public class Base extends MyUnit {
     boolean EUGENICSresearched = false;
     boolean SCHOOLSresearched = false;
     boolean isBaseClose = false;
+    boolean MILITARY_TRAININGresearched = false;
     Location baseLoc = null;
     Location myLoc = uc.getLocation();
     Direction[] safeSpawn = new Direction[8];
 
-    void playRound(){
-        if(uc.getRound() == 1) init();
+    boolean firstSmokeSignal = false;
+    boolean rushAttack = false;
 
+    void playRound(){
+        if(uc.getRound() == 0) init();
+
+        checkAttackRush();
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         trySpawn();
         tryResearch();
@@ -70,16 +75,47 @@ public class Base extends MyUnit {
         }
     }
 
+    private void checkAttackRush(){
+        if(!firstSmokeSignal){
+            int[] smokeSignals = uc.readSmokeSignals();
+            if(smokeSignals.length>0){
+                for (int smokeSignal:smokeSignals){
+                    if(smokeSignal == rushAttackSmokeCode){
+                        firstSmokeSignal = true;
+                        if(uc.getRound()<100){
+                            rushAttack = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void trySpawn(){
         /*if (trappers < 1) {
             if (spawnRandom(UnitType.TRAPPER)) ++trappers;
         }*/
-        if (workers < 1 && COINresearched){
+        if(explorers < 1){
+            if(spawnSafe(UnitType.EXPLORER)) ++explorers;
+        }
+        if (workers < 1 && COINresearched || workers < 1 && MILITARY_TRAININGresearched){
             if (spawnSafe(UnitType.WORKER)) ++workers;
         }
     }
 
     private void tryResearch(){
+        if(rushAttack && !MILITARY_TRAININGresearched){
+            if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) {
+                uc.researchTechnology(Technology.MILITARY_TRAINING);
+                MILITARY_TRAININGresearched = true;
+            }
+        }
+        else{
+            researchWheel();
+        }
+    }
+
+    private void researchWheel(){
         if(uc.canResearchTechnology(Technology.COIN)) {
             uc.researchTechnology(Technology.COIN);
             COINresearched = true;

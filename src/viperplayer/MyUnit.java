@@ -12,6 +12,7 @@ public abstract class MyUnit {
 
     int torchTurn = 0;
     int round = 0;
+    int rushAttackSmokeCode = 57;
 
     MyUnit(UnitController uc){
         this.uc = uc;
