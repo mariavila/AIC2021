@@ -1,6 +1,7 @@
 package viperplayer;
 
 import aic2021.user.UnitController;
+import aic2021.user.UnitType;
 
 public class Barracks extends MyUnit {
 
@@ -8,8 +9,14 @@ public class Barracks extends MyUnit {
         super(uc);
     }
 
-    void playRound(){
 
+    private void trySpawn(){
+        spawnEmpty(UnitType.AXEMAN);
+    }
+
+
+    void playRound(){
+        trySpawn();
     }
 
 }

@@ -8,8 +8,14 @@ public class Axeman extends MyUnit {
         super(uc);
     }
 
-    void playRound(){
+    boolean rushAttack=false;
 
+    private void readSmokeSignal(){
+        return;
+    }
+
+    void playRound(){
+        readSmokeSignal();
     }
 
 }

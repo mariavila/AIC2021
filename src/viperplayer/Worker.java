@@ -15,9 +15,13 @@ public class Worker extends MyUnit {
 
     boolean followingDeer = false;
     boolean boxesResearched = false;
+    boolean barracksBuilt = false;
+    boolean rushAttack = false;
+    boolean justSpawned = true;
 
     ResourceInfo[] resources;
     UnitInfo[] deer;
+    Location enemyBase;
 
     String state = "INI";
 
@@ -100,15 +104,51 @@ public class Worker extends MyUnit {
         }
     }
 
+    private void readArt(){
+        //if(uc.canRead())
+        return;
+    }
+
+
+
     void playRound(){
         round = uc.getRound();
         lightTorch();
 
+        if(justSpawned){
+            readArt();
+            justSpawned = false;
+        }
+        tryBarracks();
         tryJob();
         trySpawn();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
+    }
+
+    private void tryBarracks(){
+        if(!barracksBuilt){
+            int[] smokeSignals = uc.readSmokeSignals();
+            if(smokeSignals.length>0) {
+                for (int smokeSignal : smokeSignals) {
+                    Location offset = decodeSignal(true, smokeSignal);
+                    enemyBase = baseLocation.add(-offset.x, -offset.y);
+                    if (enemyBase != null) {
+                        rushAttack = true;
+                    }
+                }
+            }
+        }
+        if (rushAttack && !barracksBuilt){
+            barracksBuilt = spawnEmpty(UnitType.BARRACKS);
+            if(barracksBuilt){
+                int drawing = encodeEnemyBaseLoc(false, enemyBase, baseLocation);
+                if(uc.canDraw(drawing)){
+                    uc.draw(drawing);
+                }
+            }
+        }
     }
 
     private void tryJob() {
@@ -131,10 +171,12 @@ public class Worker extends MyUnit {
     }
 
     private void trySpawn(){
-        if (uc.getRound() < 430) {
-            spawnEmpty(UnitType.FARM);
-            spawnEmpty(UnitType.SAWMILL);
-            spawnEmpty(UnitType.QUARRY);
+        if (rushAttack &&!barracksBuilt){
+            if (uc.getRound() < 430) {
+                spawnEmpty(UnitType.FARM);
+                spawnEmpty(UnitType.SAWMILL);
+                spawnEmpty(UnitType.QUARRY);
+            }
         }
     }
 }

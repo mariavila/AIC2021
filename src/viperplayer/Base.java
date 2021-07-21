@@ -82,9 +82,10 @@ public class Base extends MyUnit {
             int[] smokeSignals = uc.readSmokeSignals();
             if(smokeSignals.length>0){
                 for (int smokeSignal:smokeSignals){
-                    if(smokeSignal == rushAttackSmokeCode){
+                    Location enemyBase = decodeSignal(true, smokeSignal);
+                    if(enemyBase != null){
                         firstSmokeSignal = true;
-                        if(uc.getRound()<100){
+                        if(uc.getRound()<800){
                             rushAttack = true;
                         }
                     }
@@ -100,7 +101,7 @@ public class Base extends MyUnit {
         if(explorers < 1){
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
-        if (workers < 1 && COINresearched || workers < 1 && MILITARY_TRAININGresearched){
+        if (workers < 1){
             if (spawnSafe(UnitType.WORKER)) ++workers;
         }
     }

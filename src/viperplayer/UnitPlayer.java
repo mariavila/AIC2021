@@ -21,6 +21,7 @@ public class UnitPlayer {
 		else if (t == UnitType.BARRACKS) u = new Barracks(uc);
 		else if (t == UnitType.FARM) u = new Farm(uc);
 		else if (t == UnitType.QUARRY) u = new Quarry(uc);
+		else if (t == UnitType.BARRACKS) u = new Barracks(uc);
 		else u = new Sawmill(uc);
 
 		while (true) {

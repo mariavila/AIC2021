@@ -9,8 +9,7 @@ public class Explorer extends MyUnit {
     }
 
     String state = "INI";
-    int turnsStopped = 0;
-    Location lastLoc;
+    Location enemyBase;
 
     Team myTeam = uc.getTeam();
     Location baseLocation;
@@ -25,28 +24,51 @@ public class Explorer extends MyUnit {
         return new Location(-1, -1);
     }
 
+    private Location lookForEnemyBase(){
+        UnitInfo[] units = uc.senseUnits(myTeam.getOpponent());
+        for(UnitInfo unit:units){
+            if(unit.getType() == UnitType.BASE){
+                return unit.getLocation();
+            }
+        }
+        return null;
+    }
+
+    private void drawEnemyBaseLoc(){
+        int drawing = encodeEnemyBaseLoc(false, enemyBase, baseLocation);
+        if(uc.canDraw(drawing)){
+            uc.draw(drawing);
+        }
+    }
+
     void playRound(){
-        //move.moveTo(enemyBaseLoc, false, this::moveCircle);
+        lightTorch();
+
         if (state == "INI"){
             baseLocation = getBaseLocation();
             state = "EXPLORE";
         }
-        // Explore for resources
+        // Explore to find enemy base
         if (state == "EXPLORE") {
             move.explore();
-            Location myNewLoc = uc.getLocation();
-            if (myNewLoc.isEqual(lastLoc)) {
-                turnsStopped++;
-                if (turnsStopped > 4) state = "RETURN";
-            } else {
-                lastLoc = myNewLoc;
-                turnsStopped = 0;
+            enemyBase = lookForEnemyBase();
+            if (enemyBase != null){
+                state = "BASEFOUND";
             }
         }
-        // Explore for resources
+        if (state == "BASEFOUND") {
+            if (enemyBase != null){
+                if(uc.canMakeSmokeSignal()){
+                    int drawing = encodeEnemyBaseLoc(true, enemyBase, baseLocation);
+                    uc.makeSmokeSignal(drawing);
+                    state = "RETURN";
+                }
+            }
+        }
         if (state == "RETURN") {
             move.moveTo(baseLocation, false);
-            if (uc.getLocation().distanceSquared(baseLocation) < 2) {
+            if (uc.getLocation().distanceSquared(baseLocation) <= 2) {
+                drawEnemyBaseLoc();
                 state = "EXPLORE";
             }
         }
