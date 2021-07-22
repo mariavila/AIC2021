@@ -25,6 +25,23 @@ public class Worker extends MyUnit {
 
     String state = "INI";
 
+    void playRound(){
+        round = uc.getRound();
+        lightTorch();
+
+        if(justSpawned){
+            readArt();
+            justSpawned = false;
+        }
+        uc.println(state);
+        tryBarracks();
+        tryJob();
+        trySpawn();
+        uc.println(state);
+        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer)) attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
+    }
+
     private Location getBaseLocation(){
         UnitInfo[] units = uc.senseUnits(2, myTeam);
         for (UnitInfo unit:units){
@@ -38,9 +55,9 @@ public class Worker extends MyUnit {
     private void explore(){
         resources = uc.senseResources();
         deer = uc.senseUnits(Team.NEUTRAL);
-
         if(resources.length > 0){
             resourceLocation = resources[0].getLocation();
+            followingDeer = false;
             state = "GOTORESOURCE";
         } else if(deer.length > 0){
             followingDeer = true;
@@ -51,9 +68,15 @@ public class Worker extends MyUnit {
     }
 
     private void goToResource(){
+        if (resourceLocation != null) {
+            ResourceInfo[] resourceInfo = uc.senseResourceInfo(resourceLocation);
+            //if (resourceInfo.length > 0) {
+                //if (resourceInfo[0].resourceType.equals(Resource.FOOD)) followingDeer = false;
+            //}
+        }
         if (followingDeer){
             deer = uc.senseUnits(Team.NEUTRAL);
-            if(deer.length > 0){
+            if (deer.length > 0){
                 resourceLocation = deer[0].getLocation();
             }
             else{
@@ -62,7 +85,7 @@ public class Worker extends MyUnit {
             }
         }
         move.moveTo(resourceLocation, false);
-        if(!followingDeer && resourceLocation.isEqual(uc.getLocation())){
+        if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
             state = "GATHER";
         }
     }
@@ -83,7 +106,7 @@ public class Worker extends MyUnit {
                 total_res += res;
             }
 
-            if (boxesResearched){
+            if (boxesResearched) {
                 if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
                 }
@@ -109,24 +132,6 @@ public class Worker extends MyUnit {
         return;
     }
 
-
-
-    void playRound(){
-        round = uc.getRound();
-        lightTorch();
-
-        if(justSpawned){
-            readArt();
-            justSpawned = false;
-        }
-        tryBarracks();
-        tryJob();
-        trySpawn();
-
-        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
-    }
-
     private void tryBarracks(){
         if(!barracksBuilt){
             int[] smokeSignals = uc.readSmokeSignals();
@@ -140,7 +145,7 @@ public class Worker extends MyUnit {
                 }
             }
         }
-        if (rushAttack && !barracksBuilt){
+        if (rushAttack && !barracksBuilt) {
             barracksBuilt = spawnEmpty(UnitType.BARRACKS);
             if(barracksBuilt){
                 int drawing = encodeEnemyBaseLoc(false, enemyBase, baseLocation);
@@ -170,8 +175,8 @@ public class Worker extends MyUnit {
         }
     }
 
-    private void trySpawn(){
-        if (rushAttack &&!barracksBuilt){
+    private void trySpawn() {
+        if (rushAttack &&!barracksBuilt) {
             if (uc.getRound() < 430) {
                 spawnEmpty(UnitType.FARM);
                 spawnEmpty(UnitType.SAWMILL);
