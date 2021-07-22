@@ -21,23 +21,23 @@ public class Worker extends MyUnit {
 
     ResourceInfo[] resources;
     UnitInfo[] deer;
-    Location enemyBase;
 
     String state = "INI";
 
     void playRound(){
         round = uc.getRound();
         lightTorch();
+        move.setEnemyBase(enemyBase);
 
         if(justSpawned){
             readArt();
             justSpawned = false;
         }
-        uc.println(state);
+
         tryBarracks();
         tryJob();
         trySpawn();
-        uc.println(state);
+
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer)) attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
     }
@@ -68,12 +68,12 @@ public class Worker extends MyUnit {
     }
 
     private void goToResource(){
-        if (resourceLocation != null) {
+        /*if (resourceLocation != null) {
             ResourceInfo[] resourceInfo = uc.senseResourceInfo(resourceLocation);
-            //if (resourceInfo.length > 0) {
-                //if (resourceInfo[0].resourceType.equals(Resource.FOOD)) followingDeer = false;
-            //}
-        }
+            if (resourceInfo.length > 0) {
+                if (resourceInfo[0].resourceType.equals(Resource.FOOD)) followingDeer = false;
+            }
+        }*/
         if (followingDeer){
             deer = uc.senseUnits(Team.NEUTRAL);
             if (deer.length > 0){

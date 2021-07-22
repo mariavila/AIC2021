@@ -9,10 +9,11 @@ public class Explorer extends MyUnit {
     }
 
     String state = "INI";
-    Location enemyBase;
+    Location enemyBase = null;
+    boolean returned = false;
 
     Team myTeam = uc.getTeam();
-    Location baseLocation;
+    Location baseLocation = null;
 
     Location getBaseLocation(){
         UnitInfo[] units = uc.senseUnits(2, myTeam);
@@ -42,19 +43,21 @@ public class Explorer extends MyUnit {
     }
 
     void playRound(){
+        round = uc.getRound();
         lightTorch();
 
+        tryJob();
+    }
+
+    void tryJob() {
         if (state == "INI"){
             baseLocation = getBaseLocation();
             state = "EXPLORE";
         }
-        // Explore to find enemy base
         if (state == "EXPLORE") {
             move.explore();
-            enemyBase = lookForEnemyBase();
-            if (enemyBase != null){
-                state = "BASEFOUND";
-            }
+            if (enemyBase == null) enemyBase = lookForEnemyBase();
+            else if (!returned) state = "BASEFOUND";
         }
         if (state == "BASEFOUND") {
             if (enemyBase != null){
@@ -69,6 +72,7 @@ public class Explorer extends MyUnit {
             move.moveTo(baseLocation, false);
             if (uc.getLocation().distanceSquared(baseLocation) <= 2) {
                 drawEnemyBaseLoc();
+                returned = true;
                 state = "EXPLORE";
             }
         }

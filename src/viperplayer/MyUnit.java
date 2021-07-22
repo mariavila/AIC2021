@@ -10,6 +10,8 @@ public abstract class MyUnit {
     Move move;
     Attack attack;
 
+    Location enemyBase = null;
+
     int torchTurn = 0;
     int round = 0;
     int rushAttackEncoding = 17;
@@ -23,17 +25,23 @@ public abstract class MyUnit {
     abstract void playRound();
 
     Location decodeSignal(boolean encoded, int signal){
-        if(signal%rushAttackEncoding == 0){
+        if(!encoded) decode(signal);
+        else if(signal%rushAttackEncoding == 0){
             signal = signal /rushAttackEncoding;
-            int negative = signal % 10;
-            signal = signal/10;
-            int offsetY = signal%50;
-            int offsetX = signal/50;
-            if (negative == 1 || negative == 2) offsetX = -offsetX;
-            if(negative == 1 || negative == 3) offsetY = -offsetY;
-            return new Location(offsetX, offsetY);
+            return decode(signal);
         }
         return null;
+    }
+
+    Location decode(int signal) {
+        int negative = signal % 10;
+        if (negative != 0 && negative != 1 && negative != 2 && negative != 3) return null;
+        signal = signal/10;
+        int offsetY = signal%50;
+        int offsetX = signal/50;
+        if (negative == 1 || negative == 2) offsetX = -offsetX;
+        if(negative == 1 || negative == 3) offsetY = -offsetY;
+        return new Location(offsetX, offsetY);
     }
 
     int encodeEnemyBaseLoc(boolean encoded, Location enemyBase, Location baseLocation){
@@ -63,12 +71,18 @@ public abstract class MyUnit {
     boolean spawnEmpty(UnitType t){
         ResourceInfo[] res;
         Location myLoc = uc.getLocation();
+        Location[] traps = uc.senseTraps(2);
         boolean hasResource;
 
+        outerloop:
         for (Direction dir : dirs){
             if (dir == Direction.ZERO) continue;
 
             Location target = myLoc.add(dir);
+
+            for (Location trap: traps) {
+                if (target.isEqual(trap)) continue outerloop;
+            }
 
             if (uc.canSenseLocation(target)) {
                 res = uc.senseResourceInfo(target);
@@ -99,7 +113,7 @@ public abstract class MyUnit {
     }
 
     boolean randomThrow(){
-        Location[] locs = uc.getVisibleLocations(uc.getType().getTorchThrowRange(), false);
+        Location[] locs = uc.getVisibleLocations(2, true);
         int index = (int)(uc.getRandomDouble()*locs.length);
         if (uc.canThrowTorch(locs[index])){
             uc.throwTorch(locs[index]);

@@ -48,6 +48,7 @@ public class Base extends MyUnit {
         UnitInfo[] units = uc.senseUnits(uc.getTeam().getOpponent());
         if (units.length > 0) {
             isBaseClose = true;
+            rushAttack = true;
             baseLoc = units[0].getLocation();
         }
 
@@ -98,7 +99,7 @@ public class Base extends MyUnit {
         /*if (trappers < 1) {
             if (spawnRandom(UnitType.TRAPPER)) ++trappers;
         }*/
-        if(explorers < 1){
+        if(explorers < 1 && !rushAttack){
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
         if (workers < 1){

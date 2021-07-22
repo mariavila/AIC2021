@@ -17,7 +17,14 @@ public class Move {
     int minDistToEnemy = INF; //minimum distance I've been to the enemy while going around an obstacle
     Location prevTarget = null; //previous target
 
-    Direction exploringDir = null;
+    Location enemyBase = null;
+    boolean edgesFound = false;
+    Location edgeTarget = null;
+    int x1 = -1;
+    int x2 = 1100;
+    int y1 = -1;
+    int y2 = 1100;
+    int counter = 0;
 
     void moveTo(Location target, boolean reckless) {
         moveTo(target, reckless, (Direction dir)->uc.canMove(dir));
@@ -103,51 +110,90 @@ public class Move {
         int index = 0;
 
         for (Direction dir: dirs) {
+            Location target = myLoc.add(dir);
+
+            if (enemyBase != null) {
+                int dist = enemyBase.distanceSquared(target);
+                if (dist <= UnitType.BASE.getAttackRange()) {
+                    dangerLocs[index] = target;
+                    index++;
+                    continue;
+                }
+            }
+
             for (UnitInfo unit: units) {
                 UnitType unitType = unit.getType();
                 int maxRange = unitType.getAttackRange();
                 int minRange = unitType.getMinAttackRange();
-                Location target = myLoc.add(dir);
                 int dist = unit.getLocation().distanceSquared(target);
                 if (dist <= maxRange && dist >= minRange) {
                     dangerLocs[index] = target;
                     break;
                 }
             }
+
             index++;
         }
         return dangerLocs;
     }
 
+    void setEnemyBase(Location target) {
+        enemyBase = target;
+    }
+
     void explore(){
-        Location[] trapLocs = uc.senseTraps();
-        Location[] dangerLocs = dangerousLocations();
+        findMapEdges();
+        if (uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 20) {
+            edgeTarget = null;
+            counter = 0;
+        } else counter++;
+
+        if (edgeTarget == null) {
+            if (y1 == -1) edgeTarget = new Location(x1, y1);
+            else if (x1 == -1) edgeTarget = new Location(x1, y2);
+            else if (y2 == 1100) edgeTarget = new Location(x2, y2);
+            else if (x2 == 1100) edgeTarget = new Location(x2, y1);
+            else {
+                edgesFound = true;
+                edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
+            }
+        }
+        moveTo(edgeTarget, false);
+    }
+
+    public int getRandomNumber(int min, int max) {
+        return (int) ((Math.random() * (max - min)) + min);
+    }
+
+    void findMapEdges() {
+        if (edgesFound) return;
+        Location[] myLocs = uc.getVisibleLocations();
         Location myLoc = uc.getLocation();
-        if (exploringDir != null) {
-            if (uc.canMove(exploringDir) && safeLocation(myLoc.add(exploringDir), dangerLocs, trapLocs, false)) {
-                uc.move(exploringDir);
-                return;
+        for (Location loc: myLocs) {
+            if (loc.x == myLoc.x) {
+                if (uc.isOutOfMap(loc)) {
+                    if (myLoc.y > loc.y && loc.y > y1) {
+                        y1 = loc.y + 1;
+                        edgeTarget = null;
+                    }
+                    if (myLoc.y < loc.y && loc.y < y2) {
+                        y2 = loc.y - 1;
+                        edgeTarget = null;
+                    }
+                }
             }
-        }
-
-        Direction[] dirs = Direction.values();
-        Direction[] myDirs = new Direction[9];
-        int index = 0;
-
-        for (Direction dir: dirs) {
-            if (dir != Direction.ZERO) {
-                myDirs[index] = dir;
-                index++;
+            if (loc.y == myLoc.y) {
+                if (uc.isOutOfMap(loc)) {
+                    if (myLoc.x > loc.x && loc.x > x1) {
+                        x1 = loc.x + 1;
+                        edgeTarget = null;
+                    }
+                    if (myLoc.x < loc.x && loc.x < x2) {
+                        x2 = loc.x - 1;
+                        edgeTarget = null;
+                    }
+                }
             }
-        }
-
-        if (myDirs[0] == null) return;
-
-        int random = (int)(uc.getRandomDouble()*index);
-
-        if (uc.canMove(myDirs[random]) && safeLocation(myLoc.add(myDirs[random]), dangerLocs, trapLocs, false)) {
-            exploringDir = myDirs[random];
-            uc.move(myDirs[random]);
         }
     }
 }
