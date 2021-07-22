@@ -143,7 +143,7 @@ public class Move {
 
     void explore(){
         findMapEdges();
-        if (uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 20) {
+        if (edgeTarget != null && uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 20) {
             edgeTarget = null;
             counter = 0;
         } else counter++;

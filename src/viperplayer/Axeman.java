@@ -8,14 +8,13 @@ public class Axeman extends MyUnit {
         super(uc);
     }
 
-    boolean rushAttack=false;
 
     private void readSmokeSignal(){
         return;
     }
 
     void playRound(){
+        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         readSmokeSignal();
     }
-
 }

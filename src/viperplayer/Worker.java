@@ -10,7 +10,6 @@ public class Worker extends MyUnit {
 
     Team myTeam = uc.getTeam();
 
-    Location baseLocation = null;
     Location resourceLocation = null;
 
     boolean followingDeer = false;
@@ -27,12 +26,13 @@ public class Worker extends MyUnit {
     void playRound(){
         round = uc.getRound();
         lightTorch();
-        move.setEnemyBase(enemyBase);
 
         if(justSpawned){
-            readArt();
+            tryReadArt();
             justSpawned = false;
         }
+
+        smokeSignals = tryReadSmoke();
 
         tryBarracks();
         tryJob();
@@ -127,20 +127,22 @@ public class Worker extends MyUnit {
         }
     }
 
-    private void readArt(){
-        //if(uc.canRead())
-        return;
-    }
-
     private void tryBarracks(){
         if(!barracksBuilt){
-            int[] smokeSignals = uc.readSmokeSignals();
-            if(smokeSignals.length>0) {
-                for (int smokeSignal : smokeSignals) {
-                    Location offset = decodeSignal(true, smokeSignal);
-                    enemyBase = baseLocation.add(-offset.x, -offset.y);
-                    if (enemyBase != null) {
-                        rushAttack = true;
+            if(smokeSignals.length > 0) {
+                Location loc;
+                int type;
+
+                for (smokeSignal smokeSignal : smokeSignals) {
+                    loc = smokeSignal.getLoc();
+                    type = smokeSignal.getType();
+
+                    if (type == rushAttackEncoding) {
+                        enemyBase = baseLocation.add(-loc.x, -loc.y);
+                        if (enemyBase != null) {
+                            move.setEnemyBase(enemyBase);
+                            rushAttack = true;
+                        }
                     }
                 }
             }

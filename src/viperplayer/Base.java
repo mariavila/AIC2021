@@ -23,14 +23,14 @@ public class Base extends MyUnit {
     boolean MILITARY_TRAININGresearched = false;
     boolean enemyExplorer = false;
     Location baseLoc = null;
-    Location myLoc = uc.getLocation();
     Direction[] safeSpawn = new Direction[8];
 
-    boolean firstSmokeSignal = false;
     boolean rushAttack = false;
 
     void playRound(){
         if(uc.getRound() == 0) init();
+
+        smokeSignals = tryReadSmoke();
 
         checkAttackRush();
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
@@ -40,6 +40,7 @@ public class Base extends MyUnit {
     }
 
     void init() {
+        baseLocation = uc.getLocation();
         senseBase();
         senseInitialWater();
     }
@@ -60,7 +61,7 @@ public class Base extends MyUnit {
             Direction[] myDirs = Direction.values();
             Direction[] tempDirs = new Direction[9];
             for (Direction dir: myDirs) {
-                Location target = myLoc.add(dir);
+                Location target = baseLocation.add(dir);
                 if (target.distanceSquared(baseLoc) > range || uc.isObstructed(target, baseLoc)) {
                     tempDirs[index] = dir;
                     index++;
@@ -79,16 +80,19 @@ public class Base extends MyUnit {
     }
 
     private void checkAttackRush(){
-        if(!firstSmokeSignal){
-            int[] smokeSignals = uc.readSmokeSignals();
-            if(smokeSignals.length>0){
-                for (int smokeSignal:smokeSignals){
-                    Location enemyBase = decodeSignal(true, smokeSignal);
-                    if(enemyBase != null){
-                        firstSmokeSignal = true;
-                        if(uc.getRound()<800){
-                            rushAttack = true;
-                        }
+        if(smokeSignals.length > 0) {
+            Location loc;
+            int type;
+
+            for (smokeSignal smokeSignal : smokeSignals) {
+                loc = smokeSignal.getLoc();
+                type = smokeSignal.getType();
+
+                if (type == rushAttackEncoding) {
+                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    if (enemyBase != null) {
+                        move.setEnemyBase(enemyBase);
+                        rushAttack = true;
                     }
                 }
             }
@@ -185,5 +189,4 @@ public class Base extends MyUnit {
         uc.spawn(t, myDirs[random]);
         return true;
     }
-
 }

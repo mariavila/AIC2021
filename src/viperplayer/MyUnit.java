@@ -11,6 +11,8 @@ public abstract class MyUnit {
     Attack attack;
 
     Location enemyBase = null;
+    Location baseLocation = null;
+    smokeSignal[] smokeSignals = null;
 
     int torchTurn = 0;
     int round = 0;
@@ -22,13 +24,52 @@ public abstract class MyUnit {
         this.attack = new Attack(uc);
     }
 
+    class smokeSignal {
+        Location loc;
+        int type;
+
+        smokeSignal(Location loc, int type) {
+            this.loc = loc;
+            this.type = type;
+        }
+
+        Location getLoc() {
+            return loc;
+        }
+
+        int getType() {
+            return type;
+        }
+    }
+
     abstract void playRound();
 
-    Location decodeSignal(boolean encoded, int signal){
+    void tryReadArt(){
+
+    }
+
+    smokeSignal[] tryReadSmoke() {
+        int[] smokeSignals = uc.readSmokeSignals();
+        smokeSignal[] decodedSignals = new smokeSignal[smokeSignals.length];
+        int index = 0;
+
+        if(smokeSignals.length > 0) {
+            for (int smokeSignal : smokeSignals) {
+                decodedSignals[index] = decodeSignal(true, smokeSignal);
+                index++;
+            }
+        }
+
+        return decodedSignals;
+    }
+
+    smokeSignal decodeSignal(boolean encoded, int signal){
+        int encoding;
         if(!encoded) decode(signal);
         else if(signal%rushAttackEncoding == 0){
+            encoding = rushAttackEncoding;
             signal = signal /rushAttackEncoding;
-            return decode(signal);
+            return new smokeSignal(decode(signal), encoding);
         }
         return null;
     }
