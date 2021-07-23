@@ -38,7 +38,7 @@ public class Worker extends MyUnit {
         tryBarracks();
         tryJob();
         trySpawn();
-        uc.println(state);
+
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer)) attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
     }
