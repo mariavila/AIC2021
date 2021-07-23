@@ -15,6 +15,13 @@ public class Explorer extends MyUnit {
     Team myTeam = uc.getTeam();
     Location baseLocation = null;
 
+    void playRound(){
+        round = uc.getRound();
+        lightTorch();
+
+        tryJob();
+    }
+
     Location getBaseLocation(){
         UnitInfo[] units = uc.senseUnits(2, myTeam);
         for (UnitInfo unit:units){
@@ -40,13 +47,6 @@ public class Explorer extends MyUnit {
         if(uc.canDraw(drawing)){
             uc.draw(drawing);
         }
-    }
-
-    void playRound(){
-        round = uc.getRound();
-        lightTorch();
-
-        tryJob();
     }
 
     void tryJob() {
