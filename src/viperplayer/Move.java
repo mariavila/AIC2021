@@ -71,7 +71,7 @@ public class Move {
             else dir = dir.rotateLeft();
         }
 
-        if (conditions.apply(dir)) uc.move(dir);
+        if (conditions.apply(dir) && safeLocation(myLoc.add(dir), dangerLocs, trapLocs, reckless)) uc.move(dir);
     }
 
     //clear some of the previous data
@@ -103,7 +103,6 @@ public class Move {
     }
 
     private Location[] dangerousLocations(){
-        UnitInfo[] units = uc.senseUnits(uc.getTeam().getOpponent());
         Direction[] dirs = Direction.values();
         Location myLoc = uc.getLocation();
         Location[] dangerLocs = new Location[9];
@@ -118,17 +117,6 @@ public class Move {
                     dangerLocs[index] = target;
                     index++;
                     continue;
-                }
-            }
-
-            for (UnitInfo unit: units) {
-                UnitType unitType = unit.getType();
-                int maxRange = unitType.getAttackRange();
-                int minRange = unitType.getMinAttackRange();
-                int dist = unit.getLocation().distanceSquared(target);
-                if (dist <= maxRange && dist >= minRange) {
-                    dangerLocs[index] = target;
-                    break;
                 }
             }
 

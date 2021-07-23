@@ -13,6 +13,7 @@ public abstract class MyUnit {
     Location enemyBase = null;
     Location baseLocation = null;
     smokeSignal[] smokeSignals = null;
+    boolean justSpawned = true;
 
     int torchTurn = 0;
     int round = 0;
@@ -44,8 +45,29 @@ public abstract class MyUnit {
 
     abstract void playRound();
 
-    void tryReadArt(){
+    Location tryReadArt(){
+        UnitInfo[] units = uc.senseUnits(uc.getTeam());
+        Direction[] myDirs = Direction.values();
+        int signal = 0;
 
+        for (UnitInfo unit: units) {
+            UnitType myType = unit.getType();
+            if (myType == UnitType.BARRACKS) {
+                Location barracks = unit.getLocation();
+                for (Direction dir: myDirs) {
+                    Location target = barracks.add(dir);
+                    if (uc.canRead(target)) {
+                        signal = uc.read(target);
+                        if (signal != 0) {
+                            Location offset = decode(signal);
+                            return new Location(barracks.x - offset.x, barracks.y - offset.y);
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     smokeSignal[] tryReadSmoke() {
@@ -109,7 +131,7 @@ public abstract class MyUnit {
         return drawing;
     }
 
-    boolean spawnEmpty(UnitType t){
+    Location spawnEmpty(UnitType t){
         ResourceInfo[] res;
         Location myLoc = uc.getLocation();
         Location[] traps = uc.senseTraps(2);
@@ -134,11 +156,11 @@ public abstract class MyUnit {
 
                 if (!hasResource && uc.canSpawn(t, dir)){
                     uc.spawn(t, dir);
-                    return true;
+                    return myLoc.add(dir);
                 }
             }
         }
-        return false;
+        return null;
     }
 
     boolean moveRandom(){
@@ -155,10 +177,11 @@ public abstract class MyUnit {
 
     boolean randomThrow(){
         Location[] locs = uc.getVisibleLocations(2, true);
-        int index = (int)(uc.getRandomDouble()*locs.length);
-        if (uc.canThrowTorch(locs[index])){
-            uc.throwTorch(locs[index]);
-            return true;
+        for (Location loc:locs) {
+            if (uc.canThrowTorch(loc)){
+                uc.throwTorch(loc);
+                return true;
+            }
         }
         return false;
     }
