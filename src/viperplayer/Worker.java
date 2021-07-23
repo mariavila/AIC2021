@@ -11,6 +11,7 @@ public class Worker extends MyUnit {
     Team myTeam = uc.getTeam();
 
     Location resourceLocation = null;
+    int resourcesLeft = 0;
 
     boolean followingDeer = false;
     boolean boxesResearched = false;
@@ -37,7 +38,7 @@ public class Worker extends MyUnit {
         tryBarracks();
         tryJob();
         trySpawn();
-
+        uc.println(state);
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer)) attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
     }
@@ -68,12 +69,11 @@ public class Worker extends MyUnit {
     }
 
     private void goToResource(){
-        /*if (resourceLocation != null) {
-            ResourceInfo[] resourceInfo = uc.senseResourceInfo(resourceLocation);
-            if (resourceInfo.length > 0) {
-                if (resourceInfo[0].resourceType.equals(Resource.FOOD)) followingDeer = false;
-            }
-        }*/
+        resources = uc.senseResources();
+        if (resources.length > 0){
+            resourceLocation = resources[0].getLocation();
+            followingDeer = false;
+        }
         if (followingDeer){
             deer = uc.senseUnits(Team.NEUTRAL);
             if (deer.length > 0){
@@ -83,6 +83,9 @@ public class Worker extends MyUnit {
                 state = "EXPLORE";
                 followingDeer = false;
             }
+        }
+        if (resourcesLeft < 100) {
+            state = "EXPLORE";
         }
         move.moveTo(resourceLocation, false);
         if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
@@ -109,10 +112,12 @@ public class Worker extends MyUnit {
             if (boxesResearched) {
                 if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
+                    resourcesLeft = resources[0].getAmount();
                 }
             }
             else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
+                resourcesLeft = resources[0].getAmount();
             }
         } else {
             state = "EXPLORE";
