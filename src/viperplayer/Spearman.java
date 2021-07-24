@@ -60,12 +60,15 @@ public class Spearman extends MyUnit {
         }
 
         if (enemies.length == 0) return false;
-        if (enemies.length == 1 && enemyBase != null && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
 
         int bestIndex = -1;
+        int baseRange = UnitType.BASE.getAttackRange();
 
         for (int i = 8; i >= 0; i--) {
             if (!uc.canMove(dirs[i])) continue;
+            if (enemyBase != null && enemyBase.distanceSquared(myLoc.add(dirs[i])) <= baseRange) {
+                microInfo[i].numEnemies += 10;
+            }
             if (bestIndex < 0 || !microInfo[bestIndex].isBetter(microInfo[i])) bestIndex = i;
         }
 
@@ -101,6 +104,7 @@ public class Spearman extends MyUnit {
         }
 
         boolean isBetter(MicroInfo m) {
+            if (numEnemies > 9 || m.numEnemies > 9) return numEnemies < m.numEnemies;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
                 if (numEnemies < m.numEnemies) return true;

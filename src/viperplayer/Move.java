@@ -10,7 +10,7 @@ public class Move {
         this.uc = uc;
     }
 
-    final int INF = 1000000;
+    final int INF = 1000000000;
 
     boolean rotateRight = true; //if I should rotate right or left
     Location lastObstacleFound = null; //latest obstacle I've found in my way
@@ -138,8 +138,8 @@ public class Move {
 
         if (edgeTarget == null) {
             if (y1 == -1) edgeTarget = new Location(x1, y1);
-            else if (x1 == -1) edgeTarget = new Location(x1, y2);
             else if (y2 == 1100) edgeTarget = new Location(x2, y2);
+            else if (x1 == -1) edgeTarget = new Location(x1, y2);
             else if (x2 == 1100) edgeTarget = new Location(x2, y1);
             else {
                 edgesFound = true;
