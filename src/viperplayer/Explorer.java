@@ -97,6 +97,7 @@ public class Explorer extends MyUnit {
         Location myLoc = uc.getLocation();
         Direction[] dirs = Direction.values();
         MicroInfo[] microInfo = new MicroInfo[9];
+
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(dirs[i]);
             microInfo[i] = new MicroInfo(target);
@@ -113,14 +114,21 @@ public class Explorer extends MyUnit {
         }
 
         if (enemies.length == 0) return false;
-        if (enemies.length == 1 && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
+        if (enemies.length == 1 && enemyBase != null && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
 
         int bestIndex = -1;
 
-        for (int i = 8; i >= 0; i--) {
+        for (int i = 0; i <= 8; i++) {
             if (!uc.canMove(dirs[i])) continue;
-            if (bestIndex < 0 || !microInfo[bestIndex].isBetter(microInfo[i])) bestIndex = i;
+            if (bestIndex < 0) {
+                bestIndex = i;
+            }
+            if (!microInfo[bestIndex].isBetter(microInfo[i])) {
+                bestIndex = i;
+            }
         }
+
+        if (bestIndex == 0 && microInfo[8].numEnemies == 0) return false;
 
         if (bestIndex != -1) {
             microDir = (dirs[bestIndex]);
@@ -142,26 +150,28 @@ public class Explorer extends MyUnit {
         }
 
         void update(UnitInfo unit) {
-            int distance = unit.getLocation().distanceSquared(loc);
-            if (distance <= unit.getType().attackRange) {
+            Location target = unit.getLocation();
+            int xdiff = target.x - loc.x;
+            int ydiff = target.y - loc.y;
+            if (xdiff < 0) xdiff++;
+            else if (xdiff > 0) xdiff--;
+            else xdiff = 1;
+            if (ydiff < 0) ydiff++;
+            else if (ydiff > 0) ydiff--;
+            else ydiff = 1;
+
+            int distance = xdiff*xdiff + ydiff*ydiff;
+            int attackRange = unit.getType().attackRange;
+            if (attackRange != 0 && distance <= attackRange) {
                 ++numEnemies;
             }
             if (distance < minDistToEnemy) minDistToEnemy = distance;
         }
 
-        boolean canAttack() {
-            return uc.getType().getAttackRange()+10 >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
-        }
-
         boolean isBetter(MicroInfo m) {
-            if (numEnemies < m.numEnemies) return true;
             if (numEnemies > m.numEnemies) return false;
-            if (canAttack()) {
-                if (!m.canAttack()) return true;
-                return minDistToEnemy >= m.minDistToEnemy;
-            }
-            if (m.canAttack()) return false;
-            return minDistToEnemy >= m.minDistToEnemy;
+            if (numEnemies < m.numEnemies) return true;
+            return true;
         }
     }
 }

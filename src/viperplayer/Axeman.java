@@ -18,15 +18,23 @@ public class Axeman extends MyUnit {
             justSpawned = false;
         }
 
+        round = uc.getRound();
+
         smokeSignals = tryReadSmoke();
         microResult = doMicro();
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        tryMove();
+        if (!microResult || round > 1900) {
+            if (round > 1900) tryMove(true);
+            else tryMove(false);
+        } else {
+            if (!uc.canMove()) return;
+            uc.move(microDir);
+        }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
 
-    void tryMove() {
-        move.moveTo(enemyBase, false);
+    void tryMove(boolean reckless) {
+        move.moveTo(enemyBase, reckless);
     }
 
     public boolean doMicro() {
@@ -92,11 +100,10 @@ public class Axeman extends MyUnit {
         }
 
         boolean isBetter(MicroInfo m) {
-            if (numEnemies < m.numEnemies) return true;
-            if (numEnemies > m.numEnemies) return false;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
-                return minDistToEnemy >= m.minDistToEnemy;
+                if (numEnemies < m.numEnemies) return true;
+                return minDistToEnemy <= m.minDistToEnemy;
             }
             if (m.canAttack()) return false;
             return minDistToEnemy <= m.minDistToEnemy;

@@ -13,7 +13,7 @@ public class Worker extends MyUnit {
     private Direction microDir;
 
     Location resourceLocation = null;
-    int resourcesLeft = 0;
+    ResourceInfo resourcesLeft = null;
 
     boolean followingDeer = false;
     boolean boxesResearched = false;
@@ -88,7 +88,7 @@ public class Worker extends MyUnit {
                 followingDeer = false;
             }
         }
-        if (resourcesLeft < 100) {
+        if (resourcesLeft != null && resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) {
             state = "EXPLORE";
         }
         move.moveTo(resourceLocation, false);
@@ -116,12 +116,12 @@ public class Worker extends MyUnit {
             if (boxesResearched) {
                 if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
-                    resourcesLeft = resources[0].getAmount();
+                    resourcesLeft = resources[0];
                 }
             }
             else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
-                resourcesLeft = resources[0].getAmount();
+                resourcesLeft = resources[0];
             }
         } else {
             state = "EXPLORE";
@@ -221,7 +221,7 @@ public class Worker extends MyUnit {
         }
 
         if (enemies.length == 0) return false;
-        if (enemies.length == 1 && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
+        if (enemies.length == 1 && enemyBase != null && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
 
         int bestIndex = -1;
 
