@@ -60,6 +60,7 @@ public class Axeman extends MyUnit {
         }
 
         if (enemies.length == 0) return false;
+        if (enemies.length == 1 && enemyBase != null && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
 
         int bestIndex = -1;
 
