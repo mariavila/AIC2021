@@ -19,6 +19,7 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
+        spawnSafe(UnitType.SPEARMAN);
         spawnSafe(UnitType.AXEMAN);
     }
 
