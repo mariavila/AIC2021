@@ -32,7 +32,7 @@ public class Spearman extends MyUnit {
             else tryMove(false);
         } else {
             if (!uc.canMove()) return;
-            uc.move(microDir);
+            if (move.isSafe(microDir)) uc.move(microDir);
         }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }

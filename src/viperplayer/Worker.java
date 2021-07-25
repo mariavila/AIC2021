@@ -269,7 +269,7 @@ public class Worker extends MyUnit {
                 if (target.isEqual(trap)) continue outerloop;
             }
 
-            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
+            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+4) {
                 uc.spawn(t, dir);
                 return myLoc.add(dir);
             }

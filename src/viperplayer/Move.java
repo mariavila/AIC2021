@@ -74,6 +74,12 @@ public class Move {
         if (conditions.apply(dir) && safeLocation(myLoc.add(dir), dangerLocs, trapLocs, reckless)) uc.move(dir);
     }
 
+    public boolean isSafe(Direction dir) {
+        Location[] trapLocs = uc.senseTraps();
+        Location[] dangerLocs = dangerousLocations();
+        return safeLocation(uc.getLocation().add(dir), dangerLocs, trapLocs, false);
+    }
+
     //clear some of the previous data
     private void resetPathfinding(){
         lastObstacleFound = null;

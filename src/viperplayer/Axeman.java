@@ -32,7 +32,8 @@ public class Axeman extends MyUnit {
             else tryMove(false);
         } else {
             if (!uc.canMove()) return;
-            uc.move(microDir);
+            if (move.isSafe(microDir)) uc.move(microDir);
+            else move.explore();
         }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
