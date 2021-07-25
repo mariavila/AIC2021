@@ -19,6 +19,7 @@ public class Spearman extends MyUnit {
         }
 
         round = uc.getRound();
+        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
 
         smokeSignals = tryReadSmoke();
         microResult = doMicro();

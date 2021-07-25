@@ -60,11 +60,18 @@ public class Worker extends MyUnit {
     private void explore(){
         resources = uc.senseResources();
         deer = uc.senseUnits(Team.NEUTRAL);
-        if(resources.length > 0){
-            resourceLocation = resources[0].getLocation();
+        int baseRange = UnitType.BASE.getAttackRange();
+
+        for (ResourceInfo resource: resources) {
+            Location resLoc = resource.getLocation();
+            if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
+            resourceLocation = resLoc;
             followingDeer = false;
             state = "GOTORESOURCE";
-        } else if(deer.length > 0){
+            return;
+        }
+
+        if(deer.length > 0){
             followingDeer = true;
             state = "GOTORESOURCE";
         } else{
@@ -74,10 +81,9 @@ public class Worker extends MyUnit {
 
     private void goToResource(){
         resources = uc.senseResources();
-        if (resources.length > 0){
-            resourceLocation = resources[0].getLocation();
-            followingDeer = false;
-        }
+        int baseRange = UnitType.BASE.getAttackRange();
+        if (enemyBase != null && resourceLocation != null && resourceLocation.distanceSquared(enemyBase) <= baseRange) resourceLocation = null;
+
         if (followingDeer){
             deer = uc.senseUnits(Team.NEUTRAL);
             if (deer.length > 0){
@@ -88,12 +94,14 @@ public class Worker extends MyUnit {
                 followingDeer = false;
             }
         }
-        if (resourcesLeft != null && resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) {
+
+        if (resourceLocation == null) {
             state = "EXPLORE";
-        }
-        move.moveTo(resourceLocation, false);
-        if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
-            state = "GATHER";
+        } else {
+            move.moveTo(resourceLocation, false);
+            if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
+                state = "GATHER";
+            }
         }
     }
 
@@ -106,6 +114,8 @@ public class Worker extends MyUnit {
                 uc.gatherResources();
             }
 
+            resources = uc.senseResources();
+
             int[] gatheredResources = uc.getResourcesCarried();
             int total_res = 0;
 
@@ -116,12 +126,16 @@ public class Worker extends MyUnit {
             if (boxesResearched) {
                 if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
-                    resourcesLeft = resources[0];
+                    if (resources.length > 0) {
+                        resourcesLeft = resources[0];
+                    } else resourcesLeft = null;
                 }
             }
             else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
-                resourcesLeft = resources[0];
+                if (resources.length > 0) {
+                    resourcesLeft = resources[0];
+                } else resourcesLeft = null;
             }
         } else {
             state = "EXPLORE";
@@ -132,6 +146,10 @@ public class Worker extends MyUnit {
         move.moveTo(baseLocation, false);
         if (uc.canDeposit()) {
             uc.deposit();
+            if (resourcesLeft != null && (resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) || resourcesLeft.getAmount() == 0) {
+                resourcesLeft = null;
+                state = "EXPLORE";
+            }
             state = "GOTORESOURCE";
         }
     }

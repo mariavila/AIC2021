@@ -19,6 +19,7 @@ public class Axeman extends MyUnit {
         }
 
         round = uc.getRound();
+        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 25) lightTorch();
 
         smokeSignals = tryReadSmoke();
         microResult = doMicro();

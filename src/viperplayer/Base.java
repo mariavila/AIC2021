@@ -22,13 +22,13 @@ public class Base extends MyUnit {
     boolean isBaseClose = false;
     boolean MILITARY_TRAININGresearched = false;
     boolean enemyExplorer = false;
-    Location baseLoc = null;
     Direction[] safeSpawn = new Direction[8];
 
     boolean rushAttack = false;
 
     void playRound(){
-        if(uc.getRound() == 0) init();
+        round = uc.getRound();
+        if(round == 0) init();
 
         smokeSignals = tryReadSmoke();
 
@@ -50,7 +50,7 @@ public class Base extends MyUnit {
         if (units.length > 0) {
             isBaseClose = true;
             rushAttack = true;
-            baseLoc = units[0].getLocation();
+            enemyBase = units[0].getLocation();
         }
 
         if (!isBaseClose) {
@@ -62,7 +62,7 @@ public class Base extends MyUnit {
             Direction[] tempDirs = new Direction[9];
             for (Direction dir: myDirs) {
                 Location target = baseLocation.add(dir);
-                if (target.distanceSquared(baseLoc) > range || uc.isObstructed(target, baseLoc)) {
+                if (target.distanceSquared(enemyBase) > range || uc.isObstructed(target, enemyBase)) {
                     tempDirs[index] = dir;
                     index++;
                 }
@@ -80,7 +80,11 @@ public class Base extends MyUnit {
     }
 
     private void checkAttackRush(){
-        if(smokeSignals.length > 0) {
+        if (isBaseClose && round == 10) {
+            int drawing = encodeEnemyBaseLoc(true, enemyBase, baseLocation);
+            uc.makeSmokeSignal(drawing);
+        }
+        if (smokeSignals.length > 0) {
             Location loc;
             int type;
 
