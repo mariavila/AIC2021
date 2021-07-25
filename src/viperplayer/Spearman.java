@@ -93,7 +93,7 @@ public class Spearman extends MyUnit {
         public MicroInfo(Location loc) {
             this.loc = loc;
             numEnemies = 0;
-            minDistToEnemy =  100000;
+            minDistToEnemy = 100000;
         }
 
         void update(UnitInfo unit) {

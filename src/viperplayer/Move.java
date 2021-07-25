@@ -137,12 +137,12 @@ public class Move {
         } else counter++;
 
         if (edgeTarget == null) {
-            if (y1 == -1) edgeTarget = new Location(x1, y1);
-            else if (y2 == 1100) edgeTarget = new Location(x2, y2);
-            else if (x1 == -1) edgeTarget = new Location(x1, y2);
-            else if (x2 == 1100) edgeTarget = new Location(x2, y1);
+            if (y1 == -1 && x1 == -1) edgeTarget = new Location(x1, y1);
+            else if (y2 == -1 && x2 == -1) edgeTarget = new Location(x2, y2);
+            else if (x1 == -1 && y2 == 1100) edgeTarget = new Location(x1, y2);
+            else if (x2 == 1100 && y1 == -1) edgeTarget = new Location(x2, y1);
             else {
-                edgesFound = true;
+                if (x1 != -1 && y1 != -1 && x2 != 1100 && y2 != 1100) edgesFound = true;
                 edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
             }
         }

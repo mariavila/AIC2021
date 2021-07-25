@@ -12,6 +12,8 @@ public class Base extends MyUnit {
     int explorers = 0;
     int trappers = 0;
     int waterTiles = 0;
+    boolean DOMESTICATIONresearched = false;
+    boolean RAFTSresearched = false;
     boolean COINresearched = false;
     boolean BOXESresearched = false;
     boolean ROCK_ARTresearched = false;
@@ -107,18 +109,17 @@ public class Base extends MyUnit {
     }
 
     private void trySpawn(){
-        /*if (trappers < 1) {
-            if (spawnRandom(UnitType.TRAPPER)) ++trappers;
-        }*/
-        if(explorers < 1 && !rushAttack){
+        if (explorers < 1 && !rushAttack){
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
-        if (workers < 1){
+        if (workers < 3){
             if (spawnSafe(UnitType.WORKER)) {
-                ++workers;
+                workers++;
                 trySpawn();
             }
         }
+
+        if (rushAttack) spawnSafe(UnitType.WOLF);
     }
 
     private void tryResearch(){
@@ -129,40 +130,19 @@ public class Base extends MyUnit {
             }
         }
         else{
-            //researchWheel();
+            researchWheel();
         }
     }
 
     private void researchWheel(){
-        if(uc.canResearchTechnology(Technology.COIN)) {
-            uc.researchTechnology(Technology.COIN);
-            COINresearched = true;
+        if(uc.canResearchTechnology(Technology.DOMESTICATION)) {
+            uc.researchTechnology(Technology.DOMESTICATION);
+            DOMESTICATIONresearched = true;
         }
-        else if(COINresearched && uc.canResearchTechnology(Technology.BOXES)) {
-            uc.researchTechnology(Technology.BOXES);
-            BOXESresearched = true;
+        if(uc.canResearchTechnology(Technology.RAFTS)) {
+            uc.researchTechnology(Technology.RAFTS);
+            RAFTSresearched = true;
         }
-        else if(BOXESresearched && uc.canResearchTechnology(Technology.ROCK_ART)) {
-            uc.researchTechnology(Technology.ROCK_ART);
-            ROCK_ARTresearched = true;
-        }
-        else if(ROCK_ARTresearched && uc.canResearchTechnology(Technology.JOBS)) {
-            uc.researchTechnology(Technology.JOBS);
-            JOBSresearched = true;
-        }
-        else if(JOBSresearched && uc.canResearchTechnology(Technology.VOCABULARY)) {
-            uc.researchTechnology(Technology.VOCABULARY);
-            VOCABULARYresearched = true;
-        }
-        else if(VOCABULARYresearched && uc.canResearchTechnology(Technology.EUGENICS)) {
-            uc.researchTechnology(Technology.EUGENICS);
-            EUGENICSresearched = true;
-        }
-        else if(EUGENICSresearched && uc.canResearchTechnology(Technology.SCHOOLS)) {
-            uc.researchTechnology(Technology.SCHOOLS);
-            SCHOOLSresearched = true;
-        }
-        else if(uc.canResearchTechnology(Technology.WHEEL)) uc.researchTechnology(Technology.WHEEL);
     }
 
     private void senseInitialWater() {

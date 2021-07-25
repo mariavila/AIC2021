@@ -20,7 +20,7 @@ public class Axeman extends MyUnit {
         }
 
         round = uc.getRound();
-        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 25) lightTorch();
+        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 40) lightTorch();
 
         smokeSignals = tryReadSmoke();
         doSmokeStuff();
@@ -93,7 +93,7 @@ public class Axeman extends MyUnit {
         public MicroInfo(Location loc) {
             this.loc = loc;
             numEnemies = 0;
-            minDistToEnemy =  100000;
+            minDistToEnemy = 100000;
         }
 
         void update(UnitInfo unit) {

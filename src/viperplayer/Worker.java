@@ -68,10 +68,22 @@ public class Worker extends MyUnit {
         for (ResourceInfo resource: resources) {
             Location resLoc = resource.getLocation();
             if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
-            resourceLocation = resLoc;
-            followingDeer = false;
-            state = "GOTORESOURCE";
-            return;
+
+            UnitInfo unit;
+            if (uc.canSenseLocation(resLoc)) {
+                unit = uc.senseUnitAtLocation(resLoc);
+                if (unit == null) {
+                    resourceLocation = resLoc;
+                    followingDeer = false;
+                    state = "GOTORESOURCE";
+                    return;
+                }
+            } else {
+                resourceLocation = resLoc;
+                followingDeer = false;
+                state = "GOTORESOURCE";
+                return;
+            }
         }
 
         if(deer.length > 0){
@@ -101,6 +113,16 @@ public class Worker extends MyUnit {
         if (resourceLocation == null) {
             state = "EXPLORE";
         } else {
+            UnitInfo unit;
+            if (uc.canSenseLocation(resourceLocation)) {
+                unit = uc.senseUnitAtLocation(resourceLocation);
+                if (unit != null) {
+                    resourceLocation = null;
+                    followingDeer = false;
+                    state = "EXPLORE";
+                    return;
+                }
+            }
             move.moveTo(resourceLocation, false);
             if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
                 state = "GATHER";
