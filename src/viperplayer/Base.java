@@ -85,6 +85,7 @@ public class Base extends MyUnit {
             int type;
 
             for (smokeSignal smokeSignal : smokeSignals) {
+                if (smokeSignal == null) continue;
                 loc = smokeSignal.getLoc();
                 type = smokeSignal.getType();
 

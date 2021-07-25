@@ -143,6 +143,7 @@ public class Worker extends MyUnit {
                 int type;
 
                 for (smokeSignal smokeSignal : smokeSignals) {
+                    if (smokeSignal == null) continue;
                     loc = smokeSignal.getLoc();
                     type = smokeSignal.getType();
 
@@ -157,7 +158,7 @@ public class Worker extends MyUnit {
             }
         }
         if (rushAttack && barracksBuilt == null) {
-            barracksBuilt = spawnEmpty(UnitType.BARRACKS);
+            barracksBuilt = spawnSafe(UnitType.BARRACKS);
             if(barracksBuilt != null){
                 int drawing = encodeEnemyBaseLoc(false, enemyBase, barracksBuilt);
                 if(uc.canDraw(drawing)){
@@ -199,6 +200,28 @@ public class Worker extends MyUnit {
                 spawnEmpty(UnitType.QUARRY);
             }
         }
+    }
+
+    Location spawnSafe(UnitType t) {
+        Location myLoc = uc.getLocation();
+        Location[] traps = uc.senseTraps(2);
+
+        outerloop:
+        for (Direction dir : dirs){
+            if (dir == Direction.ZERO) continue;
+            if (!uc.canSpawn(t, dir)) continue;
+
+            Location target = myLoc.add(dir);
+            for (Location trap: traps) {
+                if (target.isEqual(trap)) continue outerloop;
+            }
+
+            if (target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
+                uc.spawn(t, dir);
+                return myLoc.add(dir);
+            }
+        }
+        return null;
     }
 
     public boolean doMicro() {

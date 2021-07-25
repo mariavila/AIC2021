@@ -23,8 +23,8 @@ public class Axeman extends MyUnit {
         smokeSignals = tryReadSmoke();
         microResult = doMicro();
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        if (!microResult || round > 1900) {
-            if (round > 1900) tryMove(true);
+        if (!microResult || round > 1600) {
+            if (round > 1600) tryMove(true);
             else tryMove(false);
         } else {
             if (!uc.canMove()) return;

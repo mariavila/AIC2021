@@ -77,8 +77,12 @@ public abstract class MyUnit {
 
         if(smokeSignals.length > 0) {
             for (int smokeSignal : smokeSignals) {
-                decodedSignals[index] = decodeSignal(true, smokeSignal);
-                index++;
+                if (smokeSignal < 0) continue;
+                smokeSignal mySignal = decodeSignal(true, smokeSignal);
+                if (mySignal != null) {
+                    decodedSignals[index] = mySignal;
+                    index++;
+                }
             }
         }
 
