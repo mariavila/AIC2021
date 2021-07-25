@@ -147,7 +147,7 @@ public class Worker extends MyUnit {
                     loc = smokeSignal.getLoc();
                     type = smokeSignal.getType();
 
-                    if (type == rushAttackEncoding) {
+                    if (type == constants.RUSH_ATTACK_ENCODING) {
                         enemyBase = baseLocation.add(-loc.x, -loc.y);
                         if (enemyBase != null) {
                             move.setEnemyBase(enemyBase);

@@ -17,7 +17,8 @@ public abstract class MyUnit {
 
     int torchTurn = 0;
     int round = 0;
-    int rushAttackEncoding = 17;
+
+    public final Constants constants = new Constants();
 
     MyUnit(UnitController uc){
         this.uc = uc;
@@ -92,10 +93,11 @@ public abstract class MyUnit {
     smokeSignal decodeSignal(boolean encoded, int signal){
         int encoding;
         if(!encoded) decode(signal);
-        else if(signal%rushAttackEncoding == 0){
-            encoding = rushAttackEncoding;
-            signal = signal /rushAttackEncoding;
-            return new smokeSignal(decode(signal), encoding);
+        else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
+            encoding = constants.RUSH_ATTACK_ENCODING;
+            signal = signal / constants.RUSH_ATTACK_ENCODING;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
         }
         return null;
     }
@@ -130,7 +132,7 @@ public abstract class MyUnit {
         }
         int drawing = (offset.x*50+offset.y)*10 + negatives;
         if(encoded){
-            drawing = drawing * rushAttackEncoding;
+            drawing = drawing * constants.RUSH_ATTACK_ENCODING;
         }
         return drawing;
     }
