@@ -81,7 +81,7 @@ public class Base extends MyUnit {
 
     private void checkAttackRush(){
         if (isBaseClose && round == 10) {
-            int drawing = encodeEnemyBaseLoc(true, enemyBase, baseLocation);
+            int drawing = encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
             uc.makeSmokeSignal(drawing);
         }
         if (smokeSignals.length > 0) {
@@ -99,6 +99,8 @@ public class Base extends MyUnit {
                         move.setEnemyBase(enemyBase);
                         rushAttack = true;
                     }
+                } else if (type == constants.ENEMY_FOUND) {
+                    rushAttack = true;
                 }
             }
         }
@@ -112,7 +114,10 @@ public class Base extends MyUnit {
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
         if (workers < 1){
-            if (spawnSafe(UnitType.WORKER)) ++workers;
+            if (spawnSafe(UnitType.WORKER)) {
+                ++workers;
+                trySpawn();
+            }
         }
     }
 
@@ -124,7 +129,7 @@ public class Base extends MyUnit {
             }
         }
         else{
-            researchWheel();
+            //researchWheel();
         }
     }
 

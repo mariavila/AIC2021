@@ -9,13 +9,12 @@ public class Explorer extends MyUnit {
     }
 
     String state = "INI";
-    Location enemyBase = null;
     boolean returned = false;
+    boolean enemyFound = false;
 
     private Boolean microResult;
     private Direction microDir;
 
-    Team myTeam = uc.getTeam();
     Location baseLocation = null;
 
     void playRound(){
@@ -37,7 +36,7 @@ public class Explorer extends MyUnit {
         return new Location(-1, -1);
     }
 
-    private Location lookForEnemyBase(){
+    private Location lookForEnemyBaseExplorer(){
         UnitInfo[] units = uc.senseUnits(myTeam.getOpponent());
         for(UnitInfo unit:units){
             if(unit.getType() == UnitType.BASE){
@@ -45,11 +44,20 @@ public class Explorer extends MyUnit {
                 return unit.getLocation();
             }
         }
+
+        if (enemyBase == null && !enemyFound && units.length > 0) {
+            if(uc.canMakeSmokeSignal()) {
+                int drawing = encodeEnemyBaseLoc(constants.ENEMY_FOUND, units[0].getLocation(), baseLocation);
+                uc.makeSmokeSignal(drawing);
+                enemyFound = true;
+            }
+        }
+
         return null;
     }
 
     private void drawEnemyBaseLoc(){
-        int drawing = encodeEnemyBaseLoc(false, enemyBase, baseLocation);
+        int drawing = encodeEnemyBaseLoc(1, enemyBase, baseLocation);
         if(uc.canDraw(drawing)){
             uc.draw(drawing);
         }
@@ -62,14 +70,14 @@ public class Explorer extends MyUnit {
                 state = "EXPLORE";
             }
             if (state == "EXPLORE") {
-                move.explore();
-                if (enemyBase == null) enemyBase = lookForEnemyBase();
+                if (enemyBase == null) enemyBase = lookForEnemyBaseExplorer();
                 else if (!returned) state = "BASEFOUND";
+                move.explore();
             }
             if (state == "BASEFOUND") {
                 if (enemyBase != null){
                     if(uc.canMakeSmokeSignal()){
-                        int drawing = encodeEnemyBaseLoc(true, enemyBase, baseLocation);
+                        int drawing = encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
                         uc.makeSmokeSignal(drawing);
                         state = "RETURN";
                     }
@@ -87,10 +95,6 @@ public class Explorer extends MyUnit {
             if (!uc.canMove()) return;
             uc.move(microDir);
         }
-    }
-
-    boolean moveCircle(Direction dir) {
-        return uc.canMove(dir) && uc.getLocation().add(dir).distanceSquared(baseLocation) <= (10 + uc.getRound() / 10);
     }
 
     public boolean doMicro() {

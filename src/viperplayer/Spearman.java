@@ -13,6 +13,7 @@ public class Spearman extends MyUnit {
 
     void playRound(){
         if(justSpawned){
+            barracks = senseBarracks();
             enemyBase = tryReadArt();
             move.setEnemyBase(enemyBase);
             justSpawned = false;
@@ -22,6 +23,8 @@ public class Spearman extends MyUnit {
         if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
 
         smokeSignals = tryReadSmoke();
+        doSmokeStuff();
+
         microResult = doMicro();
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if (!microResult || round > 1600) {
@@ -35,7 +38,8 @@ public class Spearman extends MyUnit {
     }
 
     void tryMove(boolean reckless) {
-        move.moveTo(enemyBase, reckless);
+        if (enemyBase == null) move.explore();
+        else move.moveTo(enemyBase, reckless);
     }
 
     public boolean doMicro() {

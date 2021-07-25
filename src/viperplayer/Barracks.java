@@ -1,21 +1,53 @@
 package viperplayer;
 
-import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public class Barracks extends MyUnit {
+
+    boolean broadCast = true;
 
     Barracks(UnitController uc){
         super(uc);
     }
 
     void playRound(){
-        if(justSpawned){
-            enemyBase = barracksRead();
-            move.setEnemyBase(enemyBase);
+        round = uc.getRound();
+        if (justSpawned) {
             justSpawned = false;
+            enemyBase = barracksRead();
+            if (enemyBase != null) {
+                move.setEnemyBase(enemyBase);
+            } else {
+                broadCast = true;
+            }
         }
+        smokeSignals = tryReadSmoke();
+        broadCast();
         trySpawn();
+    }
+
+    void broadCast() {
+        Location loc;
+        int type;
+
+        for (smokeSignal smoke: smokeSignals) {
+            if (smoke == null) continue;
+            loc = smoke.getLoc();
+            type = smoke.getType();
+
+            if (type == constants.ENEMY_BASE) {
+                enemyBase = uc.getLocation().add(-loc.x, -loc.y);
+                if (enemyBase != null) {
+                    move.setEnemyBase(enemyBase);
+                }
+            }
+        }
+
+        if (broadCast && enemyBase != null) {
+            if (round % 47 == 0 && uc.canMakeSmokeSignal()) {
+                uc.makeSmokeSignal(encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, uc.getLocation()));
+            }
+        }
     }
 
     private void trySpawn(){
@@ -37,7 +69,7 @@ public class Barracks extends MyUnit {
                 if (target.isEqual(trap)) continue outerloop;
             }
 
-            if (target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) uc.spawn(t, dir);
+            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) uc.spawn(t, dir);
         }
     }
 

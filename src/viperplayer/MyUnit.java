@@ -14,6 +14,10 @@ public abstract class MyUnit {
     Location baseLocation = null;
     smokeSignal[] smokeSignals = null;
     boolean justSpawned = true;
+    Team myTeam;
+    boolean enemyBaseSend = false;
+    boolean needsToSend = false;
+    Location barracks = null;
 
     int torchTurn = 0;
     int round = 0;
@@ -24,6 +28,7 @@ public abstract class MyUnit {
         this.uc = uc;
         this.move = new Move(uc);
         this.attack = new Attack(uc);
+        this.myTeam = uc.getTeam();
     }
 
     class smokeSignal {
@@ -45,6 +50,26 @@ public abstract class MyUnit {
     }
 
     abstract void playRound();
+
+    Location senseBarracks() {
+        UnitInfo[] units = uc.senseUnits(2, myTeam);
+
+        for (UnitInfo unit: units) {
+            if (unit.getType() == UnitType.BARRACKS) return unit.getLocation();
+        }
+        return null;
+    }
+
+    Location lookForEnemyBase() {
+        UnitInfo[] units = uc.senseUnits(myTeam.getOpponent());
+        for(UnitInfo unit:units){
+            if(unit.getType() == UnitType.BASE){
+                move.setEnemyBase(unit.getLocation());
+                return unit.getLocation();
+            }
+        }
+        return null;
+    }
 
     Location tryReadArt(){
         UnitInfo[] units = uc.senseUnits(uc.getTeam());
@@ -78,7 +103,7 @@ public abstract class MyUnit {
 
         if(smokeSignals.length > 0) {
             for (int smokeSignal : smokeSignals) {
-                if (smokeSignal < 0) continue;
+                if (smokeSignal <= 0) continue;
                 smokeSignal mySignal = decodeSignal(true, smokeSignal);
                 if (mySignal != null) {
                     decodedSignals[index] = mySignal;
@@ -90,12 +115,55 @@ public abstract class MyUnit {
         return decodedSignals;
     }
 
+    void doSmokeStuff() {
+        if (enemyBase == null || needsToSend) {
+            enemyBase = lookForEnemyBase();
+            needsToSend = true;
+            if (enemyBase != null && !enemyBaseSend && uc.canMakeSmokeSignal()) {
+                uc.makeSmokeSignal(encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, barracks));
+                enemyBaseSend = true;
+            }
+        }
+
+        Location loc;
+        int type;
+
+        for (smokeSignal smoke: smokeSignals) {
+            if (smoke == null) continue;
+            loc = smoke.getLoc();
+            type = smoke.getType();
+
+            if (type == constants.ENEMY_BASE) {
+                enemyBase = barracks.add(-loc.x, -loc.y);
+                if (enemyBase != null) {
+                    needsToSend = false;
+                    move.setEnemyBase(enemyBase);
+                }
+            }
+        }
+    }
+
     smokeSignal decodeSignal(boolean encoded, int signal){
         int encoding;
         if(!encoded) decode(signal);
         else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
             encoding = constants.RUSH_ATTACK_ENCODING;
-            signal = signal / constants.RUSH_ATTACK_ENCODING;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_FOUND == 0){
+            encoding = constants.ENEMY_FOUND;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.BARRACKS_BUILT == 0){
+            encoding = constants.BARRACKS_BUILT;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_BASE == 0){
+            encoding = constants.ENEMY_BASE;
+            signal = signal / encoding;
             Location smokeLoc = decode(signal);
             if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
         }
@@ -113,7 +181,7 @@ public abstract class MyUnit {
         return new Location(offsetX, offsetY);
     }
 
-    int encodeEnemyBaseLoc(boolean encoded, Location enemyBase, Location baseLocation){
+    int encodeEnemyBaseLoc(int encoding, Location enemyBase, Location baseLocation){
         Location offset = new Location(baseLocation.x-enemyBase.x, baseLocation.y-enemyBase.y);
         int negatives = 0;
         if(offset.x<0){
@@ -131,10 +199,7 @@ public abstract class MyUnit {
             }
         }
         int drawing = (offset.x*50+offset.y)*10 + negatives;
-        if(encoded){
-            drawing = drawing * constants.RUSH_ATTACK_ENCODING;
-        }
-        return drawing;
+        return drawing * encoding;
     }
 
     Location spawnEmpty(UnitType t){

@@ -36,15 +36,18 @@ public class Worker extends MyUnit {
 
         smokeSignals = tryReadSmoke();
 
-        microResult = doMicro();
+        if (round != 10 || smokeSignals.length > 0) {
+            microResult = doMicro();
 
-        tryBarracks();
-        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        tryMove();
-        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        trySpawn();
+            tryBarracks();
+            attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+            tryMove();
+            attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+            trySpawn();
 
-        if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer)) attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
+            if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer))
+                attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
+        }
     }
 
     private Location getBaseLocation(){
@@ -146,9 +149,11 @@ public class Worker extends MyUnit {
         move.moveTo(baseLocation, false);
         if (uc.canDeposit()) {
             uc.deposit();
-            if (resourcesLeft != null && (resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) || resourcesLeft.getAmount() == 0) {
-                resourcesLeft = null;
-                state = "EXPLORE";
+            if (resourcesLeft != null) {
+                if ((resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) || resourcesLeft.getAmount() == 0) {
+                    resourcesLeft = null;
+                    state = "EXPLORE";
+                }
             }
             state = "GOTORESOURCE";
         }
@@ -171,14 +176,22 @@ public class Worker extends MyUnit {
                             move.setEnemyBase(enemyBase);
                             rushAttack = true;
                         }
+                    } else if (type == constants.ENEMY_FOUND) {
+                        rushAttack = true;
                     }
                 }
             }
         }
         if (rushAttack && barracksBuilt == null) {
             barracksBuilt = spawnSafe(UnitType.BARRACKS);
-            if(barracksBuilt != null){
-                int drawing = encodeEnemyBaseLoc(false, enemyBase, barracksBuilt);
+            if (barracksBuilt != null) {
+                if(uc.canMakeSmokeSignal()) {
+                    int drawing = encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
+                    uc.makeSmokeSignal(drawing);
+                }
+            }
+            if (barracksBuilt != null && enemyBase != null) {
+                int drawing = encodeEnemyBaseLoc(1, enemyBase, barracksBuilt);
                 if(uc.canDraw(drawing)){
                     uc.draw(drawing);
                 }
@@ -234,7 +247,7 @@ public class Worker extends MyUnit {
                 if (target.isEqual(trap)) continue outerloop;
             }
 
-            if (target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
+            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
                 uc.spawn(t, dir);
                 return myLoc.add(dir);
             }
