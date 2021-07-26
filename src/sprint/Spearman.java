@@ -1,4 +1,4 @@
-package viperplayer;
+package sprint;
 
 import aic2021.user.*;
 
@@ -32,8 +32,7 @@ public class Spearman extends MyUnit {
             else tryMove(false);
         } else {
             if (!uc.canMove()) return;
-            if (move.isSafe(microDir)) uc.move(microDir);
-            else move.explore();
+            uc.move(microDir);
         }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }

@@ -1,4 +1,4 @@
-package viperplayer;
+package sprint;
 
 import aic2021.user.*;
 
@@ -241,8 +241,7 @@ public class Worker extends MyUnit {
             }
         } else {
             if (!uc.canMove()) return;
-            if (move.isSafe(microDir)) uc.move(microDir);
-            else move.explore();
+            uc.move(microDir);
         }
     }
 
@@ -270,7 +269,7 @@ public class Worker extends MyUnit {
                 if (target.isEqual(trap)) continue outerloop;
             }
 
-            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+4) {
+            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
                 uc.spawn(t, dir);
                 return myLoc.add(dir);
             }

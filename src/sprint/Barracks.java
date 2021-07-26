@@ -1,6 +1,9 @@
-package viperplayer;
+package sprint;
 
-import aic2021.user.*;
+import aic2021.user.Direction;
+import aic2021.user.Location;
+import aic2021.user.UnitController;
+import aic2021.user.UnitType;
 
 public class Barracks extends MyUnit {
 
@@ -34,10 +37,10 @@ public class Barracks extends MyUnit {
             if (smoke == null) continue;
             loc = smoke.getLoc();
             type = smoke.getType();
-            if (type == constants.ENEMY_BASE && enemyBase == null) {
+
+            if (type == constants.ENEMY_BASE) {
                 enemyBase = uc.getLocation().add(-loc.x, -loc.y);
                 if (enemyBase != null) {
-                    uc.println(enemyBase);
                     move.setEnemyBase(enemyBase);
                 }
             }
@@ -68,7 +71,7 @@ public class Barracks extends MyUnit {
             for (Location trap: traps) {
                 if (target.isEqual(trap)) continue outerloop;
             }
-            uc.println(enemyBase);
+
             if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) uc.spawn(t, dir);
         }
     }

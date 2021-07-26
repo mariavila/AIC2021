@@ -1,10 +1,10 @@
-package viperplayer;
+package sprint;
 
 import aic2021.user.*;
 
-public class Spearman extends MyUnit {
+public class Axeman extends MyUnit {
 
-    Spearman(UnitController uc){
+    Axeman(UnitController uc){
         super(uc);
     }
 
@@ -20,7 +20,7 @@ public class Spearman extends MyUnit {
         }
 
         round = uc.getRound();
-        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
+        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 40) lightTorch();
 
         smokeSignals = tryReadSmoke();
         doSmokeStuff();
@@ -32,8 +32,7 @@ public class Spearman extends MyUnit {
             else tryMove(false);
         } else {
             if (!uc.canMove()) return;
-            if (move.isSafe(microDir)) uc.move(microDir);
-            else move.explore();
+            uc.move(microDir);
         }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
