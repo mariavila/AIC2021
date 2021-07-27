@@ -5,6 +5,8 @@ import aic2021.user.*;
 public class Barracks extends MyUnit {
 
     boolean broadCast = true;
+    int spearmen = 0;
+    int axemen = 0;
 
     Barracks(UnitController uc){
         super(uc);
@@ -12,6 +14,7 @@ public class Barracks extends MyUnit {
 
     void playRound(){
         round = uc.getRound();
+        getResources();
         if (justSpawned) {
             justSpawned = false;
             enemyBase = barracksRead();
@@ -37,7 +40,6 @@ public class Barracks extends MyUnit {
             if (type == constants.ENEMY_BASE && enemyBase == null) {
                 enemyBase = uc.getLocation().add(-loc.x, -loc.y);
                 if (enemyBase != null) {
-                    uc.println(enemyBase);
                     move.setEnemyBase(enemyBase);
                 }
             }
@@ -51,8 +53,13 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
-        spawnSafe(UnitType.SPEARMAN);
-        spawnSafe(UnitType.AXEMAN);
+        if (spearmen + axemen < 5 || uc.hasResearched(Technology.TACTICS, myTeam)) {
+            if (wood > stone) {
+                spawnSafe(UnitType.SPEARMAN);
+            } else {
+                spawnSafe(UnitType.AXEMAN);
+            }
+        }
     }
 
     void spawnSafe(UnitType t) {
@@ -68,8 +75,12 @@ public class Barracks extends MyUnit {
             for (Location trap: traps) {
                 if (target.isEqual(trap)) continue outerloop;
             }
-            uc.println(enemyBase);
-            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) uc.spawn(t, dir);
+
+            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
+                uc.spawn(t, dir);
+                if (t == UnitType.AXEMAN) axemen++;
+                else if (t == UnitType.SPEARMAN) spearmen++;
+            }
         }
     }
 

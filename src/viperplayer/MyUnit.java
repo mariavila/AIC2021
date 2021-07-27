@@ -9,6 +9,7 @@ public abstract class MyUnit {
     UnitController uc;
     Move move;
     Attack attack;
+    Tactics tactics;
 
     Location enemyBase = null;
     Location baseLocation = null;
@@ -22,12 +23,17 @@ public abstract class MyUnit {
     int torchTurn = 0;
     int round = 0;
 
+    int food = 0;
+    int wood = 0;
+    int stone = 0;
+
     public final Constants constants = new Constants();
 
     MyUnit(UnitController uc){
         this.uc = uc;
         this.move = new Move(uc);
         this.attack = new Attack(uc);
+        this.tactics = new Tactics(uc);
         this.myTeam = uc.getTeam();
     }
 
@@ -50,6 +56,12 @@ public abstract class MyUnit {
     }
 
     abstract void playRound();
+
+    void getResources() {
+        food = uc.getResource(Resource.FOOD);
+        wood = uc.getResource(Resource.WOOD);
+        stone = uc.getResource(Resource.STONE);
+    }
 
     Location senseBarracks() {
         UnitInfo[] units = uc.senseUnits(2, myTeam);

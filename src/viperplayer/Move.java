@@ -6,8 +6,11 @@ import java.util.function.Function;
 
 public class Move {
     UnitController uc;
+    Tactics tactics;
+
     public Move(UnitController uc) {
         this.uc = uc;
+        this.tactics = new Tactics(uc);
     }
 
     final int INF = 1000000000;
@@ -72,6 +75,34 @@ public class Move {
         }
 
         if (conditions.apply(dir) && safeLocation(myLoc.add(dir), dangerLocs, trapLocs, reckless)) uc.move(dir);
+    }
+
+    void moveAvoidingEnemies(Location target) {
+        Location myLoc = uc.getLocation();
+        UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
+        int randomNumber = (int)(Math.random()*2);
+        if (enemies.length > 0) {
+            uc.println(enemies[0]);
+            UnitInfo enemy = tactics.getClosestUnobstructedEnemy(enemies);
+            uc.println("test2");
+            Direction enemyDir = myLoc.directionTo(enemy.getLocation());
+            Direction myDir = myLoc.directionTo(target);
+            if (myDir == enemyDir) {
+                if (randomNumber == 1) {
+                    moveTo(myLoc.add(myDir.opposite().rotateLeft()),false);
+                } else {
+                    moveTo(myLoc.add(myDir.opposite().rotateRight()),false);
+                }
+            } else if (myDir.rotateLeft() == enemyDir) {
+                moveTo(myLoc.add(myDir.rotateRight().rotateRight()),false);
+            } else if (myDir.rotateRight() == enemyDir) {
+                moveTo(myLoc.add(myDir.rotateLeft().rotateLeft()),false);
+            } else {
+                moveTo(target, false);
+            }
+        } else {
+            moveTo(target, false);
+        }
     }
 
     public boolean isSafe(Direction dir) {

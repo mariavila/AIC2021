@@ -11,19 +11,22 @@ public class Base extends MyUnit {
     int workers = 0;
     int explorers = 0;
     int trappers = 0;
+    int wolves = 0;
     int waterTiles = 0;
 
-    int food = 0;
-    int wood = 0;
-    int stone = 0;
+    int initialFood = 0;
+    int initialWood = 0;
+    int initialStone = 0;
 
     boolean isBaseClose = false;
     boolean enemyExplorer = false;
     Direction[] safeSpawn = new Direction[8];
 
     boolean rushAttack = false;
+    boolean normalAttack = false;
     boolean hasWater = false;
     boolean ecoMap = false;
+    int idealWorkers = 5;
 
     void playRound(){
         round = uc.getRound();
@@ -43,12 +46,7 @@ public class Base extends MyUnit {
         baseLocation = uc.getLocation();
         senseBase();
         senseInitialWater();
-    }
-
-    void getResources() {
-        food = uc.getResource(Resource.FOOD);
-        wood = uc.getResource(Resource.WOOD);
-        stone = uc.getResource(Resource.STONE);
+        senseInitialResources();
     }
 
     void senseBase(){
@@ -116,32 +114,67 @@ public class Base extends MyUnit {
         if (explorers < 1 && !rushAttack){
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
-        if (workers < 3){
+        if (workers < idealWorkers){
             if (spawnSafe(UnitType.WORKER)) {
                 workers++;
                 trySpawn();
             }
         }
 
-        if (rushAttack) spawnSafe(UnitType.WOLF);
+        if (rushAttack) {
+            if (wolves < 5 || uc.hasResearched(Technology.EUGENICS, myTeam)) {
+                spawnSafe(UnitType.WOLF);
+                wolves++;
+            }
+        }
     }
 
     private void tryResearch() {
         int level = uc.getTechLevel(myTeam);
-        researchWheel(level);
-        if(rushAttack && !uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)){
-            if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+        if(level >= 2) {
+            researchWheel(level);
         }
-        else {
-            if(uc.canResearchTechnology(Technology.DOMESTICATION)) {
-                uc.researchTechnology(Technology.DOMESTICATION);
+        if(level >= 1) {
+            if(!ecoMap){
+                if(!uc.hasResearched(Technology.JOBS, myTeam)) {
+                    if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
+                }
             }
+            if(!uc.hasResearched(Technology.TACTICS, myTeam)) {
+                if (uc.canResearchTechnology(Technology.TACTICS)) uc.researchTechnology(Technology.TACTICS);
+            }
+            if(uc.hasResearched(Technology.DOMESTICATION, myTeam) && !uc.hasResearched(Technology.EUGENICS, myTeam)) {
+                if(uc.canResearchTechnology(Technology.EUGENICS)) uc.researchTechnology(Technology.EUGENICS);
+            }
+            if(!uc.hasResearched(Technology.COOKING, myTeam)) {
+                if (uc.canResearchTechnology(Technology.COOKING)) uc.researchTechnology(Technology.COOKING);
+            } else if(!uc.hasResearched(Technology.SHARPENERS, myTeam)) {
+                if (uc.canResearchTechnology(Technology.SHARPENERS)) uc.researchTechnology(Technology.SHARPENERS);
+            }
+        }
+        if(level >= 0) {
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
             }
-        }
-        if(!ecoMap && !uc.hasResearched(Technology.COIN, myTeam)){
-            if(uc.canResearchTechnology(Technology.COIN)) uc.researchTechnology(Technology.COIN);
+            if(rushAttack && !uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)){
+                if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+            }
+            if(ecoMap){
+                if(!uc.hasResearched(Technology.BOXES, myTeam)) {
+                    if(uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
+                }
+                if(!uc.hasResearched(Technology.UTENSILS, myTeam)) {
+                    if(uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
+                }
+            }
+            else{
+                if(!uc.hasResearched(Technology.COIN, myTeam)) {
+                    if(uc.canResearchTechnology(Technology.COIN)) uc.researchTechnology(Technology.COIN);
+                }
+            }
+            if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
+                uc.researchTechnology(Technology.DOMESTICATION);
+            }
         }
     }
 
@@ -156,6 +189,23 @@ public class Base extends MyUnit {
             this.waterTiles++;
         }
         if (waterTiles > 9) hasWater = true;
+    }
+
+    private void senseInitialResources() {
+        ResourceInfo[] initialResources = uc.senseResources();
+        for(int i=0; i<initialResources.length; i++) {
+            if(initialResources[i].resourceType == Resource.FOOD) {
+                initialFood += initialResources[i].amount;
+            } else if(initialResources[i].resourceType == Resource.WOOD) {
+                initialWood += initialResources[i].amount;
+            } else {
+                initialStone += initialResources[i].amount;
+            }
+        }
+        if (initialFood + initialWood + initialStone > 1000) {
+            ecoMap = true;
+            idealWorkers = 8;
+        }
     }
 
     private void senseExplorers() {

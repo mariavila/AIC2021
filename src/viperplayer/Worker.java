@@ -37,7 +37,7 @@ public class Worker extends MyUnit {
         smokeSignals = tryReadSmoke();
 
         if (round != 10 || smokeSignals.length > 0) {
-            microResult = doMicro();
+            //microResult = doMicro();
 
             tryBarracks();
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
@@ -123,7 +123,7 @@ public class Worker extends MyUnit {
                     return;
                 }
             }
-            move.moveTo(resourceLocation, false);
+            move.moveAvoidingEnemies(resourceLocation);
             if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
                 state = "GATHER";
             }
@@ -168,7 +168,7 @@ public class Worker extends MyUnit {
     }
 
     void deposit(){
-        move.moveTo(baseLocation, false);
+        move.moveAvoidingEnemies(baseLocation);
         if (uc.canDeposit()) {
             uc.deposit();
             if (resourcesLeft != null) {
@@ -222,33 +222,27 @@ public class Worker extends MyUnit {
     }
 
     private void tryMove() {
-        if (!microResult) {
-            if (state.equals("INI")){
-                baseLocation = getBaseLocation();
-                state = "EXPLORE";
-            }
-            if (state.equals("EXPLORE")){
-                explore();
-            }
-            if (state.equals("GOTORESOURCE")){
-                goToResource();
-            }
-            if (state.equals("GATHER")){
-                gather();
-            }
-            if (state.equals("DEPOSIT")){
-                deposit();
-            }
-        } else {
-            if (!uc.canMove()) return;
-            if (move.isSafe(microDir)) uc.move(microDir);
-            else move.explore();
+        if (state.equals("INI")){
+            baseLocation = getBaseLocation();
+            state = "EXPLORE";
+        }
+        if (state.equals("EXPLORE")){
+            explore();
+        }
+        if (state.equals("GOTORESOURCE")){
+            goToResource();
+        }
+        if (state.equals("GATHER")){
+            gather();
+        }
+        if (state.equals("DEPOSIT")){
+            deposit();
         }
     }
 
     private void trySpawn() {
-        if (rushAttack && barracksBuilt == null) {
-            if (uc.getRound() < 430) {
+        if (barracksBuilt == null) {
+            if (uc.getRound() < 800) {
                 spawnEmpty(UnitType.FARM);
                 spawnEmpty(UnitType.SAWMILL);
                 spawnEmpty(UnitType.QUARRY);
