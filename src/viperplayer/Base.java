@@ -26,12 +26,13 @@ public class Base extends MyUnit {
     boolean normalAttack = false;
     boolean hasWater = false;
     boolean ecoMap = false;
-    int idealWorkers = 5;
+    int idealWorkers = 3;
 
     void playRound(){
         round = uc.getRound();
         if(round == 0) init();
 
+        calcIdealWorkers();
         getResources();
         smokeSignals = tryReadSmoke();
 
@@ -114,7 +115,7 @@ public class Base extends MyUnit {
         if (explorers < 1 && !rushAttack){
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
-        if (workers < idealWorkers){
+        if (workers < idealWorkers && !rushAttack){
             if (spawnSafe(UnitType.WORKER)) {
                 workers++;
                 trySpawn();
@@ -135,7 +136,7 @@ public class Base extends MyUnit {
             researchWheel(level);
         }
         if(level >= 1) {
-            if(!ecoMap){
+            if(!ecoMap && !rushAttack){
                 if(!uc.hasResearched(Technology.JOBS, myTeam)) {
                     if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
                 }
@@ -156,24 +157,32 @@ public class Base extends MyUnit {
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
             }
-            if(rushAttack && !uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)){
-                if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+            if(rushAttack){
+                if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
+                    uc.researchTechnology(Technology.DOMESTICATION);
+                }
+                if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
+                    if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+                }
+            }
+            if(normalAttack) {
+                if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
+                    if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+                }
             }
             if(ecoMap){
-                if(!uc.hasResearched(Technology.BOXES, myTeam)) {
-                    if(uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
+                if(!rushAttack || round > 500) {
+                    if (!uc.hasResearched(Technology.BOXES, myTeam)) {
+                        if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
+                    }
+                    if (!uc.hasResearched(Technology.UTENSILS, myTeam)) {
+                        if (uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
+                    }
                 }
-                if(!uc.hasResearched(Technology.UTENSILS, myTeam)) {
-                    if(uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
-                }
-            }
-            else{
+            } else{
                 if(!uc.hasResearched(Technology.COIN, myTeam)) {
                     if(uc.canResearchTechnology(Technology.COIN)) uc.researchTechnology(Technology.COIN);
                 }
-            }
-            if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
-                uc.researchTechnology(Technology.DOMESTICATION);
             }
         }
     }
@@ -194,9 +203,9 @@ public class Base extends MyUnit {
     private void senseInitialResources() {
         ResourceInfo[] initialResources = uc.senseResources();
         for(int i=0; i<initialResources.length; i++) {
-            if(initialResources[i].resourceType == Resource.FOOD) {
+            if (initialResources[i].resourceType == Resource.FOOD) {
                 initialFood += initialResources[i].amount;
-            } else if(initialResources[i].resourceType == Resource.WOOD) {
+            } else if (initialResources[i].resourceType == Resource.WOOD) {
                 initialWood += initialResources[i].amount;
             } else {
                 initialStone += initialResources[i].amount;
@@ -204,8 +213,18 @@ public class Base extends MyUnit {
         }
         if (initialFood + initialWood + initialStone > 1000) {
             ecoMap = true;
-            idealWorkers = 8;
         }
+    }
+
+    private void calcIdealWorkers() {
+        if(round > 25) {
+            if (ecoMap) {
+                idealWorkers = 8;
+            } else {
+                idealWorkers = 5;
+            }
+        }
+
     }
 
     private void senseExplorers() {
