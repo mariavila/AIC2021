@@ -190,7 +190,6 @@ public abstract class MyUnit {
     }
 
     MyUnit.smokeSignal decodeSignal(boolean encoded, int signal){
-        uc.println(signal);
         int encoding;
         if(!encoded) smoke.decode(signal);
         else if(signal % constants.RUSH_ATTACK_ENCODING == 0){

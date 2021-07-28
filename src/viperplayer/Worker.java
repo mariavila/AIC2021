@@ -19,6 +19,7 @@ public class Worker extends MyUnit {
     boolean boxesResearched = false;
     Location barracksBuilt = null;
     boolean rushAttack = false;
+    boolean hasToSendSmokeBarracks = false;
 
     ResourceInfo[] resources;
     UnitInfo[] deer;
@@ -90,7 +91,7 @@ public class Worker extends MyUnit {
             followingDeer = true;
             state = "GOTORESOURCE";
         } else{
-            move.explore();
+            move.moveAvoidingEnemies(move.explore());
         }
     }
 
@@ -182,6 +183,13 @@ public class Worker extends MyUnit {
     }
 
     private void tryBarracks(){
+        if (hasToSendSmokeBarracks) {
+            if(uc.canMakeSmokeSignal()) {
+                int drawing = smoke.encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
+                uc.makeSmokeSignal(drawing);
+                hasToSendSmokeBarracks = false;
+            }
+        }
         if(barracksBuilt == null){
             if(smokeSignals.length > 0) {
                 Location loc;
@@ -193,7 +201,6 @@ public class Worker extends MyUnit {
                     type = smokeSignal.getType();
 
                     if (type == constants.RUSH_ATTACK_ENCODING) {
-                        uc.println("rush attack");
                         enemyBase = baseLocation.add(-loc.x, -loc.y);
                         if (enemyBase != null) {
                             move.setEnemyBase(enemyBase);
@@ -206,6 +213,8 @@ public class Worker extends MyUnit {
                         }
                     } else if (type == constants.ENEMY_FOUND) {
                         rushAttack = true;
+                    } else if (type == constants.BARRACKS_BUILT) {
+                        barracksBuilt = baseLocation.add(-loc.x, -loc.y);
                     }
                 }
             }
@@ -216,7 +225,7 @@ public class Worker extends MyUnit {
                 if(uc.canMakeSmokeSignal()) {
                     int drawing = smoke.encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
                     uc.makeSmokeSignal(drawing);
-                }
+                } else hasToSendSmokeBarracks = true;
             }
             if (barracksBuilt != null && enemyBase != null) {
                 int drawing = smoke.encodeEnemyBaseLoc(1, enemyBase, barracksBuilt);

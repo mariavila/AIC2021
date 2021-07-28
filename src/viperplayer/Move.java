@@ -152,7 +152,6 @@ public class Move {
 
             if (enemyBase != null) {
                 int dist = enemyBase.distanceSquared(target);
-                uc.println(dist);
                 if (dist <= UnitType.BASE.getAttackRange()) {
                     dangerLocs[index] = target;
                     index++;
@@ -169,24 +168,30 @@ public class Move {
         enemyBase = target;
     }
 
-    void explore(){
+    Location explore(){
         findMapEdges();
         if (edgeTarget != null && uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 20) {
             edgeTarget = null;
             counter = 0;
         } else counter++;
 
-        if (edgeTarget == null) {
+        if (edgeTarget == null && !edgesFound) {
             if (y1 == -1 && x1 == -1) edgeTarget = new Location(x1, y1);
             else if (y2 == -1 && x2 == -1) edgeTarget = new Location(x2, y2);
             else if (x1 == -1 && y2 == 1100) edgeTarget = new Location(x1, y2);
             else if (x2 == 1100 && y1 == -1) edgeTarget = new Location(x2, y1);
+            else if (x1 != -1 && y1 != -1 && x2 != 1100 && y2 != 1100) edgesFound = true;
             else {
-                if (x1 != -1 && y1 != -1 && x2 != 1100 && y2 != 1100) edgesFound = true;
-                edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
+                if (x1 == -1) edgeTarget = new Location(x1, getRandomNumber(y1, y2));
+                else if (x2 == 1100) edgeTarget = new Location(x2, getRandomNumber(y1, y2));
+                else if (y1 == -1) edgeTarget = new Location(getRandomNumber(x1, x2), y1);
+                else if (y2 == 1100) edgeTarget = new Location(getRandomNumber(x1, x2), y2);
             }
         }
-        moveAvoidingEnemies(edgeTarget);
+
+        if (edgesFound && edgeTarget == null) edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
+
+        return edgeTarget;
     }
 
     public int getRandomNumber(int min, int max) {

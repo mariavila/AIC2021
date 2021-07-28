@@ -25,7 +25,6 @@ public class Smoke {
 
     int encodeEnemyBaseLoc(int encoding, Location enemyBase, Location baseLocation){
         Location offset = new Location(baseLocation.x-enemyBase.x, baseLocation.y-enemyBase.y);
-        uc.println(offset);
         int negatives = 0;
         if(offset.x<0){
             offset.x = -offset.x;

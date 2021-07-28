@@ -33,13 +33,13 @@ public class Spearman extends MyUnit {
         } else {
             if (!uc.canMove()) return;
             if (move.isSafe(microDir)) uc.move(microDir);
-            else move.explore();
+            else move.moveTo(move.explore(), false);
         }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
 
     void tryMove(boolean reckless) {
-        if (enemyBase == null) move.explore();
+        if (enemyBase == null) move.moveTo(move.explore(), false);
         else move.moveTo(enemyBase, reckless);
     }
 
@@ -110,11 +110,11 @@ public class Spearman extends MyUnit {
         }
 
         boolean isBetter(MicroInfo m) {
-            if (numEnemies > 9 || m.numEnemies > 9) return numEnemies < m.numEnemies;
+            if(numEnemies < m.numEnemies) return true;
+            if(numEnemies > m.numEnemies) return false;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
-                if (numEnemies < m.numEnemies) return true;
-                return minDistToEnemy <= m.minDistToEnemy;
+                return minDistToEnemy >= m.minDistToEnemy;
             }
             if (m.canAttack()) return false;
             return minDistToEnemy <= m.minDistToEnemy;
