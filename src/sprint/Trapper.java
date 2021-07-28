@@ -68,13 +68,9 @@ public class Trapper extends MyUnit {
 
     boolean canSetTrap(Location trapPos, Location[] traps) {
         boolean trapPlaced = false;
-        uc.println(traps.length);
-        uc.println(trapPos);
         for(int i=0; i<traps.length; i++) {
-            uc.println(traps[i]);
             if (traps[i].isEqual(trapPos)) trapPlaced = true;
         }
-        uc.println(uc.canAttack(trapPos) && trapPos.distanceSquared(baseLocation) > 18 && !trapPlaced);
         return uc.canAttack(trapPos) && trapPos.distanceSquared(baseLocation) > 18 && !trapPlaced;
     }
 

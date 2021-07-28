@@ -33,13 +33,13 @@ public class Wolf extends MyUnit {
         } else {
             if (!uc.canMove()) return;
             if (move.isSafe(microDir)) uc.move(microDir);
-            else move.explore();
+            else move.moveTo(move.explore(), false);
         }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
 
     void tryMove(boolean reckless) {
-        if (enemyBase == null) move.explore();
+        if (enemyBase == null) move.moveTo(move.explore(), false);
         else move.moveTo(enemyBase, reckless);
     }
 
