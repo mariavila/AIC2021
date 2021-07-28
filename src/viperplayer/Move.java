@@ -82,7 +82,7 @@ public class Move {
     void moveAvoidingEnemies(Location target) {
         Location myLoc = uc.getLocation();
         UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
-        UnitType[] excluded = {UnitType.EXPLORER};
+        UnitType[] excluded = {UnitType.EXPLORER, UnitType.WORKER, UnitType.TRAPPER};
         int randomNumber = (int)(Math.random()*2);
         if (enemies.length > 0) {
             UnitInfo enemy = tactics.getClosestDangerousEnemy(enemies, excluded);
