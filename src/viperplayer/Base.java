@@ -27,6 +27,7 @@ public class Base extends MyUnit {
     boolean normalAttack = false;
     boolean hasWater = false;
     boolean ecoMap = false;
+    boolean baseCorner = false;
     int idealWorkers = 3;
     int techLevel = 0;
 
@@ -326,5 +327,14 @@ public class Base extends MyUnit {
                 spawnSpaces++;
             }
         }
+        Direction[] cardinals = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+        Location exploreLoc;
+
+        int outOfMap = 0;
+        for (int i = 0; i < 4; i++) {
+            exploreLoc = baseLocation.add(cardinals[i]).add(cardinals[i]).add(cardinals[i]).add(cardinals[i]);
+            if(uc.isOutOfMap(exploreLoc)) outOfMap++;
+        }
+        if (outOfMap >= 2) baseCorner = true;
     }
 }
