@@ -13,6 +13,7 @@ public class Base extends MyUnit {
     int trappers = 0;
     int wolves = 0;
     int waterTiles = 0;
+    int spawnSpaces = 0;
 
     int initialFood = 0;
     int initialWood = 0;
@@ -27,6 +28,7 @@ public class Base extends MyUnit {
     boolean hasWater = false;
     boolean ecoMap = false;
     int idealWorkers = 3;
+    int techLevel = 0;
 
     void playRound(){
         round = uc.getRound();
@@ -46,8 +48,7 @@ public class Base extends MyUnit {
     void init() {
         baseLocation = uc.getLocation();
         senseBase();
-        senseInitialWater();
-        senseInitialResources();
+        senseInitialConditions();
     }
 
     void senseBase(){
@@ -131,11 +132,19 @@ public class Base extends MyUnit {
     }
 
     private void tryResearch() {
-        int level = uc.getTechLevel(myTeam);
-        if(level >= 2) {
-            researchWheel(level);
+        techLevel = uc.getTechLevel(myTeam);
+        if(spawnSpaces <= 1) {
+            researchWheelPath();
+        } else {
+            researchAdaptivePath();
         }
-        if(level >= 1) {
+    }
+
+    private void researchAdaptivePath(){
+        if(techLevel >= 2) {
+            researchWheel();
+        }
+        if(techLevel >= 1) {
             if(!ecoMap && !rushAttack){
                 if(!uc.hasResearched(Technology.JOBS, myTeam)) {
                     if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
@@ -144,16 +153,17 @@ public class Base extends MyUnit {
             if(!uc.hasResearched(Technology.TACTICS, myTeam)) {
                 if (uc.canResearchTechnology(Technology.TACTICS)) uc.researchTechnology(Technology.TACTICS);
             }
+            if(!uc.hasResearched(Technology.COOKING, myTeam)) {
+                if (uc.canResearchTechnology(Technology.COOKING)) uc.researchTechnology(Technology.COOKING);
+            }
             if(uc.hasResearched(Technology.DOMESTICATION, myTeam) && !uc.hasResearched(Technology.EUGENICS, myTeam)) {
                 if(uc.canResearchTechnology(Technology.EUGENICS)) uc.researchTechnology(Technology.EUGENICS);
             }
-            if(!uc.hasResearched(Technology.COOKING, myTeam)) {
-                if (uc.canResearchTechnology(Technology.COOKING)) uc.researchTechnology(Technology.COOKING);
-            } else if(!uc.hasResearched(Technology.SHARPENERS, myTeam)) {
+            if(uc.hasResearched(Technology.COOKING, myTeam) && !uc.hasResearched(Technology.SHARPENERS, myTeam)) {
                 if (uc.canResearchTechnology(Technology.SHARPENERS)) uc.researchTechnology(Technology.SHARPENERS);
             }
         }
-        if(level >= 0) {
+        if(techLevel >= 0) {
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
             }
@@ -187,33 +197,59 @@ public class Base extends MyUnit {
         }
     }
 
-    private void researchWheel(int level) {
-        if(level == 2 && food >= 5000 && wood >= 1500 && stone >= 1500) uc.researchTechnology(Technology.SCHOOLS);
-        if(level == 3 && uc.canResearchTechnology(Technology.WHEEL)) uc.researchTechnology(Technology.WHEEL);
-    }
-
-    private void senseInitialWater() {
-        Location[] initialWaterTiles = uc.senseWater(uc.getType().getVisionRange());
-        for(int i=0; i<initialWaterTiles.length; i++) {
-            this.waterTiles++;
+    private void researchWheelPath(){
+        if(!uc.hasResearched(Technology.COIN, myTeam) && uc.canResearchTechnology(Technology.COIN)) {
+            uc.researchTechnology(Technology.COIN);
         }
-        if (waterTiles > 9) hasWater = true;
+        else if(uc.hasResearched(Technology.COIN, myTeam) && !uc.hasResearched(Technology.BOXES, myTeam) && uc.canResearchTechnology(Technology.BOXES)) {
+            uc.researchTechnology(Technology.BOXES);
+        }
+        else if(!uc.hasResearched(Technology.UTENSILS, myTeam) && uc.canResearchTechnology(Technology.UTENSILS)) {
+            uc.researchTechnology(Technology.UTENSILS);
+        }
+        else if(!uc.hasResearched(Technology.TACTICS, myTeam) && uc.canResearchTechnology(Technology.TACTICS)) {
+            uc.researchTechnology(Technology.TACTICS);
+        }
+        else if(!uc.hasResearched(Technology.COOKING, myTeam) && uc.canResearchTechnology(Technology.COOKING)) {
+            uc.researchTechnology(Technology.COOKING);
+        }
+        else if(!uc.hasResearched(Technology.EUGENICS, myTeam) && uc.canResearchTechnology(Technology.EUGENICS)) {
+            uc.researchTechnology(Technology.EUGENICS);
+        }
+        if(techLevel >= 2) {
+            researchWheel();
+        }
     }
 
-    private void senseInitialResources() {
-        ResourceInfo[] initialResources = uc.senseResources();
-        for(int i=0; i<initialResources.length; i++) {
-            if (initialResources[i].resourceType == Resource.FOOD) {
-                initialFood += initialResources[i].amount;
-            } else if (initialResources[i].resourceType == Resource.WOOD) {
-                initialWood += initialResources[i].amount;
-            } else {
-                initialStone += initialResources[i].amount;
+    private void researchWheel() {
+        if(techLevel == 2) {
+            if(food >= 5000 && wood >= 1500 && stone >= 1500) {
+                uc.researchTechnology(Technology.SCHOOLS);
+            } else if(food >= 3000 && wood >= 3000 && stone >= 3000) {
+                uc.researchTechnology(Technology.CRYSTALS);
+                uc.researchTechnology(Technology.COMBUSTION);
+                uc.researchTechnology(Technology.POISON);
+            } else if(food >= 2000 && wood >= 3500 && stone >= 3500) {
+                uc.researchTechnology(Technology.CRYSTALS);
+                uc.researchTechnology(Technology.COMBUSTION);
+                uc.researchTechnology(Technology.EXPERTISE);
+            } else if(food >= 2000 && wood >= 2750 && stone >= 4250) {
+                uc.researchTechnology(Technology.CRYSTALS);
+                uc.researchTechnology(Technology.EXPERTISE);
+                uc.researchTechnology(Technology.HOUSES);
+            } else if(food >= 1500) {
+                if(wood > 3750 && stone > 3750) {
+                    uc.researchTechnology(Technology.CRYSTALS);
+                    uc.researchTechnology(Technology.COMBUSTION);
+                    uc.researchTechnology(Technology.HOUSES);
+                } else if(wood > 3000 && stone > 4500) {
+                    uc.researchTechnology(Technology.CRYSTALS);
+                    uc.researchTechnology(Technology.COMBUSTION);
+                    uc.researchTechnology(Technology.FLINT);
+                }
             }
         }
-        if (initialFood + initialWood + initialStone > 1000) {
-            ecoMap = true;
-        }
+        if(techLevel == 3 && uc.canResearchTechnology(Technology.WHEEL)) uc.researchTechnology(Technology.WHEEL);
     }
 
     private void calcIdealWorkers() {
@@ -252,5 +288,43 @@ public class Base extends MyUnit {
 
         uc.spawn(t, myDirs[random]);
         return true;
+    }
+
+    private void senseInitialConditions() {
+        senseInitialWater();
+        senseInitialResources();
+        senseSpaceAround();
+    }
+
+    private void senseInitialWater() {
+        Location[] initialWaterTiles = uc.senseWater(uc.getType().getVisionRange());
+        for(int i=0; i<initialWaterTiles.length; i++) {
+            this.waterTiles++;
+        }
+        if (waterTiles > 9) hasWater = true;
+    }
+
+    private void senseInitialResources() {
+        ResourceInfo[] initialResources = uc.senseResources();
+        for(int i=0; i<initialResources.length; i++) {
+            if (initialResources[i].resourceType == Resource.FOOD) {
+                initialFood += initialResources[i].amount;
+            } else if (initialResources[i].resourceType == Resource.WOOD) {
+                initialWood += initialResources[i].amount;
+            } else {
+                initialStone += initialResources[i].amount;
+            }
+        }
+        if (initialFood + initialWood + initialStone > 1000) {
+            ecoMap = true;
+        }
+    }
+
+    private void senseSpaceAround() {
+        for (Direction dir: safeSpawn) {
+            if (uc.canSpawn(UnitType.WORKER, dir)) {
+                spawnSpaces++;
+            }
+        }
     }
 }
