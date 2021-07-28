@@ -8,6 +8,8 @@ public class Move {
     UnitController uc;
     Tactics tactics;
 
+    Direction[] dirs = Direction.values();
+
     public Move(UnitController uc) {
         this.uc = uc;
         this.tactics = new Tactics(uc);
@@ -80,29 +82,29 @@ public class Move {
     void moveAvoidingEnemies(Location target) {
         Location myLoc = uc.getLocation();
         UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
+        UnitType[] excluded = {UnitType.EXPLORER};
         int randomNumber = (int)(Math.random()*2);
         if (enemies.length > 0) {
-            uc.println(enemies[0]);
-            UnitInfo enemy = tactics.getClosestUnobstructedEnemy(enemies);
-            uc.println("test2");
-            Direction enemyDir = myLoc.directionTo(enemy.getLocation());
-            Direction myDir = myLoc.directionTo(target);
-            if (myDir == enemyDir) {
-                if (randomNumber == 1) {
-                    moveTo(myLoc.add(myDir.opposite().rotateLeft()),false);
+            UnitInfo enemy = tactics.getClosestDangerousEnemy(enemies, excluded);
+            if(enemy != null) {
+                Direction enemyDir = myLoc.directionTo(enemy.getLocation());
+                Direction myDir = myLoc.directionTo(target);
+                if (myDir == enemyDir) {
+                    if (randomNumber == 1) {
+                        moveTo(myLoc.add(myDir.opposite().rotateLeft()), false);
+                    } else {
+                        moveTo(myLoc.add(myDir.opposite().rotateRight()), false);
+                    }
+                } else if (myDir.rotateLeft() == enemyDir) {
+                    moveTo(myLoc.add(myDir.rotateRight().rotateRight()), false);
+                } else if (myDir.rotateRight() == enemyDir) {
+                    moveTo(myLoc.add(myDir.rotateLeft().rotateLeft()), false);
                 } else {
-                    moveTo(myLoc.add(myDir.opposite().rotateRight()),false);
+                    moveTo(target, false);
                 }
-            } else if (myDir.rotateLeft() == enemyDir) {
-                moveTo(myLoc.add(myDir.rotateRight().rotateRight()),false);
-            } else if (myDir.rotateRight() == enemyDir) {
-                moveTo(myLoc.add(myDir.rotateLeft().rotateLeft()),false);
-            } else {
-                moveTo(target, false);
             }
-        } else {
-            moveTo(target, false);
         }
+        moveTo(target, false);
     }
 
     public boolean isSafe(Direction dir) {
@@ -150,6 +152,7 @@ public class Move {
 
             if (enemyBase != null) {
                 int dist = enemyBase.distanceSquared(target);
+                uc.println(dist);
                 if (dist <= UnitType.BASE.getAttackRange()) {
                     dangerLocs[index] = target;
                     index++;
@@ -183,7 +186,7 @@ public class Move {
                 edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
             }
         }
-        moveTo(edgeTarget, false);
+        moveAvoidingEnemies(edgeTarget);
     }
 
     public int getRandomNumber(int min, int max) {
@@ -220,5 +223,22 @@ public class Move {
                 }
             }
         }
+    }
+
+    Direction rotateClosest(Direction dirEscape, Direction dirTarget, int times) {
+        Direction finalDir = dirEscape;
+        Boolean rotateLeft = false;
+        for(int i = 0; i < 4; i++) {
+            finalDir = finalDir.rotateLeft();
+            if (finalDir.isEqual(dirTarget)) {
+                rotateLeft = true;
+                break;
+            }
+        }
+        for(int j = 0; j < times; j++) {
+            if (rotateLeft) finalDir = dirEscape.rotateLeft();
+            else finalDir = dirEscape.rotateRight();
+        }
+        return finalDir;
     }
 }

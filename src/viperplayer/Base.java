@@ -86,7 +86,7 @@ public class Base extends MyUnit {
 
     private void checkAttackRush(){
         if (isBaseClose && round == 10) {
-            int drawing = encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
+            int drawing = smoke.encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
             uc.makeSmokeSignal(drawing);
         }
         if (smokeSignals.length > 0) {
@@ -224,7 +224,6 @@ public class Base extends MyUnit {
                 idealWorkers = 5;
             }
         }
-
     }
 
     private void senseExplorers() {

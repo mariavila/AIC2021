@@ -193,10 +193,16 @@ public class Worker extends MyUnit {
                     type = smokeSignal.getType();
 
                     if (type == constants.RUSH_ATTACK_ENCODING) {
+                        uc.println("rush attack");
                         enemyBase = baseLocation.add(-loc.x, -loc.y);
                         if (enemyBase != null) {
                             move.setEnemyBase(enemyBase);
                             rushAttack = true;
+                        }
+                    } else if (type == constants.ENEMY_BASE) {
+                        enemyBase = baseLocation.add(-loc.x, -loc.y);
+                        if (enemyBase != null) {
+                            move.setEnemyBase(enemyBase);
                         }
                     } else if (type == constants.ENEMY_FOUND) {
                         rushAttack = true;
@@ -208,12 +214,12 @@ public class Worker extends MyUnit {
             barracksBuilt = spawnSafe(UnitType.BARRACKS);
             if (barracksBuilt != null) {
                 if(uc.canMakeSmokeSignal()) {
-                    int drawing = encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
+                    int drawing = smoke.encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
                     uc.makeSmokeSignal(drawing);
                 }
             }
             if (barracksBuilt != null && enemyBase != null) {
-                int drawing = encodeEnemyBaseLoc(1, enemyBase, barracksBuilt);
+                int drawing = smoke.encodeEnemyBaseLoc(1, enemyBase, barracksBuilt);
                 if(uc.canDraw(drawing)){
                     uc.draw(drawing);
                 }

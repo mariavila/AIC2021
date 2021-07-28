@@ -10,15 +10,19 @@ public class Tactics {
     }
 
     // Must receive an array of length > 0
-    public UnitInfo getClosestUnobstructedEnemy(UnitInfo[] enemies) {
-        UnitInfo closestEnemy = enemies[0];
-        UnitInfo closestUnobstructed = enemies[0];
+    public UnitInfo getClosestDangerousEnemy(UnitInfo[] enemies, UnitType[] excluded) {
+        UnitInfo closestEnemy = null;
+        UnitInfo closestUnobstructed = null;
 
         int dist0 = 100000;
-        boolean unobstructed = false;
+        boolean unobstructed;
         boolean allEnemiesObstructed = true;
 
+        outerloop:
         for (int i = 0; i < enemies.length; i++) {
+            for (int j = 0; j < excluded.length; j++) {
+                if (enemies[i].getType() == excluded[j]) continue outerloop;
+            }
 
             int dist = enemies[i].getLocation().distanceSquared(uc.getLocation());
             unobstructed = !uc.isObstructed(uc.getLocation(),enemies[i].getLocation());

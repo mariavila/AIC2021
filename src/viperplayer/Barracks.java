@@ -47,7 +47,7 @@ public class Barracks extends MyUnit {
 
         if (broadCast && enemyBase != null) {
             if (round % 47 == 0 && uc.canMakeSmokeSignal()) {
-                uc.makeSmokeSignal(encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, uc.getLocation()));
+                uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, uc.getLocation()));
             }
         }
     }
@@ -93,7 +93,7 @@ public class Barracks extends MyUnit {
             if (uc.canRead(target)) {
                 signal = uc.read(target);
                 if (signal != 0) {
-                    Location offset = decode(signal);
+                    Location offset = smoke.decode(signal);
                     return new Location(myLoc.x - offset.x, myLoc.y - offset.y);
                 }
             }

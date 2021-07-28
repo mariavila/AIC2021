@@ -10,6 +10,7 @@ public abstract class MyUnit {
     Move move;
     Attack attack;
     Tactics tactics;
+    Smoke smoke;
 
     Location enemyBase = null;
     Location baseLocation = null;
@@ -34,6 +35,7 @@ public abstract class MyUnit {
         this.move = new Move(uc);
         this.attack = new Attack(uc);
         this.tactics = new Tactics(uc);
+        this.smoke = new Smoke(uc);
         this.myTeam = uc.getTeam();
     }
 
@@ -86,7 +88,7 @@ public abstract class MyUnit {
     Location tryReadArt(){
         UnitInfo[] units = uc.senseUnits(uc.getTeam());
         Direction[] myDirs = Direction.values();
-        int signal = 0;
+        int signal;
 
         for (UnitInfo unit: units) {
             UnitType myType = unit.getType();
@@ -97,7 +99,7 @@ public abstract class MyUnit {
                     if (uc.canRead(target)) {
                         signal = uc.read(target);
                         if (signal != 0) {
-                            Location offset = decode(signal);
+                            Location offset = smoke.decode(signal);
                             return new Location(barracks.x - offset.x, barracks.y - offset.y);
                         }
                     }
@@ -106,114 +108,6 @@ public abstract class MyUnit {
         }
 
         return null;
-    }
-
-    smokeSignal[] tryReadSmoke() {
-        int[] smokeSignals = uc.readSmokeSignals();
-        smokeSignal[] decodedSignals = new smokeSignal[smokeSignals.length];
-        int index = 0;
-
-        if(smokeSignals.length > 0) {
-            for (int smokeSignal : smokeSignals) {
-                if (smokeSignal <= 0) continue;
-                smokeSignal mySignal = decodeSignal(true, smokeSignal);
-                if (mySignal != null) {
-                    decodedSignals[index] = mySignal;
-                    index++;
-                }
-            }
-        }
-
-        return decodedSignals;
-    }
-
-    void doSmokeStuff() {
-        if (enemyBase == null || needsToSend) {
-            enemyBase = lookForEnemyBase();
-            needsToSend = true;
-            if (enemyBase != null && !enemyBaseSend && uc.canMakeSmokeSignal()) {
-                uc.makeSmokeSignal(encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, barracks));
-                enemyBaseSend = true;
-            }
-        }
-
-        Location loc;
-        int type;
-
-        for (smokeSignal smoke: smokeSignals) {
-            if (smoke == null) continue;
-            loc = smoke.getLoc();
-            type = smoke.getType();
-
-            if (type == constants.ENEMY_BASE) {
-                enemyBase = barracks.add(-loc.x, -loc.y);
-                if (enemyBase != null) {
-                    needsToSend = false;
-                    move.setEnemyBase(enemyBase);
-                }
-            }
-        }
-    }
-
-    smokeSignal decodeSignal(boolean encoded, int signal){
-        uc.println(signal);
-        int encoding;
-        if(!encoded) decode(signal);
-        else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
-            encoding = constants.RUSH_ATTACK_ENCODING;
-            signal = signal / encoding;
-            Location smokeLoc = decode(signal);
-            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.ENEMY_FOUND == 0){
-            encoding = constants.ENEMY_FOUND;
-            signal = signal / encoding;
-            Location smokeLoc = decode(signal);
-            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.BARRACKS_BUILT == 0){
-            encoding = constants.BARRACKS_BUILT;
-            signal = signal / encoding;
-            Location smokeLoc = decode(signal);
-            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.ENEMY_BASE == 0){
-            encoding = constants.ENEMY_BASE;
-            signal = signal / encoding;
-            Location smokeLoc = decode(signal);
-            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
-        }
-        return null;
-    }
-
-    Location decode(int signal) {
-        int negative = signal % 10;
-        if (negative != 0 && negative != 1 && negative != 2 && negative != 3) return null;
-        signal = signal/10;
-        int offsetY = signal%50;
-        int offsetX = signal/50;
-        if (negative == 1 || negative == 2) offsetX = -offsetX;
-        if(negative == 1 || negative == 3) offsetY = -offsetY;
-        return new Location(offsetX, offsetY);
-    }
-
-    int encodeEnemyBaseLoc(int encoding, Location enemyBase, Location baseLocation){
-        Location offset = new Location(baseLocation.x-enemyBase.x, baseLocation.y-enemyBase.y);
-        uc.println(offset);
-        int negatives = 0;
-        if(offset.x<0){
-            offset.x = -offset.x;
-            if(offset.y<0){
-                offset.y = -offset.y;
-                negatives = 1;
-            }
-            else negatives = 2;
-        }
-        else{
-            if(offset.y<0){
-                offset.y = -offset.y;
-                negatives = 3;
-            }
-        }
-        int drawing = (offset.x*50+offset.y)*10 + negatives;
-        return drawing * encoding;
     }
 
     Location spawnEmpty(UnitType t){
@@ -244,6 +138,81 @@ public abstract class MyUnit {
                     return myLoc.add(dir);
                 }
             }
+        }
+        return null;
+    }
+
+    MyUnit.smokeSignal[] tryReadSmoke() {
+        int[] smokeSignals = uc.readSmokeSignals();
+        MyUnit.smokeSignal[] decodedSignals = new MyUnit.smokeSignal[smokeSignals.length];
+        int index = 0;
+
+        if(smokeSignals.length > 0) {
+            for (int smokeSignal : smokeSignals) {
+                if (smokeSignal <= 0) continue;
+                MyUnit.smokeSignal mySignal = decodeSignal(true, smokeSignal);
+                if (mySignal != null) {
+                    decodedSignals[index] = mySignal;
+                    index++;
+                }
+            }
+        }
+
+        return decodedSignals;
+    }
+
+    void doSmokeStuff() {
+        if (enemyBase == null || needsToSend) {
+            enemyBase = lookForEnemyBase();
+            needsToSend = true;
+            if (enemyBase != null && !enemyBaseSend && uc.canMakeSmokeSignal()) {
+                uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, barracks));
+                enemyBaseSend = true;
+            }
+        }
+
+        Location loc;
+        int type;
+
+        for (MyUnit.smokeSignal smoke: smokeSignals) {
+            if (smoke == null) continue;
+            loc = smoke.getLoc();
+            type = smoke.getType();
+
+            if (type == constants.ENEMY_BASE) {
+                enemyBase = barracks.add(-loc.x, -loc.y);
+                if (enemyBase != null) {
+                    needsToSend = false;
+                    move.setEnemyBase(enemyBase);
+                }
+            }
+        }
+    }
+
+    MyUnit.smokeSignal decodeSignal(boolean encoded, int signal){
+        uc.println(signal);
+        int encoding;
+        if(!encoded) smoke.decode(signal);
+        else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
+            encoding = constants.RUSH_ATTACK_ENCODING;
+            signal = signal / encoding;
+            Location smokeLoc = smoke.decode(signal);
+            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_FOUND == 0){
+            encoding = constants.ENEMY_FOUND;
+            signal = signal / encoding;
+            Location smokeLoc = smoke.decode(signal);
+            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.BARRACKS_BUILT == 0){
+            encoding = constants.BARRACKS_BUILT;
+            signal = signal / encoding;
+            Location smokeLoc = smoke.decode(signal);
+            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_BASE == 0){
+            encoding = constants.ENEMY_BASE;
+            signal = signal / encoding;
+            Location smokeLoc = smoke.decode(signal);
+            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
         }
         return null;
     }
