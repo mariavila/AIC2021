@@ -4,13 +4,9 @@ import aic2021.user.*;
 
 public class Worker extends MyUnit {
 
-    Worker(UnitController uc){
-        super(uc);
-    }
+    ExplorerPathfinder pathfinder;
 
     Team myTeam = uc.getTeam();
-    private Boolean microResult;
-    private Direction microDir;
 
     Location resourceLocation = null;
     ResourceInfo resourcesLeft = null;
@@ -26,6 +22,12 @@ public class Worker extends MyUnit {
 
     String state = "INI";
 
+    Worker(UnitController uc){
+        super(uc);
+
+        this.pathfinder = new ExplorerPathfinder(uc);
+    }
+
     void playRound(){
         if(justSpawned){
             tryReadArt();
@@ -38,8 +40,6 @@ public class Worker extends MyUnit {
         smokeSignals = tryReadSmoke();
 
         if (round != 10 || smokeSignals.length > 0) {
-            //microResult = doMicro();
-
             tryBarracks();
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
             tryMove();
@@ -91,7 +91,7 @@ public class Worker extends MyUnit {
             followingDeer = true;
             state = "GOTORESOURCE";
         } else{
-            move.moveAvoidingEnemies(move.explore());
+            if(uc.canMove()) pathfinder.getNextLocationTarget(move.explore());
         }
     }
 
@@ -169,7 +169,7 @@ public class Worker extends MyUnit {
     }
 
     void deposit(){
-        move.moveAvoidingEnemies(baseLocation);
+        if(uc.canMove()) pathfinder.getNextLocationTarget(baseLocation);
         if (uc.canDeposit()) {
             uc.deposit();
             if (resourcesLeft != null) {
@@ -285,77 +285,5 @@ public class Worker extends MyUnit {
             }
         }
         return null;
-    }
-
-    public boolean doMicro() {
-        Location myLoc = uc.getLocation();
-        Direction[] dirs = Direction.values();
-        MicroInfo[] microInfo = new MicroInfo[9];
-        for (int i = 0; i < 9; i++) {
-            Location target = myLoc.add(dirs[i]);
-            microInfo[i] = new MicroInfo(target);
-        }
-
-        UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
-
-        for (UnitInfo enemy : enemies) {
-            if (!uc.isObstructed(enemy.getLocation(), myLoc)) {
-                for (int i = 0; i < 9; i++) {
-                    microInfo[i].update(enemy);
-                }
-            }
-        }
-
-        if (enemies.length == 0) return false;
-        if (enemies.length == 1 && enemyBase != null && enemyBase.distanceSquared(myLoc) <= uc.getType().getVisionRange()) return false;
-
-        int bestIndex = -1;
-
-        for (int i = 8; i >= 0; i--) {
-            if (!uc.canMove(dirs[i])) continue;
-            if (bestIndex < 0 || !microInfo[bestIndex].isBetter(microInfo[i])) bestIndex = i;
-        }
-
-        if (bestIndex != -1) {
-            microDir = (dirs[bestIndex]);
-            return true;
-        }
-
-        return false;
-    }
-
-    class MicroInfo {
-        int numEnemies;
-        int minDistToEnemy;
-        Location loc;
-
-        public MicroInfo(Location loc) {
-            this.loc = loc;
-            numEnemies = 0;
-            minDistToEnemy =  100000;
-        }
-
-        void update(UnitInfo unit) {
-            int distance = unit.getLocation().distanceSquared(loc);
-            if (distance <= unit.getType().attackRange) {
-                ++numEnemies;
-            }
-            if (distance < minDistToEnemy) minDistToEnemy = distance;
-        }
-
-        boolean canAttack() {
-            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
-        }
-
-        boolean isBetter(MicroInfo m) {
-            if (numEnemies < m.numEnemies) return true;
-            if (numEnemies > m.numEnemies) return false;
-            if (canAttack()) {
-                if (!m.canAttack()) return true;
-                return minDistToEnemy >= m.minDistToEnemy;
-            }
-            if (m.canAttack()) return false;
-            return minDistToEnemy >= m.minDistToEnemy;
-        }
     }
 }

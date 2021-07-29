@@ -10,9 +10,6 @@ public class Explorer extends MyUnit {
     boolean returned = false;
     boolean enemyFound = false;
 
-    private Boolean microResult;
-    private Direction microDir;
-
     Location baseLocation = null;
 
     Explorer(UnitController uc){
