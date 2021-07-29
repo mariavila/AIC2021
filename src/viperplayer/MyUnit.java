@@ -161,35 +161,7 @@ public abstract class MyUnit {
         return decodedSignals;
     }
 
-    void doSmokeStuff() {
-        if (enemyBase == null || needsToSend) {
-            enemyBase = lookForEnemyBase();
-            needsToSend = true;
-            if (enemyBase != null && !enemyBaseSend && uc.canMakeSmokeSignal()) {
-                uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, barracks));
-                enemyBaseSend = true;
-            }
-        }
-
-        Location loc;
-        int type;
-
-        for (MyUnit.smokeSignal smoke: smokeSignals) {
-            if (smoke == null) continue;
-            loc = smoke.getLoc();
-            type = smoke.getType();
-
-            if (type == constants.ENEMY_BASE) {
-                enemyBase = barracks.add(-loc.x, -loc.y);
-                if (enemyBase != null) {
-                    needsToSend = false;
-                    move.setEnemyBase(enemyBase);
-                }
-            }
-        }
-    }
-
-    MyUnit.smokeSignal decodeSignal(boolean encoded, int signal){
+    smokeSignal decodeSignal(boolean encoded, int signal){
         int encoding;
         if(!encoded) smoke.decode(signal);
         else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
@@ -214,18 +186,6 @@ public abstract class MyUnit {
             if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
         }
         return null;
-    }
-
-    boolean moveRandom(){
-        int tries = 10;
-        while (uc.canMove() && tries-- > 0){
-            int random = (int)(uc.getRandomDouble()*8);
-            if (uc.canMove(dirs[random])){
-                uc.move(dirs[random]);
-                return true;
-            }
-        }
-        return false;
     }
 
     boolean randomThrow(){

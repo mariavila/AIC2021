@@ -53,12 +53,10 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
-        if (spearmen + axemen < 5 || uc.hasResearched(Technology.TACTICS, myTeam)) {
-            if (wood > stone) {
-                spawnSafe(UnitType.SPEARMAN);
-            } else {
-                spawnSafe(UnitType.AXEMAN);
-            }
+        if (wood > stone) {
+            spawnSafe(UnitType.SPEARMAN);
+        } else {
+            spawnSafe(UnitType.AXEMAN);
         }
     }
 

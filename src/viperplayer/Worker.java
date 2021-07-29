@@ -4,7 +4,7 @@ import aic2021.user.*;
 
 public class Worker extends MyUnit {
 
-    ExplorerPathfinder pathfinder;
+    WorkerPathfinder pathfinder;
 
     Team myTeam = uc.getTeam();
 
@@ -12,20 +12,21 @@ public class Worker extends MyUnit {
     ResourceInfo resourcesLeft = null;
 
     boolean followingDeer = false;
+    Location lastDeer = null;
     boolean boxesResearched = false;
     Location barracksBuilt = null;
     boolean rushAttack = false;
     boolean hasToSendSmokeBarracks = false;
 
     ResourceInfo[] resources;
-    UnitInfo[] deer;
+    UnitInfo[] deers;
 
     String state = "INI";
 
     Worker(UnitController uc){
         super(uc);
 
-        this.pathfinder = new ExplorerPathfinder(uc);
+        this.pathfinder = new WorkerPathfinder(uc);
     }
 
     void playRound(){
@@ -63,12 +64,13 @@ public class Worker extends MyUnit {
 
     private void explore(){
         resources = uc.senseResources();
-        deer = uc.senseUnits(Team.NEUTRAL);
+        deers = uc.senseUnits(Team.NEUTRAL);
         int baseRange = UnitType.BASE.getAttackRange();
 
         for (ResourceInfo resource: resources) {
             Location resLoc = resource.getLocation();
             if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
+            if (uc.isObstructed(resLoc, uc.getLocation())) continue;
 
             UnitInfo unit;
             if (uc.canSenseLocation(resLoc)) {
@@ -87,29 +89,45 @@ public class Worker extends MyUnit {
             }
         }
 
-        if(deer.length > 0){
+        for (UnitInfo deer: deers) {
+            Location deerLoc = deer.getLocation();
+            if (enemyBase != null && deerLoc.distanceSquared(enemyBase) <= baseRange) continue;
+            if (uc.isObstructed(deerLoc, uc.getLocation())) continue;
+
             followingDeer = true;
+            lastDeer = deerLoc;
             state = "GOTORESOURCE";
-        } else{
-            if(uc.canMove()) pathfinder.getNextLocationTarget(move.explore());
+            return;
         }
+
+        pathfinder.getNextLocationTarget(move.explore());
     }
 
     private void goToResource(){
-        resources = uc.senseResources();
         int baseRange = UnitType.BASE.getAttackRange();
-        if (enemyBase != null && resourceLocation != null && resourceLocation.distanceSquared(enemyBase) <= baseRange) resourceLocation = null;
 
         if (followingDeer){
-            deer = uc.senseUnits(Team.NEUTRAL);
-            if (deer.length > 0){
-                resourceLocation = deer[0].getLocation();
+            if (uc.canMove()) pathfinder.getNextLocationTarget(lastDeer);
+            else return;
+
+            deers = uc.senseUnits(Team.NEUTRAL);
+
+            for (UnitInfo deer: deers) {
+                Location deerLoc = deer.getLocation();
+                if (enemyBase != null && deerLoc.distanceSquared(enemyBase) <= baseRange) continue;
+                if (uc.isObstructed(deerLoc, uc.getLocation())) continue;
+
+                lastDeer = deerLoc;
+                return;
             }
-            else{
-                state = "EXPLORE";
-                followingDeer = false;
-            }
+
+            state = "EXPLORE";
+            followingDeer = false;
+            lastDeer = null;
         }
+
+        resources = uc.senseResources();
+        if (enemyBase != null && resourceLocation != null && resourceLocation.distanceSquared(enemyBase) <= baseRange) resourceLocation = null;
 
         if (resourceLocation == null) {
             state = "EXPLORE";
@@ -117,14 +135,14 @@ public class Worker extends MyUnit {
             UnitInfo unit;
             if (uc.canSenseLocation(resourceLocation)) {
                 unit = uc.senseUnitAtLocation(resourceLocation);
-                if (unit != null) {
+                if (unit != null && unit.getType() == UnitType.WORKER) {
                     resourceLocation = null;
                     followingDeer = false;
                     state = "EXPLORE";
                     return;
                 }
             }
-            move.moveAvoidingEnemies(resourceLocation);
+            pathfinder.getNextLocationTarget(resourceLocation);
             if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
                 state = "GATHER";
             }
@@ -169,7 +187,7 @@ public class Worker extends MyUnit {
     }
 
     void deposit(){
-        if(uc.canMove()) pathfinder.getNextLocationTarget(baseLocation);
+        pathfinder.getNextLocationTarget(baseLocation);
         if (uc.canDeposit()) {
             uc.deposit();
             if (resourcesLeft != null) {
@@ -203,13 +221,13 @@ public class Worker extends MyUnit {
                     if (type == constants.RUSH_ATTACK_ENCODING) {
                         enemyBase = baseLocation.add(-loc.x, -loc.y);
                         if (enemyBase != null) {
-                            move.setEnemyBase(enemyBase);
+                            pathfinder.setEnemyBase(enemyBase);
                             rushAttack = true;
                         }
                     } else if (type == constants.ENEMY_BASE) {
                         enemyBase = baseLocation.add(-loc.x, -loc.y);
                         if (enemyBase != null) {
-                            move.setEnemyBase(enemyBase);
+                            pathfinder.setEnemyBase(enemyBase);
                         }
                     } else if (type == constants.ENEMY_FOUND) {
                         rushAttack = true;

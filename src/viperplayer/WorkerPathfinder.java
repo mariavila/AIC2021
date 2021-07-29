@@ -13,20 +13,28 @@ public class WorkerPathfinder {
     int minDistToEnemy = INF; //minimum distance I've been to the enemy while going around an obstacle
     Location prevTarget = null; //previous target
     Location myLoc;
+    Location enemyBase = null;
     Team myTeam;
+    Location[] traps;
     UnitInfo[] enemies;
     Direction microDir;
     Direction[] myDirs;
     MicroInfo[] microInfo = new MicroInfo[9];
+    int baseRange;
 
     WorkerPathfinder(UnitController uc){
         this.myDirs = Direction.values();
         this.uc = uc;
         this.myTeam = uc.getTeam();
+        this.baseRange = UnitType.BASE.getAttackRange();
+    }
+
+    void setEnemyBase(Location target) {
+        enemyBase = target;
     }
 
     Boolean getNextLocationTarget(Location target){
-        //No target? ==> bye!
+        if (!uc.canMove()) return false;
         if (target == null) return false;
 
         //different target? ==> previous data does not help!
@@ -57,7 +65,7 @@ public class WorkerPathfinder {
                 if (myDirs[j] == dir) {
                     if (uc.canMove(dir) && microInfo[j].numEnemies == 0) {
                         uc.move(dir);
-                        return false;
+                        return true;
                     }
                     break;
                 }
@@ -78,15 +86,18 @@ public class WorkerPathfinder {
             if (myDirs[j] == dir) {
                 if (uc.canMove(dir) && microInfo[j].numEnemies == 0) {
                     uc.move(dir);
-                    return false;
+                    return true;
                 }
                 break;
             }
         }
 
-        uc.move(microDir);
+        if (microDir != Direction.ZERO) {
+            uc.move(microDir);
+            return true;
+        }
 
-        return true;
+        return false;
     }
 
     void resetPathfinding(){
@@ -96,13 +107,23 @@ public class WorkerPathfinder {
 
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
+        traps = uc.senseTraps();
         for (int i = 0; i < 9; i++) {
+            Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
-        }
 
-        for (int i = 0; i < 9; i++) {
+            if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) microInfo[i].numEnemies += 10;
+
+            for(Location trap: traps) {
+                if(trap.isEqual(target)) {
+                    microInfo[i].numEnemies = 100;
+                    break;
+                }
+            }
+
             int length = enemies.length;
             for (int j = 0; j < length; j++) {
+                if (uc.canSenseLocation(microInfo[i].loc) && uc.canSenseLocation(target) && uc.isObstructed(microInfo[i].loc, target)) continue;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();
                 int distance = microInfo[i].loc.distanceSquared(enemy.getLocation());
@@ -118,9 +139,7 @@ public class WorkerPathfinder {
         }
 
         if (bestIndex != -1) {
-            if (enemies.length > 0) {
-                microDir = (myDirs[bestIndex]);
-            }
+            microDir = myDirs[bestIndex];
         }
     }
 
@@ -143,7 +162,7 @@ public class WorkerPathfinder {
             } else if (enemyType == UnitType.AXEMAN) {
                 if (distance < 14) numEnemies++;
             } else if (enemyType == UnitType.BASE) {
-                if (distance < 19) numEnemies++;
+                if (distance < 19) numEnemies += 10;
             }
 
             if (distance < minDistToEnemy) minDistToEnemy = distance;

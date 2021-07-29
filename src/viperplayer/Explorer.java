@@ -39,7 +39,7 @@ public class Explorer extends MyUnit {
         UnitInfo[] units = uc.senseUnits(myTeam.getOpponent());
         for(UnitInfo unit:units){
             if(unit.getType() == UnitType.BASE){
-                move.setEnemyBase(unit.getLocation());
+                pathfinder.setEnemyBase(unit.getLocation());
                 return unit.getLocation();
             }
         }
@@ -70,7 +70,7 @@ public class Explorer extends MyUnit {
         if (state == "EXPLORE") {
             if (enemyBase == null) enemyBase = lookForEnemyBaseExplorer();
             else if (!returned) state = "BASEFOUND";
-            if(uc.canMove()) pathfinder.getNextLocationTarget(move.explore());
+            pathfinder.getNextLocationTarget(move.explore());
         }
         if (state == "BASEFOUND") {
             if (enemyBase != null){
@@ -82,7 +82,7 @@ public class Explorer extends MyUnit {
             }
         }
         if (state == "RETURN") {
-            if(uc.canMove()) pathfinder.getNextLocationTarget(baseLocation);
+            pathfinder.getNextLocationTarget(baseLocation);
             if (uc.getLocation().distanceSquared(baseLocation) <= 2) {
                 drawEnemyBaseLoc();
                 returned = true;

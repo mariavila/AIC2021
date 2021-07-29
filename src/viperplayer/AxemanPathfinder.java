@@ -2,7 +2,7 @@ package viperplayer;
 
 import aic2021.user.*;
 
-public class ExplorerPathfinder {
+public class AxemanPathfinder {
 
     UnitController uc;
 
@@ -22,7 +22,7 @@ public class ExplorerPathfinder {
     MicroInfo[] microInfo = new MicroInfo[9];
     int baseRange;
 
-    ExplorerPathfinder(UnitController uc){
+    AxemanPathfinder(UnitController uc){
         this.myDirs = Direction.values();
         this.uc = uc;
         this.myTeam = uc.getTeam();
@@ -33,7 +33,7 @@ public class ExplorerPathfinder {
         enemyBase = target;
     }
 
-    Boolean getNextLocationTarget(Location target){
+    Boolean getNextLocationTarget(Location target, boolean reckless){
         if (!uc.canMove()) return false;
         if (target == null) return false;
 
@@ -63,7 +63,7 @@ public class ExplorerPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && microInfo[j].numEnemies == 0) {
+                    if (uc.canMove(dir) && (microInfo[j].numEnemies == 0 || reckless)) {
                         uc.move(dir);
                         return true;
                     }
@@ -84,7 +84,7 @@ public class ExplorerPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && microInfo[j].numEnemies == 0) {
+                if (uc.canMove(dir) && (microInfo[j].numEnemies == 0 || reckless)) {
                     uc.move(dir);
                     return true;
                 }
@@ -110,7 +110,7 @@ public class ExplorerPathfinder {
         traps = uc.senseTraps();
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
-            microInfo[i] = new MicroInfo(target);
+            microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) microInfo[i].numEnemies += 10;
 
@@ -163,8 +163,6 @@ public class ExplorerPathfinder {
                 if (distance < 33) numEnemies++;
             } else if (enemyType == UnitType.AXEMAN) {
                 if (distance < 14) numEnemies++;
-            } else if (enemyType == UnitType.TRAPPER) {
-                if (distance < 9) numEnemies++;
             } else if (enemyType == UnitType.BASE) {
                 if (distance < 19) numEnemies += 10;
             }
@@ -172,10 +170,19 @@ public class ExplorerPathfinder {
             if (distance < minDistToEnemy) minDistToEnemy = distance;
         }
 
+        boolean canAttack() {
+            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
+        }
+
         boolean isBetter(MicroInfo m) {
-            if (numEnemies < m.numEnemies) return true;
-            if (numEnemies > m.numEnemies) return false;
-            return minDistToEnemy >= m.minDistToEnemy;
+            if(numEnemies < m.numEnemies) return true;
+            if(numEnemies > m.numEnemies) return false;
+            if (canAttack()) {
+                if (!m.canAttack()) return true;
+                return minDistToEnemy >= m.minDistToEnemy;
+            }
+            if (m.canAttack()) return false;
+            return minDistToEnemy <= m.minDistToEnemy;
         }
     }
 }
