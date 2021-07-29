@@ -1,5 +1,6 @@
 package viperplayer;
 
+import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public class Worker extends MyUnit {
@@ -157,6 +158,9 @@ public class Worker extends MyUnit {
             }
 
             resources = uc.senseResources();
+            if(canSpawnSettlement(myLoc, resources)) {
+                spawnSafe(UnitType.SETTLEMENT);
+            }
 
             int[] gatheredResources = uc.getResourcesCarried();
             int total_res = 0;
@@ -185,17 +189,52 @@ public class Worker extends MyUnit {
     }
 
     void deposit(){
-        pathfinder.getNextLocationTarget(baseLocation);
+        Location closeSettlement = senseSettlement();
+        if (closeSettlement != null) {
+            pathfinder.getNextLocationTarget(closeSettlement);
+        } else {
+            pathfinder.getNextLocationTarget(baseLocation);
+        }
         if (uc.canDeposit()) {
             uc.deposit();
             if (resourcesLeft != null) {
                 if ((resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) || resourcesLeft.getAmount() == 0) {
                     resourcesLeft = null;
-                    state = "EXPLORE";
                 }
             }
             state = "GOTORESOURCE";
         }
+    }
+
+    boolean canSpawnSettlement(Location myLoc, ResourceInfo[] res){
+        if(myLoc.distanceSquared(baseLocation) < 30 && !uc.isObstructed(myLoc, baseLocation)) {
+            return false;
+        }
+
+        Location settlement = senseSettlement();
+        if (settlement != null) return false;
+
+        int closeResources = 0;
+        for(int i = 0; i < res.length; i++) {
+            closeResources += res[i].getAmount();
+            if (closeResources > 600) break;
+        }
+        if(closeResources < 600) {
+            return false;
+        }
+
+        return true;
+    }
+
+    Location senseSettlement() {
+        Location settlement = null;
+        UnitInfo[] allies = uc.senseUnits(myTeam);
+        for(int i = 0; i < allies.length; i++) {
+            if(allies[i].getType() == UnitType.SETTLEMENT) {
+                settlement = allies[i].getLocation();
+            }
+        }
+        return settlement;
     }
 
     private void tryBarracks(){
