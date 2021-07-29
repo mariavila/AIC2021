@@ -23,7 +23,7 @@ public class Spearman extends MyUnit {
         if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
 
         smokeSignals = tryReadSmoke();
-        doSmokeStuff();
+        doSmokeStuffSoldier();
 
         microResult = doMicro();
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
