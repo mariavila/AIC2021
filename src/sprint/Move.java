@@ -159,7 +159,7 @@ public class Move {
     }
 
     public int getRandomNumber(int min, int max) {
-        return (int) ((Math.random() * (max - min)) + min);
+        return (int) ((uc.getRandomDouble() * (max - min)) + min);
     }
 
     void findMapEdges() {

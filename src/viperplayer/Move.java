@@ -83,7 +83,7 @@ public class Move {
         Location myLoc = uc.getLocation();
         UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
         UnitType[] excluded = {UnitType.EXPLORER, UnitType.WORKER, UnitType.TRAPPER};
-        int randomNumber = (int)(Math.random()*2);
+        int randomNumber = (int)(uc.getRandomDouble()*2);
         if (enemies.length > 0) {
             UnitInfo enemy = tactics.getClosestDangerousEnemy(enemies, excluded);
             if(enemy != null) {
@@ -195,7 +195,7 @@ public class Move {
     }
 
     public int getRandomNumber(int min, int max) {
-        return (int) ((Math.random() * (max - min)) + min);
+        return (int) ((uc.getRandomDouble() * (max - min)) + min);
     }
 
     void findMapEdges() {
