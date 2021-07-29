@@ -4,6 +4,7 @@ import aic2021.user.*;
 
 public class Barracks extends MyUnit {
 
+    Location myLoc = null;
     boolean broadCast = true;
     int spearmen = 0;
     int axemen = 0;
@@ -13,6 +14,7 @@ public class Barracks extends MyUnit {
     }
 
     void playRound(){
+        myLoc = uc.getLocation();
         round = uc.getRound();
         getResources();
         if (justSpawned) {
@@ -38,7 +40,7 @@ public class Barracks extends MyUnit {
             loc = smoke.getLoc();
             type = smoke.getType();
             if (type == constants.ENEMY_BASE && enemyBase == null) {
-                enemyBase = uc.getLocation().add(-loc.x, -loc.y);
+                enemyBase = myLoc.add(-loc.x, -loc.y);
                 if (enemyBase != null) {
                     move.setEnemyBase(enemyBase);
                 }
@@ -49,6 +51,10 @@ public class Barracks extends MyUnit {
             if (round % 47 == 0 && uc.canMakeSmokeSignal()) {
                 uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, uc.getLocation()));
             }
+        }
+
+        if (round % 43 == 0 && uc.canMakeSmokeSignal()) {
+            uc.makeSmokeSignal(smoke.encodeLoc(constants.BARRACKS_ALIVE, myLoc));
         }
     }
 
@@ -61,7 +67,6 @@ public class Barracks extends MyUnit {
     }
 
     void spawnSafe(UnitType t) {
-        Location myLoc = uc.getLocation();
         Location[] traps = uc.senseTraps(2);
 
         outerloop:
@@ -84,7 +89,7 @@ public class Barracks extends MyUnit {
 
     Location barracksRead() {
         Direction[] myDirs = Direction.values();
-        Location myLoc = uc.getLocation();
+
         int signal = 0;
         for (Direction dir: myDirs) {
             Location target = myLoc.add(dir);

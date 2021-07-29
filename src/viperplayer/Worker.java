@@ -14,8 +14,6 @@ public class Worker extends MyUnit {
     boolean followingDeer = false;
     Location lastDeer = null;
     boolean boxesResearched = false;
-    Location barracksBuilt = null;
-    boolean rushAttack = false;
     boolean hasToSendSmokeBarracks = false;
 
     ResourceInfo[] resources;
@@ -208,35 +206,9 @@ public class Worker extends MyUnit {
                 hasToSendSmokeBarracks = false;
             }
         }
-        if(barracksBuilt == null){
-            if(smokeSignals.length > 0) {
-                Location loc;
-                int type;
-
-                for (smokeSignal smokeSignal : smokeSignals) {
-                    if (smokeSignal == null) continue;
-                    loc = smokeSignal.getLoc();
-                    type = smokeSignal.getType();
-
-                    if (type == constants.RUSH_ATTACK_ENCODING) {
-                        enemyBase = baseLocation.add(-loc.x, -loc.y);
-                        if (enemyBase != null) {
-                            pathfinder.setEnemyBase(enemyBase);
-                            rushAttack = true;
-                        }
-                    } else if (type == constants.ENEMY_BASE) {
-                        enemyBase = baseLocation.add(-loc.x, -loc.y);
-                        if (enemyBase != null) {
-                            pathfinder.setEnemyBase(enemyBase);
-                        }
-                    } else if (type == constants.ENEMY_FOUND) {
-                        rushAttack = true;
-                    } else if (type == constants.BARRACKS_BUILT) {
-                        barracksBuilt = baseLocation.add(-loc.x, -loc.y);
-                    }
-                }
-            }
-        }
+        //if(barracksBuilt == null){
+            doSmokeStuffProducer();
+        //}
         if (rushAttack && barracksBuilt == null) {
             barracksBuilt = spawnSafe(UnitType.BARRACKS);
             if (barracksBuilt != null) {

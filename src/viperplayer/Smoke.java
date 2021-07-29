@@ -23,6 +23,27 @@ public class Smoke {
         return new Location(offsetX, offsetY);
     }
 
+    int encodeLoc(int encoding, Location loc){
+        Location offset = new Location(loc.x, loc.y);
+        int negatives = 0;
+        if(offset.x<0){
+            offset.x = -offset.x;
+            if(offset.y<0){
+                offset.y = -offset.y;
+                negatives = 1;
+            }
+            else negatives = 2;
+        }
+        else{
+            if(offset.y<0){
+                offset.y = -offset.y;
+                negatives = 3;
+            }
+        }
+        int drawing = (offset.x*50+offset.y)*10 + negatives;
+        return drawing * encoding;
+    }
+
     int encodeEnemyBaseLoc(int encoding, Location enemyBase, Location baseLocation){
         Location offset = new Location(baseLocation.x-enemyBase.x, baseLocation.y-enemyBase.y);
         int negatives = 0;

@@ -14,6 +14,13 @@ public class Base extends MyUnit {
     int wolves = 0;
     int waterTiles = 0;
     int spawnSpaces = 0;
+    int idealWorkers = 3;
+    int techLevel = 0;
+
+    int enemySpearmen = 0;
+    int enemyAxemen = 0;
+    int enemyTrappers = 0;
+    int enemyWolves = 0;
 
     int initialFood = 0;
     int initialWood = 0;
@@ -23,18 +30,16 @@ public class Base extends MyUnit {
     boolean enemyExplorer = false;
     Direction[] safeSpawn = new Direction[8];
 
-    boolean rushAttack = false;
     boolean normalAttack = false;
     boolean hasWater = false;
     boolean ecoMap = false;
     boolean baseCorner = false;
-    int idealWorkers = 3;
-    int techLevel = 0;
 
     void playRound(){
         round = uc.getRound();
         if(round == 0) init();
 
+        senseEnemyUnits();
         calcIdealWorkers();
         getResources();
         smokeSignals = tryReadSmoke();
@@ -91,45 +96,37 @@ public class Base extends MyUnit {
             int drawing = smoke.encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
             uc.makeSmokeSignal(drawing);
         }
-        if (smokeSignals.length > 0) {
-            Location loc;
-            int type;
-
-            for (smokeSignal smokeSignal : smokeSignals) {
-                if (smokeSignal == null) continue;
-                loc = smokeSignal.getLoc();
-                type = smokeSignal.getType();
-
-                if (type == constants.RUSH_ATTACK_ENCODING) {
-                    enemyBase = baseLocation.add(-loc.x, -loc.y);
-                    if (enemyBase != null) {
-                        move.setEnemyBase(enemyBase);
-                        rushAttack = true;
-                    }
-                } else if (type == constants.ENEMY_FOUND) {
-                    rushAttack = true;
-                }
-            }
-        }
+        doSmokeStuffProducer();
     }
 
     private void trySpawn(){
         if (explorers < 1 && !rushAttack){
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
-        if (workers < idealWorkers && !rushAttack){
-            if (spawnSafe(UnitType.WORKER)) {
-                workers++;
-                trySpawn();
+
+        if (enemyAxemen+enemySpearmen+enemyWolves == 0) {
+            if (workers < idealWorkers && !rushAttack){
+                if (spawnSafe(UnitType.WORKER)) {
+                    workers++;
+                    trySpawn();
+                }
             }
+
+            if (rushAttack) {
+                if (barracksBuilt == null && round % 100 == 0) {
+                    spawnSafe(UnitType.WORKER);
+                    workers++;
+                }
+                if (wolves < 5 || uc.hasResearched(Technology.EUGENICS, myTeam)) {
+                    spawnSafe(UnitType.WOLF);
+                    wolves++;
+                }
+            }
+        } else {
+            spawnSafe(UnitType.WOLF);
+            wolves++;
         }
 
-        if (rushAttack) {
-            if (wolves < 5 || uc.hasResearched(Technology.EUGENICS, myTeam)) {
-                spawnSafe(UnitType.WOLF);
-                wolves++;
-            }
-        }
     }
 
     private void tryResearch() {
@@ -168,9 +165,16 @@ public class Base extends MyUnit {
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
             }
-            if(rushAttack){
+            if(enemyAxemen+enemySpearmen+enemyWolves > 0) {
                 if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
                     uc.researchTechnology(Technology.DOMESTICATION);
+                }
+            }
+            if(rushAttack){
+                if(isBaseClose) {
+                    if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
+                        uc.researchTechnology(Technology.DOMESTICATION);
+                    }
                 }
                 if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
                     if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
@@ -289,6 +293,23 @@ public class Base extends MyUnit {
 
         uc.spawn(t, myDirs[random]);
         return true;
+    }
+
+    private void senseEnemyUnits() {
+        enemySpearmen = 0;
+        enemyAxemen = 0;
+        enemyTrappers = 0;
+        enemyWolves = 0;
+        UnitInfo[] enemies = uc.senseUnits(myTeam.getOpponent());
+        for (int i = 0; i < enemies.length; i++) {
+            if (!uc.isObstructed(baseLocation, enemies[i].getLocation())) {
+                UnitType type = enemies[i].getType();
+                if (type == UnitType.AXEMAN) enemyAxemen++;
+                else if (type == UnitType.SPEARMAN) enemySpearmen++;
+                else if (type == UnitType.TRAPPER) enemyTrappers++;
+                else if (type == UnitType.WOLF) enemyWolves++;
+            }
+        }
     }
 
     private void senseInitialConditions() {

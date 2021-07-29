@@ -14,15 +14,18 @@ public abstract class MyUnit {
 
     Location enemyBase = null;
     Location baseLocation = null;
+    Location barracksBuilt = null;
     smokeSignal[] smokeSignals = null;
-    boolean justSpawned = true;
     Team myTeam;
+    boolean rushAttack = false;
+    boolean justSpawned = true;
     boolean enemyBaseSend = false;
     boolean needsToSend = false;
     Location barracks = null;
 
     int torchTurn = 0;
     int round = 0;
+    int barracksSmokeTurn = 0;
 
     int food = 0;
     int wood = 0;
@@ -159,6 +162,43 @@ public abstract class MyUnit {
         }
 
         return decodedSignals;
+    }
+
+    void doSmokeStuffProducer() {
+        if(barracksBuilt != null) uc.println(barracksBuilt);
+        if(smokeSignals.length > 0) {
+            Location loc;
+            int type;
+
+            for (smokeSignal smokeSignal : smokeSignals) {
+                if (smokeSignal == null) continue;
+                loc = smokeSignal.getLoc();
+                type = smokeSignal.getType();
+
+                if (type == constants.RUSH_ATTACK_ENCODING) {
+                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    if (enemyBase != null) {
+                        move.setEnemyBase(enemyBase);
+                        rushAttack = true;
+                    }
+                } else if (type == constants.ENEMY_BASE) {
+                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    if (enemyBase != null) {
+                        move.setEnemyBase(enemyBase);
+                    }
+                } else if (type == constants.ENEMY_FOUND) {
+                    rushAttack = true;
+                } else if (type == constants.BARRACKS_BUILT) {
+                    barracksBuilt = baseLocation.add(-loc.x, -loc.y);
+                    barracksSmokeTurn = round;
+                } else if (type == constants.BARRACKS_ALIVE) {
+                    barracksSmokeTurn = round;
+                }
+            }
+        }
+        if (barracksBuilt != null && barracksSmokeTurn + 55 < round) {
+            barracksBuilt = null;
+        }
     }
 
     smokeSignal decodeSignal(boolean encoded, int signal){
