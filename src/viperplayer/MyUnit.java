@@ -136,7 +136,7 @@ public abstract class MyUnit {
                 if (res[1] != null) hasResource = true;
                 if (res[2] != null) hasResource = true;
 
-                if (!hasResource && uc.canSpawn(t, dir)){
+                if (!hasResource && (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+4) && uc.canSpawn(t, dir)){
                     uc.spawn(t, dir);
                     return myLoc.add(dir);
                 }

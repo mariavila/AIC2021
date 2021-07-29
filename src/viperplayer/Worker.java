@@ -159,7 +159,7 @@ public class Worker extends MyUnit {
 
             resources = uc.senseResources();
             if(canSpawnSettlement(myLoc, resources)) {
-                spawnSafe(UnitType.SETTLEMENT);
+                spawnEmpty(UnitType.SETTLEMENT);
             }
 
             int[] gatheredResources = uc.getResourcesCarried();
@@ -250,7 +250,7 @@ public class Worker extends MyUnit {
             doSmokeStuffProducer();
         //}
         if (rushAttack && barracksBuilt == null && uc.canMakeSmokeSignal()) {
-            barracksBuilt = spawnSafe(UnitType.BARRACKS);
+            barracksBuilt = spawnEmpty(UnitType.BARRACKS);
             if (barracksBuilt != null) {
                 barracksSmokeTurn = round;
                 if(uc.canMakeSmokeSignal()) {
