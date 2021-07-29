@@ -24,7 +24,7 @@ public class Spearman extends MyUnit {
         if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
 
         smokeSignals = tryReadSmoke();
-        doSmokeStuffSoldier();
+        doSmokeStuff();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if (round > 1600) tryMove(true);

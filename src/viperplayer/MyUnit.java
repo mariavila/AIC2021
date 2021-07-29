@@ -165,7 +165,6 @@ public abstract class MyUnit {
     }
 
     void doSmokeStuffProducer() {
-        if(barracksBuilt != null) uc.println(barracksBuilt);
         if(smokeSignals.length > 0) {
             Location loc;
             int type;
