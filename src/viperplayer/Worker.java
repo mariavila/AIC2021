@@ -248,9 +248,10 @@ public class Worker extends MyUnit {
         //if(barracksBuilt == null){
             doSmokeStuffProducer();
         //}
-        if (rushAttack && barracksBuilt == null) {
+        if (rushAttack && barracksBuilt == null && uc.canMakeSmokeSignal()) {
             barracksBuilt = spawnSafe(UnitType.BARRACKS);
             if (barracksBuilt != null) {
+                barracksSmokeTurn = round;
                 if(uc.canMakeSmokeSignal()) {
                     int drawing = smoke.encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
                     uc.makeSmokeSignal(drawing);
@@ -314,5 +315,43 @@ public class Worker extends MyUnit {
             }
         }
         return null;
+    }
+
+    void doSmokeStuffProducer() {
+        if(smokeSignals.length > 0) {
+            Location loc;
+            int type;
+
+            for (smokeSignal smokeSignal : smokeSignals) {
+                if (smokeSignal == null) continue;
+                loc = smokeSignal.getLoc();
+                type = smokeSignal.getType();
+
+                if (type == constants.RUSH_ATTACK_ENCODING) {
+                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    if (enemyBase != null) {
+                        pathfinder.setEnemyBase(enemyBase);
+                        rushAttack = true;
+                    }
+                } else if (type == constants.ENEMY_BASE) {
+                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    pathfinder.setEnemyBase(enemyBase);
+                    barracksSmokeTurn = round;
+                    if (enemyBase != null) {
+                        move.setEnemyBase(enemyBase);
+                    }
+                } else if (type == constants.ENEMY_FOUND) {
+                    rushAttack = true;
+                } else if (type == constants.BARRACKS_BUILT) {
+                    barracksBuilt = baseLocation.add(-loc.x, -loc.y);
+                    barracksSmokeTurn = round;
+                } else if (type == constants.BARRACKS_ALIVE) {
+                    barracksSmokeTurn = round;
+                }
+            }
+        }
+        if (barracksBuilt != null && barracksSmokeTurn + 55 < round) {
+            barracksBuilt = null;
+        }
     }
 }
