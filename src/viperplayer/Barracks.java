@@ -51,10 +51,8 @@ public class Barracks extends MyUnit {
             if (round % 47 == 0 && uc.canMakeSmokeSignal()) {
                 uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, uc.getLocation()));
             }
-        }
-
-        if (round % 43 == 0 && uc.canMakeSmokeSignal()) {
-            uc.makeSmokeSignal(smoke.encodeLoc(constants.BARRACKS_ALIVE, myLoc));
+        } else {
+            uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.BARRACKS_ALIVE, myLoc, myLoc.add(Direction.NORTH)));
         }
     }
 

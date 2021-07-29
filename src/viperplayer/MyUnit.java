@@ -182,6 +182,7 @@ public abstract class MyUnit {
                     }
                 } else if (type == constants.ENEMY_BASE) {
                     enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    barracksSmokeTurn = round;
                     if (enemyBase != null) {
                         move.setEnemyBase(enemyBase);
                     }
@@ -220,6 +221,11 @@ public abstract class MyUnit {
             if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
         } else if(signal % constants.ENEMY_BASE == 0){
             encoding = constants.ENEMY_BASE;
+            signal = signal / encoding;
+            Location smokeLoc = smoke.decode(signal);
+            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.BARRACKS_ALIVE == 0){
+            encoding = constants.BARRACKS_ALIVE;
             signal = signal / encoding;
             Location smokeLoc = smoke.decode(signal);
             if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
