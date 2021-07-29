@@ -232,6 +232,7 @@ public class Worker extends MyUnit {
         for(int i = 0; i < allies.length; i++) {
             if(allies[i].getType() == UnitType.SETTLEMENT) {
                 settlement = allies[i].getLocation();
+                break;
             }
         }
         return settlement;
