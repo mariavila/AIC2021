@@ -74,7 +74,7 @@ public class Worker extends MyUnit {
             UnitInfo unit;
             if (uc.canSenseLocation(resLoc)) {
                 unit = uc.senseUnitAtLocation(resLoc);
-                if (unit == null) {
+                if (unit == null || unit.getType() != UnitType.WORKER) {
                     resourceLocation = resLoc;
                     followingDeer = false;
                     state = "GOTORESOURCE";
@@ -151,6 +151,7 @@ public class Worker extends MyUnit {
 
     void gather(){
         Location myLoc = uc.getLocation();
+        resources = uc.senseResources();
 
         if (resources.length > 0 && resources[0].getLocation().isEqual(myLoc)) {
             if (uc.canGatherResources()){
@@ -304,28 +305,6 @@ public class Worker extends MyUnit {
                 spawnEmpty(UnitType.QUARRY);
             }
         }
-    }
-
-    Location spawnSafe(UnitType t) {
-        Location myLoc = uc.getLocation();
-        Location[] traps = uc.senseTraps(2);
-
-        outerloop:
-        for (Direction dir : dirs){
-            if (dir == Direction.ZERO) continue;
-            if (!uc.canSpawn(t, dir)) continue;
-
-            Location target = myLoc.add(dir);
-            for (Location trap: traps) {
-                if (target.isEqual(trap)) continue outerloop;
-            }
-
-            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+4) {
-                uc.spawn(t, dir);
-                return myLoc.add(dir);
-            }
-        }
-        return null;
     }
 
     void doSmokeStuffProducer() {
