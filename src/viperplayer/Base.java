@@ -38,6 +38,7 @@ public class Base extends MyUnit {
     void playRound(){
         round = uc.getRound();
         if(round == 0) init();
+        //if(round % 20 == 0) printTechsResearched();
 
         senseEnemyUnits();
         calcIdealWorkers();
@@ -91,6 +92,25 @@ public class Base extends MyUnit {
         }
     }
 
+    void printTechsResearched() {
+        if(uc.hasResearched(Technology.DOMESTICATION, myTeam)) uc.println("DOMESTICATION");
+        if(uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) uc.println("MILITARY_TRAINING");
+        if(uc.hasResearched(Technology.BOXES, myTeam)) uc.println("BOXES");
+        if(uc.hasResearched(Technology.ROCK_ART, myTeam)) uc.println("ROCK_ART");
+        if(uc.hasResearched(Technology.UTENSILS, myTeam)) uc.println("UTENSILS");
+        if(uc.hasResearched(Technology.RAFTS, myTeam)) uc.println("RAFTS");
+        if(uc.hasResearched(Technology.COIN, myTeam)) uc.println("COIN");
+        if(uc.hasResearched(Technology.SHARPENERS, myTeam)) uc.println("SHARPENERS");
+        if(uc.hasResearched(Technology.COOKING, myTeam)) uc.println("COOKING");
+        if(uc.hasResearched(Technology.EUGENICS, myTeam)) uc.println("EUGENICS");
+        if(uc.hasResearched(Technology.NAVIGATION, myTeam)) uc.println("NAVIGATION");
+        if(uc.hasResearched(Technology.OIL, myTeam)) uc.println("OIL");
+        if(uc.hasResearched(Technology.VOCABULARY, myTeam)) uc.println("VOCABULARY");
+        if(uc.hasResearched(Technology.HUTS, myTeam)) uc.println("HUTS");
+        if(uc.hasResearched(Technology.TACTICS, myTeam)) uc.println("TACTICS");
+        if(uc.hasResearched(Technology.JOBS, myTeam)) uc.println("JOBS");
+    }
+
     private void checkAttackRush(){
         if (isBaseClose && round == 10) {
             int drawing = smoke.encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
@@ -131,6 +151,7 @@ public class Base extends MyUnit {
 
     private void tryResearch() {
         techLevel = uc.getTechLevel(myTeam);
+        if(round >= 1998) researchAll();
         if(spawnSpaces <= 1) {
             researchWheelPath();
         } else {
@@ -165,11 +186,11 @@ public class Base extends MyUnit {
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
             }
-            if(enemyAxemen+enemySpearmen+enemyWolves > 0) {
+            /*if(enemyAxemen+enemySpearmen+enemyWolves > 0) {
                 if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
                     uc.researchTechnology(Technology.DOMESTICATION);
                 }
-            }
+            }*/
             if(rushAttack){
                 if(isBaseClose) {
                     if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
@@ -186,7 +207,7 @@ public class Base extends MyUnit {
                 }
             }
             if(ecoMap){
-                if(!rushAttack || round > 500) {
+                if(!rushAttack || round > 600) {
                     if (!uc.hasResearched(Technology.BOXES, myTeam)) {
                         if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
                     }
@@ -224,6 +245,34 @@ public class Base extends MyUnit {
         if(techLevel >= 2) {
             researchWheel();
         }
+    }
+
+    private void researchAll(){
+        if(techLevel == 0 && uc.canResearchTechnology(Technology.DOMESTICATION)) uc.researchTechnology(Technology.DOMESTICATION);
+        if(uc.getTechLevel(myTeam) == 0 && uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+        if(uc.getTechLevel(myTeam) == 0 && uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
+        if(uc.getTechLevel(myTeam) == 0 && uc.canResearchTechnology(Technology.ROCK_ART)) uc.researchTechnology(Technology.ROCK_ART);
+        if(uc.getTechLevel(myTeam) == 0 && uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
+        if(uc.getTechLevel(myTeam) == 0 && uc.canResearchTechnology(Technology.RAFTS)) uc.researchTechnology(Technology.RAFTS);
+        if(uc.getTechLevel(myTeam) == 0 && uc.canResearchTechnology(Technology.COIN)) uc.researchTechnology(Technology.COIN);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.SHARPENERS)) uc.researchTechnology(Technology.SHARPENERS);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.COOKING)) uc.researchTechnology(Technology.COOKING);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.EUGENICS)) uc.researchTechnology(Technology.EUGENICS);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.NAVIGATION)) uc.researchTechnology(Technology.NAVIGATION);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.OIL)) uc.researchTechnology(Technology.OIL);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.VOCABULARY)) uc.researchTechnology(Technology.VOCABULARY);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.HUTS)) uc.researchTechnology(Technology.HUTS);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.TACTICS)) uc.researchTechnology(Technology.TACTICS);
+        if(uc.getTechLevel(myTeam) == 1 && uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.SCHOOLS)) uc.researchTechnology(Technology.SCHOOLS);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.CRYSTALS)) uc.researchTechnology(Technology.CRYSTALS);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.COMBUSTION)) uc.researchTechnology(Technology.COMBUSTION);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.POISON)) uc.researchTechnology(Technology.POISON);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.EXPERTISE)) uc.researchTechnology(Technology.EXPERTISE);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.FLINT)) uc.researchTechnology(Technology.FLINT);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.HOUSES)) uc.researchTechnology(Technology.HOUSES);
+        if(uc.getTechLevel(myTeam) == 2 && uc.canResearchTechnology(Technology.POISON)) uc.researchTechnology(Technology.POISON);
+        if(uc.canResearchTechnology(Technology.WHEEL)) uc.researchTechnology(Technology.WHEEL);
     }
 
     private void researchWheel() {
