@@ -1,6 +1,5 @@
 package viperplayer;
 
-import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public class Worker extends MyUnit {
@@ -18,6 +17,7 @@ public class Worker extends MyUnit {
     boolean hasToSendSmokeBarracks = false;
 
     ResourceInfo[] resources;
+    ResourceInfo nearestResource;
     UnitInfo[] deers;
 
     String state = "INI";
@@ -36,6 +36,7 @@ public class Worker extends MyUnit {
 
         round = uc.getRound();
         lightTorch();
+        resources = uc.senseResources();
 
         smokeSignals = tryReadSmoke();
 
@@ -62,7 +63,6 @@ public class Worker extends MyUnit {
     }
 
     private void explore(){
-        resources = uc.senseResources();
         deers = uc.senseUnits(Team.NEUTRAL);
         int baseRange = UnitType.BASE.getAttackRange();
 
@@ -125,7 +125,8 @@ public class Worker extends MyUnit {
             lastDeer = null;
         }
 
-        resources = uc.senseResources();
+        //nearestResource = getNearestResource();
+        //if (nearestResource != null) resourceLocation = nearestResource.location;
         if (enemyBase != null && resourceLocation != null && resourceLocation.distanceSquared(enemyBase) <= baseRange) resourceLocation = null;
 
         if (resourceLocation == null) {
@@ -150,15 +151,13 @@ public class Worker extends MyUnit {
 
     void gather(){
         Location myLoc = uc.getLocation();
-        resources = uc.senseResources();
 
         if (resources.length > 0 && resources[0].getLocation().isEqual(myLoc)) {
             if (uc.canGatherResources()){
                 uc.gatherResources();
             }
 
-            resources = uc.senseResources();
-            if(canSpawnSettlement(myLoc, resources)) {
+            if(canSpawnSettlement(myLoc)) {
                 spawnEmpty(UnitType.SETTLEMENT);
             }
 
@@ -206,7 +205,7 @@ public class Worker extends MyUnit {
         }
     }
 
-    boolean canSpawnSettlement(Location myLoc, ResourceInfo[] res){
+    boolean canSpawnSettlement(Location myLoc){
         if(myLoc.distanceSquared(baseLocation) < 30 && !uc.isObstructed(myLoc, baseLocation)) {
             return false;
         }
@@ -215,8 +214,8 @@ public class Worker extends MyUnit {
         if (settlement != null) return false;
 
         int closeResources = 0;
-        for(int i = 0; i < res.length; i++) {
-            closeResources += res[i].getAmount();
+        for(int i = 0; i < resources.length; i++) {
+            closeResources += resources[i].getAmount();
             if (closeResources > 600) break;
         }
         if(closeResources < 600) {
@@ -236,6 +235,17 @@ public class Worker extends MyUnit {
             }
         }
         return settlement;
+    }
+
+    ResourceInfo getNearestResource() {
+        ResourceInfo nearest = null;
+        for(int i=0; i < resources.length; i++) {
+            if(uc.isAccessible(resources[i].location) && uc.senseUnitAtLocation(resources[i].location) != null) {
+                nearest = resources[0];
+                break;
+            }
+        }
+        return nearest;
     }
 
     private void tryBarracks(){

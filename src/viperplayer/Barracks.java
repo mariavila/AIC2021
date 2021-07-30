@@ -57,10 +57,13 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
-        if (wood > stone) {
-            spawnSafe(UnitType.SPEARMAN);
-        } else {
-            spawnSafe(UnitType.AXEMAN);
+        if (round < 1000) spawnSafe(UnitType.SPEARMAN);
+        if (round >= 1000 && round < 1800) {
+            if (wood > stone) {
+                spawnSafe(UnitType.SPEARMAN);
+            } else {
+                spawnSafe(UnitType.AXEMAN);
+            }
         }
     }
 
@@ -88,7 +91,7 @@ public class Barracks extends MyUnit {
     Location barracksRead() {
         Direction[] myDirs = Direction.values();
 
-        int signal = 0;
+        int signal;
         for (Direction dir: myDirs) {
             Location target = myLoc.add(dir);
             if (uc.canRead(target)) {

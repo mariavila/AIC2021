@@ -229,6 +229,11 @@ public abstract class MyUnit {
             signal = signal / encoding;
             Location smokeLoc = smoke.decode(signal);
             if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ECO_MAP == 0){
+            encoding = constants.ECO_MAP;
+            signal = signal / encoding;
+            Location smokeLoc = smoke.decode(signal);
+            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
         }
         return null;
     }

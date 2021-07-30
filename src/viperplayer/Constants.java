@@ -9,4 +9,5 @@ public class Constants {
     public int BARRACKS_BUILT = 181;
     public int BARRACKS_ALIVE = 191;
     public int UNDER_ATTACK = 197;
+    public int ECO_MAP = 211;
 }
