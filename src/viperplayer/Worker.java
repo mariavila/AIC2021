@@ -329,17 +329,21 @@ public class Worker extends MyUnit {
                 type = smokeSignal.getType();
 
                 if (type == constants.RUSH_ATTACK_ENCODING) {
-                    enemyBase = baseLocation.add(-loc.x, -loc.y);
-                    if (enemyBase != null) {
-                        pathfinder.setEnemyBase(enemyBase);
-                        rushAttack = true;
+                    if (enemyBase == null) {
+                        enemyBase = baseLocation.add(-loc.x, -loc.y);
+                        if (enemyBase != null) {
+                            pathfinder.setEnemyBase(enemyBase);
+                            rushAttack = true;
+                        }
                     }
                 } else if (type == constants.ENEMY_BASE) {
-                    enemyBase = baseLocation.add(-loc.x, -loc.y);
-                    pathfinder.setEnemyBase(enemyBase);
                     barracksSmokeTurn = round;
-                    if (enemyBase != null) {
-                        move.setEnemyBase(enemyBase);
+                    if (enemyBase == null) {
+                        enemyBase = baseLocation.add(-loc.x, -loc.y);
+                        pathfinder.setEnemyBase(enemyBase);
+                        if (enemyBase != null) {
+                            move.setEnemyBase(enemyBase);
+                        }
                     }
                 } else if (type == constants.ENEMY_FOUND) {
                     rushAttack = true;
