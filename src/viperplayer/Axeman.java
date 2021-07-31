@@ -42,7 +42,7 @@ public class Axeman extends MyUnit {
             enemyBase = lookForEnemyBase();
             needsToSend = true;
             if (enemyBase != null && !enemyBaseSend && uc.canMakeSmokeSignal()) {
-                uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ENEMY_BASE, enemyBase, barracks));
+                uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
                 enemyBaseSend = true;
             }
         }
@@ -50,13 +50,13 @@ public class Axeman extends MyUnit {
         Location loc;
         int type;
 
-        for (MyUnit.smokeSignal smoke: smokeSignals) {
-            if (smoke == null) continue;
-            loc = smoke.getLoc();
-            type = smoke.getType();
+        for (Smoke.smokeSignal signal: smokeSignals) {
+            if (signal == null) continue;
+            loc = signal.getLoc();
+            type = signal.getType();
 
             if (type == constants.ENEMY_BASE) {
-                enemyBase = barracks.add(-loc.x, -loc.y);
+                enemyBase = loc;
                 if (enemyBase != null) {
                     needsToSend = false;
                     pathfinder.setEnemyBase(enemyBase);

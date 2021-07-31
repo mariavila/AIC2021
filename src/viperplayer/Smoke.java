@@ -12,36 +12,69 @@ public class Smoke {
         this.uc = uc;
     }
 
-    Location decode(int signal) {
-        int negative = signal % 10;
-        if (negative != 0 && negative != 1 && negative != 2 && negative != 3) return null;
-        signal = signal/10;
-        int offsetY = signal%50;
-        int offsetX = signal/50;
-        if (negative == 1 || negative == 2) offsetX = -offsetX;
-        if(negative == 1 || negative == 3) offsetY = -offsetY;
-        return new Location(offsetX, offsetY);
+    class smokeSignal {
+        Location loc;
+        int type;
+
+        smokeSignal(Location loc, int type) {
+            this.loc = loc;
+            this.type = type;
+        }
+
+        Location getLoc() {
+            return loc;
+        }
+
+        int getType() {
+            return type;
+        }
     }
 
-    int encodeEnemyBaseLoc(int encoding, Location enemyBase, Location baseLocation){
-        Location offset = new Location(baseLocation.x-enemyBase.x, baseLocation.y-enemyBase.y);
-        int negatives = 0;
-        if(offset.x<0){
-            offset.x = -offset.x;
-            if(offset.y<0){
-                offset.y = -offset.y;
-                negatives = 1;
-            }
-            else negatives = 2;
+    smokeSignal decodeSignal(boolean encoded, int signal){
+        int encoding;
+        if(!encoded) decode(signal);
+        else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
+            encoding = constants.RUSH_ATTACK_ENCODING;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_FOUND == 0){
+            encoding = constants.ENEMY_FOUND;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.BARRACKS_BUILT == 0){
+            encoding = constants.BARRACKS_BUILT;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_BASE == 0){
+            encoding = constants.ENEMY_BASE;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.BARRACKS_ALIVE == 0){
+            encoding = constants.BARRACKS_ALIVE;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ECO_MAP == 0){
+            encoding = constants.ECO_MAP;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
         }
-        else{
-            if(offset.y<0){
-                offset.y = -offset.y;
-                negatives = 3;
-            }
-        }
-        int drawing = (offset.x*50+offset.y)*10 + negatives;
+        return null;
+    }
+
+    Location decode(int signal) {
+        int posY = signal%1051;
+        int posX = signal/1051;
+        return new Location(posX, posY);
+    }
+
+    int encode(int encoding, Location loc){
+        int drawing = loc.x*1051+loc.y;
         return drawing * encoding;
     }
-
 }

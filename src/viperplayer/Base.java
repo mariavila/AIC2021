@@ -113,7 +113,7 @@ public class Base extends MyUnit {
 
     private void checkAttackRush(){
         if (isBaseClose && round == 10) {
-            int drawing = smoke.encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
+            int drawing = smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase);
             uc.makeSmokeSignal(drawing);
         }
         doSmokeStuffProducer();

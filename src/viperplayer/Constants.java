@@ -1,6 +1,7 @@
 package viperplayer;
 
 public class Constants {
+    // MAX constant is 1944
 
     public int ALLY_BASE = 233;
     public int ENEMY_BASE = 139;

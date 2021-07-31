@@ -15,7 +15,7 @@ public abstract class MyUnit {
     Location enemyBase = null;
     Location baseLocation = null;
     Location barracksBuilt = null;
-    smokeSignal[] smokeSignals = null;
+    Smoke.smokeSignal[] smokeSignals = null;
     Team myTeam;
     boolean rushAttack = false;
     boolean justSpawned = true;
@@ -40,24 +40,6 @@ public abstract class MyUnit {
         this.tactics = new Tactics(uc);
         this.smoke = new Smoke(uc);
         this.myTeam = uc.getTeam();
-    }
-
-    class smokeSignal {
-        Location loc;
-        int type;
-
-        smokeSignal(Location loc, int type) {
-            this.loc = loc;
-            this.type = type;
-        }
-
-        Location getLoc() {
-            return loc;
-        }
-
-        int getType() {
-            return type;
-        }
     }
 
     abstract void playRound();
@@ -145,15 +127,15 @@ public abstract class MyUnit {
         return null;
     }
 
-    MyUnit.smokeSignal[] tryReadSmoke() {
+    Smoke.smokeSignal[] tryReadSmoke() {
         int[] smokeSignals = uc.readSmokeSignals();
-        MyUnit.smokeSignal[] decodedSignals = new MyUnit.smokeSignal[smokeSignals.length];
+        Smoke.smokeSignal[] decodedSignals = new Smoke.smokeSignal[smokeSignals.length];
         int index = 0;
 
         if(smokeSignals.length > 0) {
             for (int smokeSignal : smokeSignals) {
                 if (smokeSignal <= 0) continue;
-                MyUnit.smokeSignal mySignal = decodeSignal(true, smokeSignal);
+                Smoke.smokeSignal mySignal = smoke.decodeSignal(true, smokeSignal);
                 if (mySignal != null) {
                     decodedSignals[index] = mySignal;
                     index++;
@@ -169,19 +151,19 @@ public abstract class MyUnit {
             Location loc;
             int type;
 
-            for (smokeSignal smokeSignal : smokeSignals) {
+            for (Smoke.smokeSignal smokeSignal : smokeSignals) {
                 if (smokeSignal == null) continue;
                 loc = smokeSignal.getLoc();
                 type = smokeSignal.getType();
 
                 if (type == constants.RUSH_ATTACK_ENCODING) {
-                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    enemyBase = loc;
                     if (enemyBase != null) {
                         move.setEnemyBase(enemyBase);
                         rushAttack = true;
                     }
                 } else if (type == constants.ENEMY_BASE) {
-                    enemyBase = baseLocation.add(-loc.x, -loc.y);
+                    enemyBase = loc;
                     barracksSmokeTurn = round;
                     if (enemyBase != null) {
                         move.setEnemyBase(enemyBase);
@@ -189,7 +171,7 @@ public abstract class MyUnit {
                 } else if (type == constants.ENEMY_FOUND) {
                     rushAttack = true;
                 } else if (type == constants.BARRACKS_BUILT) {
-                    barracksBuilt = baseLocation.add(-loc.x, -loc.y);
+                    barracksBuilt = loc;
                     barracksSmokeTurn = round;
                 } else if (type == constants.BARRACKS_ALIVE) {
                     barracksSmokeTurn = round;
@@ -199,43 +181,6 @@ public abstract class MyUnit {
         if (barracksBuilt != null && barracksSmokeTurn + 55 < round) {
             barracksBuilt = null;
         }
-    }
-
-    smokeSignal decodeSignal(boolean encoded, int signal){
-        int encoding;
-        if(!encoded) smoke.decode(signal);
-        else if(signal % constants.RUSH_ATTACK_ENCODING == 0){
-            encoding = constants.RUSH_ATTACK_ENCODING;
-            signal = signal / encoding;
-            Location smokeLoc = smoke.decode(signal);
-            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.ENEMY_FOUND == 0){
-            encoding = constants.ENEMY_FOUND;
-            signal = signal / encoding;
-            Location smokeLoc = smoke.decode(signal);
-            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.BARRACKS_BUILT == 0){
-            encoding = constants.BARRACKS_BUILT;
-            signal = signal / encoding;
-            Location smokeLoc = smoke.decode(signal);
-            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.ENEMY_BASE == 0){
-            encoding = constants.ENEMY_BASE;
-            signal = signal / encoding;
-            Location smokeLoc = smoke.decode(signal);
-            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.BARRACKS_ALIVE == 0){
-            encoding = constants.BARRACKS_ALIVE;
-            signal = signal / encoding;
-            Location smokeLoc = smoke.decode(signal);
-            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
-        } else if(signal % constants.ECO_MAP == 0){
-            encoding = constants.ECO_MAP;
-            signal = signal / encoding;
-            Location smokeLoc = smoke.decode(signal);
-            if (smokeLoc != null) return new MyUnit.smokeSignal(smokeLoc, encoding);
-        }
-        return null;
     }
 
     boolean randomThrow(){

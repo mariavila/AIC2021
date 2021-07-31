@@ -46,7 +46,7 @@ public class Explorer extends MyUnit {
 
         if (enemyBase == null && !enemyFound && units.length > 0) {
             if(uc.canMakeSmokeSignal()) {
-                int drawing = smoke.encodeEnemyBaseLoc(constants.ENEMY_FOUND, units[0].getLocation(), baseLocation);
+                int drawing = smoke.encode(constants.ENEMY_FOUND, units[0].getLocation());
                 uc.makeSmokeSignal(drawing);
                 enemyFound = true;
             }
@@ -56,7 +56,7 @@ public class Explorer extends MyUnit {
     }
 
     private void drawEnemyBaseLoc(){
-        int drawing = smoke.encodeEnemyBaseLoc(1, enemyBase, baseLocation);
+        int drawing = smoke.encode(1, enemyBase);
         if(uc.canDraw(drawing)){
             uc.draw(drawing);
         }
@@ -75,7 +75,7 @@ public class Explorer extends MyUnit {
         if (state == "BASEFOUND") {
             if (enemyBase != null){
                 if(uc.canMakeSmokeSignal()){
-                    int drawing = smoke.encodeEnemyBaseLoc(constants.RUSH_ATTACK_ENCODING, enemyBase, baseLocation);
+                    int drawing = smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase);
                     uc.makeSmokeSignal(drawing);
                     state = "RETURN";
                 }

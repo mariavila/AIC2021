@@ -4,6 +4,7 @@ import aic2021.user.*;
 
 public class Settlement extends MyUnit {
 
+    Location myLoc = null;
     int initialFood = 0;
     int initialWood = 0;
     int initialStone = 0;
@@ -15,6 +16,7 @@ public class Settlement extends MyUnit {
     }
 
     void playRound(){
+        myLoc = uc.getLocation();
         if (justSpawned) {
             justSpawned = false;
             senseInitialResources();
@@ -26,7 +28,7 @@ public class Settlement extends MyUnit {
     void broadCast() {
         if (ecoMap) {
             if (round % 41 == 0 && uc.canMakeSmokeSignal()) {
-                uc.makeSmokeSignal(smoke.encodeEnemyBaseLoc(constants.ECO_MAP, uc.getLocation().add(Direction.SOUTH), uc.getLocation()));
+                uc.makeSmokeSignal(smoke.encode(constants.ECO_MAP, myLoc));
             }
         }
     }

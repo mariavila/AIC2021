@@ -252,7 +252,7 @@ public class Worker extends MyUnit {
     private void tryBarracks(){
         if (hasToSendSmokeBarracks) {
             if(uc.canMakeSmokeSignal()) {
-                int drawing = smoke.encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
+                int drawing = smoke.encode(constants.BARRACKS_BUILT, barracksBuilt);
                 uc.makeSmokeSignal(drawing);
                 hasToSendSmokeBarracks = false;
             }
@@ -265,12 +265,12 @@ public class Worker extends MyUnit {
             if (barracksBuilt != null) {
                 barracksSmokeTurn = round;
                 if(uc.canMakeSmokeSignal()) {
-                    int drawing = smoke.encodeEnemyBaseLoc(constants.BARRACKS_BUILT, barracksBuilt, baseLocation);
+                    int drawing = smoke.encode(constants.BARRACKS_BUILT, barracksBuilt);
                     uc.makeSmokeSignal(drawing);
                 } else hasToSendSmokeBarracks = true;
             }
             if (barracksBuilt != null && enemyBase != null) {
-                int drawing = smoke.encodeEnemyBaseLoc(1, enemyBase, barracksBuilt);
+                int drawing = smoke.encode(1, enemyBase);
                 if(uc.canDraw(drawing)){
                     uc.draw(drawing);
                 }
@@ -312,14 +312,14 @@ public class Worker extends MyUnit {
             Location loc;
             int type;
 
-            for (smokeSignal smokeSignal : smokeSignals) {
+            for (Smoke.smokeSignal smokeSignal : smokeSignals) {
                 if (smokeSignal == null) continue;
                 loc = smokeSignal.getLoc();
                 type = smokeSignal.getType();
 
                 if (type == constants.RUSH_ATTACK_ENCODING) {
                     if (enemyBase == null) {
-                        enemyBase = baseLocation.add(-loc.x, -loc.y);
+                        enemyBase = loc;
                         if (enemyBase != null) {
                             pathfinder.setEnemyBase(enemyBase);
                             rushAttack = true;
@@ -328,7 +328,7 @@ public class Worker extends MyUnit {
                 } else if (type == constants.ENEMY_BASE) {
                     barracksSmokeTurn = round;
                     if (enemyBase == null) {
-                        enemyBase = baseLocation.add(-loc.x, -loc.y);
+                        enemyBase = loc;
                         pathfinder.setEnemyBase(enemyBase);
                         if (enemyBase != null) {
                             move.setEnemyBase(enemyBase);
@@ -337,7 +337,7 @@ public class Worker extends MyUnit {
                 } else if (type == constants.ENEMY_FOUND) {
                     rushAttack = true;
                 } else if (type == constants.BARRACKS_BUILT) {
-                    barracksBuilt = baseLocation.add(-loc.x, -loc.y);
+                    barracksBuilt = loc;
                     barracksSmokeTurn = round;
                 } else if (type == constants.BARRACKS_ALIVE) {
                     barracksSmokeTurn = round;
