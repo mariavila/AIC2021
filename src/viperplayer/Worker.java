@@ -13,7 +13,6 @@ public class Worker extends MyUnit {
 
     boolean followingDeer = false;
     Location lastDeer = null;
-    boolean boxesResearched = false;
     boolean hasToSendSmokeBarracks = false;
 
     ResourceInfo[] resources;
@@ -169,7 +168,7 @@ public class Worker extends MyUnit {
                 total_res += res;
             }
 
-            if (boxesResearched) {
+            if (uc.hasResearched(Technology.BOXES, myTeam)) {
                 if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
                     if (resources.length > 0) {
@@ -177,7 +176,7 @@ public class Worker extends MyUnit {
                     } else resourcesLeft = null;
                 }
             }
-            else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
+            else if (total_res == GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
                 if (resources.length > 0) {
                     resourcesLeft = resources[0];
