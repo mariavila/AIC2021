@@ -16,6 +16,7 @@ public class Base extends MyUnit {
     int spawnSpaces = 0;
     int idealWorkers = 3;
     int techLevel = 0;
+    int enemyTechLevel = 0;
 
     int enemySpearmen = 0;
     int enemyAxemen = 0;
@@ -39,6 +40,11 @@ public class Base extends MyUnit {
         round = uc.getRound();
         if(round == 0) init();
         //if(round % 20 == 0) printTechsResearched();
+
+        if(uc.hasResearched(Technology.ROCK_ART, myTeam)) {
+            enemyTechLevel = uc.getTechLevel(myTeam.getOpponent());
+            //TODO: if(enemyTechLevel == 2) sendSmokeSignalAttackBase();
+        }
 
         senseEnemyUnits();
         calcIdealWorkers();
@@ -183,6 +189,9 @@ public class Base extends MyUnit {
             }
         }
         if(techLevel >= 0) {
+            if(round > 1100 && uc.canResearchTechnology(Technology.ROCK_ART)) {
+                uc.researchTechnology(Technology.ROCK_ART);
+            }
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
             }
