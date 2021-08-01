@@ -108,6 +108,7 @@ public class ExplorerPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
+        boolean isEnemies = false;
         int length = enemies.length;
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
@@ -125,6 +126,7 @@ public class ExplorerPathfinder {
             for (int j = 0; j < length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
                 if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && uc.isObstructed(enemyLoc, target)) continue;
+                isEnemies = true;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();
                 int distance = microInfo[i].loc.distanceSquared(enemy.getLocation());
@@ -132,14 +134,14 @@ public class ExplorerPathfinder {
             }
         }
 
-        int bestIndex = -1;
+        int bestIndex = 8;
 
         for (int i = 8; i >= 0; i--) {
             if (!uc.canMove(myDirs[i])) continue;
-            if (bestIndex < 0 || !microInfo[bestIndex].isBetter(microInfo[i])) bestIndex = i;
+            if (!microInfo[bestIndex].isBetter(microInfo[i])) bestIndex = i;
         }
 
-        if (bestIndex != -1) {
+        if (isEnemies) {
             microDir = myDirs[bestIndex];
         }
     }
