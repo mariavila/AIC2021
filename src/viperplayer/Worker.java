@@ -181,7 +181,7 @@ public class Worker extends MyUnit {
             }
 
             if (uc.hasResearched(Technology.BOXES, myTeam)) {
-                if (total_res == GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+                if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
                     if (resources.length > 0) {
                         resourcesLeft = resources[0];
@@ -189,7 +189,7 @@ public class Worker extends MyUnit {
                     targetDeposit();
                 }
             }
-            else if (total_res == GameConstants.MAX_RESOURCE_CAPACITY) {
+            else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
                 if (resources.length > 0) {
                     resourcesLeft = resources[0];
@@ -243,6 +243,13 @@ public class Worker extends MyUnit {
         }
         if(closeResources < 600) {
             return false;
+        }
+
+        UnitInfo[] allies = uc.senseUnits(myTeam);
+        for(int i = 0; i < allies.length; i++) {
+            if(allies[i].getType() == UnitType.SETTLEMENT) {
+                if(uc.isAccessible(allies[i].getLocation())) return false;
+            }
         }
 
         return true;
