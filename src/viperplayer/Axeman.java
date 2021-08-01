@@ -22,7 +22,7 @@ public class Axeman extends MyUnit {
 
         round = uc.getRound();
         if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
-
+        senseEnemyBarracks();
         smokeSignals = tryReadSmoke();
         doSmokeStuff();
 
@@ -33,8 +33,9 @@ public class Axeman extends MyUnit {
     }
 
     void tryMove(boolean reckless) {
-        if (enemyBase == null) pathfinder.getNextLocationTarget(move.explore(), reckless);
-        else pathfinder.getNextLocationTarget(enemyBase, reckless);
+        if (enemyBarracks != null) pathfinder.getNextLocationTarget(enemyBarracks, reckless);
+        else if (enemyBase != null) pathfinder.getNextLocationTarget(enemyBase, reckless);
+        else pathfinder.getNextLocationTarget(move.explore(), reckless);
     }
 
     void doSmokeStuff() {
@@ -64,6 +65,8 @@ public class Axeman extends MyUnit {
             } else if (type == constants.ATTACK_BASE) {
                 enemyBase = loc;
                 roundAttack = round;
+            } else if (type == constants.ENEMY_BARRACKS) {
+                enemyBarracks = loc;
             }
         }
     }

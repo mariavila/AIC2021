@@ -14,4 +14,5 @@ public class Constants {
     public int SETTLEMENT = 277;
     public int WATER = 281;
     public int ATTACK_BASE = 283;
+    public int ENEMY_BARRACKS = 293;
 }

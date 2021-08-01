@@ -78,6 +78,11 @@ public class Smoke {
             signal = signal / encoding;
             Location smokeLoc = decode(signal);
             if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ENEMY_BARRACKS == 0){
+            encoding = constants.ENEMY_BARRACKS;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
         }
         return null;
     }
@@ -85,6 +90,7 @@ public class Smoke {
     Location decode(int signal) {
         int posY = signal%1051;
         int posX = signal/1051;
+        if (posX > 1050 || posY > 1050) return null;
         return new Location(posX, posY);
     }
 

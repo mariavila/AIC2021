@@ -22,7 +22,7 @@ public class Explorer extends MyUnit {
     void playRound(){
         round = uc.getRound();
         lightTorch();
-
+        senseEnemyBarracks();
         if (!hasWater) senseWater();
         tryMove();
     }

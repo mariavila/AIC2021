@@ -1,5 +1,6 @@
 package viperplayer;
 
+import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public abstract class MyUnit {
@@ -22,6 +23,8 @@ public abstract class MyUnit {
     boolean enemyBaseSend = false;
     boolean needsToSend = false;
     Location barracks = null;
+    Location enemyBarracks = null;
+    boolean hasToSendBarracks = false;
 
     int torchTurn = 0;
     int round = 0;
@@ -154,6 +157,29 @@ public abstract class MyUnit {
             }
         }
         return false;
+    }
+
+    void senseEnemyBarracks() {
+        if (enemyBarracks != null) {
+            if (uc.canSenseLocation(enemyBarracks)) {
+                UnitInfo unit = uc.senseUnitAtLocation(enemyBarracks);
+                if (unit == null || unit.getType() != UnitType.BARRACKS) enemyBarracks = null;
+            }
+            if (uc.canMakeSmokeSignal() && hasToSendBarracks) {
+                int drawing = smoke.encode(constants.ENEMY_BARRACKS, enemyBarracks);
+                uc.makeSmokeSignal(drawing);
+                hasToSendBarracks = false;
+            }
+        } else {
+            UnitInfo[] enemies = uc.senseUnits(myTeam.getOpponent());
+            for (UnitInfo enemy: enemies) {
+                UnitType type = enemy.getType();
+                if (type == UnitType.BARRACKS) {
+                    enemyBarracks = enemy.getLocation();
+                    hasToSendBarracks = true;
+                }
+            }
+        }
     }
 
     void lightTorch(){
