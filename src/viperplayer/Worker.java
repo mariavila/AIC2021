@@ -169,10 +169,6 @@ public class Worker extends MyUnit {
                 uc.gatherResources();
             }
 
-            if(canSpawnSettlement(myLoc)) {
-                spawnEmpty(UnitType.SETTLEMENT);
-            }
-
             int[] gatheredResources = uc.getResourcesCarried();
             int total_res = 0;
 
@@ -216,6 +212,10 @@ public class Worker extends MyUnit {
     }
 
     void deposit(){
+        Location myLoc = uc.getLocation();
+        if(canSpawnSettlement(myLoc)) {
+            spawnEmpty(UnitType.SETTLEMENT);
+        }
         if (uc.canDeposit()) {
             uc.deposit();
             if (resourcesLeft != null) {

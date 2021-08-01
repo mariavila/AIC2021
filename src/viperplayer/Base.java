@@ -34,6 +34,7 @@ public class Base extends MyUnit {
 
     boolean normalAttack = false;
     boolean hasWater = false;
+    boolean waterReady = true;
     boolean ecoMap = false;
     boolean baseCorner = false;
     boolean smokeAttack = false;
@@ -215,13 +216,14 @@ public class Base extends MyUnit {
             }
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
+                waterReady = true;
             }
             /*if(enemyAxemen+enemySpearmen+enemyWolves > 0) {
                 if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
                     uc.researchTechnology(Technology.DOMESTICATION);
                 }
             }*/
-            if(rushAttack){
+            if(rushAttack && waterReady){
                 if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
                     if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
                 }
@@ -400,10 +402,15 @@ public class Base extends MyUnit {
 
     private void senseInitialWater() {
         Location[] initialWaterTiles = uc.senseWater(uc.getType().getVisionRange());
+        Location waterTile;
         for(int i=0; i<initialWaterTiles.length; i++) {
-            this.waterTiles++;
+            waterTile = initialWaterTiles[i];
+            if(uc.isAccessible(waterTile.add(waterTile.directionTo(baseLocation)))) waterTiles++;
         }
-        if (waterTiles > 9) hasWater = true;
+        if (waterTiles > 9) {
+            hasWater = true;
+            waterReady = false;
+        }
     }
 
     private void senseInitialResources() {
