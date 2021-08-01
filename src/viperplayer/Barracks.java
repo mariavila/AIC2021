@@ -52,7 +52,9 @@ public class Barracks extends MyUnit {
                 uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
             }
         } else {
-            uc.makeSmokeSignal(smoke.encode(constants.BARRACKS_ALIVE, myLoc));
+            if (round % 47 == 0 && uc.canMakeSmokeSignal()) {
+                uc.makeSmokeSignal(smoke.encode(constants.BARRACKS_ALIVE, myLoc));
+            }
         }
     }
 
