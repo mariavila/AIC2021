@@ -13,4 +13,5 @@ public class Constants {
     public int ECO_MAP = 271;
     public int SETTLEMENT = 277;
     public int WATER = 281;
+    public int ATTACK_BASE = 283;
 }

@@ -43,8 +43,13 @@ public class Base extends MyUnit {
 
         if(uc.hasResearched(Technology.ROCK_ART, myTeam)) {
             enemyTechLevel = uc.getTechLevel(myTeam.getOpponent());
-            //TODO: if(enemyTechLevel == 2) sendSmokeSignalAttackBase();
+            if(enemyTechLevel >= 2 && enemyBase != null && uc.canMakeSmokeSignal()) {
+                int drawing = smoke.encode(constants.ATTACK_BASE, enemyBase);
+                uc.makeSmokeSignal(drawing);
+            }
         }
+
+        broadCast();
 
         senseEnemyUnits();
         calcIdealWorkers();
@@ -62,6 +67,14 @@ public class Base extends MyUnit {
         baseLocation = uc.getLocation();
         senseBase();
         senseInitialConditions();
+    }
+
+    void broadCast() {
+        if (enemyBase != null) {
+            if ((round % 41 == 0) && uc.canMakeSmokeSignal()) {
+                uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
+            }
+        }
     }
 
     void senseBase(){

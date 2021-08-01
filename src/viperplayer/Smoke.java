@@ -73,6 +73,11 @@ public class Smoke {
             signal = signal / encoding;
             Location smokeLoc = decode(signal);
             if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
+        } else if(signal % constants.ATTACK_BASE == 0){
+            encoding = constants.ATTACK_BASE;
+            signal = signal / encoding;
+            Location smokeLoc = decode(signal);
+            if (smokeLoc != null) return new smokeSignal(smokeLoc, encoding);
         }
         return null;
     }

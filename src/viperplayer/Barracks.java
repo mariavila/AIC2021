@@ -59,7 +59,10 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
-        if (round < 1000) spawnSafe(UnitType.SPEARMAN);
+        if (round < 1000) {
+            spawnSafe(UnitType.SPEARMAN);
+            if (2*wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
+        }
         if (round >= 1000 && round < 1800) {
             if (wood > stone) {
                 spawnSafe(UnitType.SPEARMAN);

@@ -5,6 +5,7 @@ import aic2021.user.*;
 public class Axeman extends MyUnit {
 
     AxemanPathfinder pathfinder;
+    int roundAttack = 2001;
 
     Axeman(UnitController uc){
         super(uc);
@@ -26,7 +27,7 @@ public class Axeman extends MyUnit {
         doSmokeStuff();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        if (round > 1600) tryMove(true);
+        if (round > roundAttack) tryMove(true);
         else tryMove(false);
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
@@ -60,6 +61,9 @@ public class Axeman extends MyUnit {
                     needsToSend = false;
                     pathfinder.setEnemyBase(enemyBase);
                 }
+            } else if (type == constants.ATTACK_BASE) {
+                enemyBase = loc;
+                roundAttack = round;
             }
         }
     }
