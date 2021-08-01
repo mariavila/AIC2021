@@ -87,9 +87,11 @@ public class Base extends MyUnit {
 
     void senseBase(){
         UnitInfo[] units = uc.senseUnits(uc.getTeam().getOpponent());
-        if (units.length > 0) {
-            enemyBase = units[0].getLocation();
-            isBaseClose = true;
+        for (UnitInfo unit: units) {
+            if (unit.getType() == UnitType.BASE) {
+                enemyBase = unit.getLocation();
+                isBaseClose = true;
+            }
         }
 
         if (!isBaseClose) {

@@ -21,6 +21,7 @@ public class ExplorerPathfinder {
     Direction[] myDirs;
     MicroInfo[] microInfo = new MicroInfo[9];
     int baseRange;
+    boolean isEnemies;
 
     ExplorerPathfinder(UnitController uc){
         this.myDirs = Direction.values();
@@ -36,7 +37,7 @@ public class ExplorerPathfinder {
     Boolean getNextLocationTarget(Location target){
         if (!uc.canMove()) return false;
         if (target == null) return false;
-
+        isEnemies = false;
         //different target? ==> previous data does not help!
         if (prevTarget == null || !target.isEqual(prevTarget)) resetPathfinding();
 
@@ -63,7 +64,7 @@ public class ExplorerPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && microInfo[j].numEnemies == 0) {
+                    if (uc.canMove(dir) && !isEnemies) {
                         uc.move(dir);
                         return true;
                     }
@@ -84,7 +85,7 @@ public class ExplorerPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && microInfo[j].numEnemies == 0) {
+                if (uc.canMove(dir) && !isEnemies) {
                     uc.move(dir);
                     return true;
                 }
@@ -108,13 +109,15 @@ public class ExplorerPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
-        boolean isEnemies = false;
         int length = enemies.length;
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(target);
 
-            if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) microInfo[i].numEnemies += 10;
+            if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
+                isEnemies = true;
+                microInfo[i].numEnemies += 10;
+            }
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
