@@ -9,6 +9,7 @@ public class Explorer extends MyUnit {
     String state = "INI";
     boolean returned = false;
     boolean enemyFound = false;
+    boolean hasWater = false;
 
     Location baseLocation = null;
 
@@ -22,7 +23,17 @@ public class Explorer extends MyUnit {
         round = uc.getRound();
         lightTorch();
 
+        if (!hasWater) senseWater();
         tryMove();
+    }
+
+    void senseWater() {
+        Location[] waterTiles = uc.senseWater(uc.getType().getVisionRange());
+        if (waterTiles.length > 15 && uc.canMakeSmokeSignal()) {
+            hasWater = true;
+            int drawing = smoke.encode(constants.ENEMY_FOUND, uc.getLocation());
+            uc.makeSmokeSignal(drawing);
+        }
     }
 
     Location getBaseLocation(){
@@ -32,7 +43,7 @@ public class Explorer extends MyUnit {
                 return unit.getLocation();
             }
         }
-        return new Location(-1, -1);
+        return null;
     }
 
     private Location lookForEnemyBaseExplorer(){

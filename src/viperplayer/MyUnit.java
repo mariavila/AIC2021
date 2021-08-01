@@ -84,8 +84,7 @@ public abstract class MyUnit {
                     if (uc.canRead(target)) {
                         signal = uc.read(target);
                         if (signal != 0) {
-                            Location offset = smoke.decode(signal);
-                            return new Location(barracks.x - offset.x, barracks.y - offset.y);
+                            return smoke.decode(signal);
                         }
                     }
                 }
@@ -144,43 +143,6 @@ public abstract class MyUnit {
         }
 
         return decodedSignals;
-    }
-
-    void doSmokeStuffProducer() {
-        if(smokeSignals.length > 0) {
-            Location loc;
-            int type;
-
-            for (Smoke.smokeSignal smokeSignal : smokeSignals) {
-                if (smokeSignal == null) continue;
-                loc = smokeSignal.getLoc();
-                type = smokeSignal.getType();
-
-                if (type == constants.RUSH_ATTACK_ENCODING) {
-                    enemyBase = loc;
-                    if (enemyBase != null) {
-                        move.setEnemyBase(enemyBase);
-                        rushAttack = true;
-                    }
-                } else if (type == constants.ENEMY_BASE) {
-                    enemyBase = loc;
-                    barracksSmokeTurn = round;
-                    if (enemyBase != null) {
-                        move.setEnemyBase(enemyBase);
-                    }
-                } else if (type == constants.ENEMY_FOUND) {
-                    rushAttack = true;
-                } else if (type == constants.BARRACKS_BUILT) {
-                    barracksBuilt = loc;
-                    barracksSmokeTurn = round;
-                } else if (type == constants.BARRACKS_ALIVE) {
-                    barracksSmokeTurn = round;
-                }
-            }
-        }
-        if (barracksBuilt != null && barracksSmokeTurn + 55 < round) {
-            barracksBuilt = null;
-        }
     }
 
     boolean randomThrow(){

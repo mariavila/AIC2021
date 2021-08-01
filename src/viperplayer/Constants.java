@@ -12,4 +12,5 @@ public class Constants {
     public int UNDER_ATTACK = 269;
     public int ECO_MAP = 271;
     public int SETTLEMENT = 277;
+    public int WATER = 281;
 }

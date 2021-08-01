@@ -108,6 +108,7 @@ public class ExplorerPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
+        int length = enemies.length;
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(target);
@@ -121,9 +122,9 @@ public class ExplorerPathfinder {
                 }
             }
 
-            int length = enemies.length;
             for (int j = 0; j < length; j++) {
-                if (uc.canSenseLocation(microInfo[i].loc) && uc.canSenseLocation(target) && uc.isObstructed(microInfo[i].loc, target)) continue;
+                Location enemyLoc = enemies[j].getLocation();
+                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && uc.isObstructed(enemyLoc, target)) continue;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();
                 int distance = microInfo[i].loc.distanceSquared(enemy.getLocation());
