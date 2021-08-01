@@ -35,17 +35,19 @@ public class Base extends MyUnit {
     boolean hasWater = false;
     boolean ecoMap = false;
     boolean baseCorner = false;
+    boolean smokeAttack = false;
 
     void playRound(){
         round = uc.getRound();
         if(round == 0) init();
         //if(round % 20 == 0) printTechsResearched();
 
-        if(uc.hasResearched(Technology.ROCK_ART, myTeam)) {
+        if(uc.hasResearched(Technology.ROCK_ART, myTeam) && !smokeAttack) {
             enemyTechLevel = uc.getTechLevel(myTeam.getOpponent());
             if(enemyTechLevel >= 2 && enemyBase != null && uc.canMakeSmokeSignal()) {
                 int drawing = smoke.encode(constants.ATTACK_BASE, enemyBase);
                 uc.makeSmokeSignal(drawing);
+                smokeAttack = true;
             }
         }
 
