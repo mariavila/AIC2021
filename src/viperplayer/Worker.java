@@ -14,10 +14,11 @@ public class Worker extends MyUnit {
     boolean followingDeer = false;
     Location lastDeer = null;
     boolean hasToSendSmokeBarracks = false;
-
+    Location closeSettlement = null;
     ResourceInfo[] resources;
     ResourceInfo nearestResource;
     UnitInfo[] deers;
+    Location targetDeposit = null;
 
     String state = "INI";
 
@@ -174,6 +175,7 @@ public class Worker extends MyUnit {
                     if (resources.length > 0) {
                         resourcesLeft = resources[0];
                     } else resourcesLeft = null;
+                    targetDeposit();
                 }
             }
             else if (total_res == GameConstants.MAX_RESOURCE_CAPACITY) {
@@ -181,19 +183,28 @@ public class Worker extends MyUnit {
                 if (resources.length > 0) {
                     resourcesLeft = resources[0];
                 } else resourcesLeft = null;
+                targetDeposit();
             }
         } else {
             state = "EXPLORE";
         }
     }
 
-    void deposit(){
-        Location closeSettlement = senseSettlement();
-        if (closeSettlement != null) {
-            pathfinder.getNextLocationTarget(closeSettlement);
-        } else {
-            pathfinder.getNextLocationTarget(baseLocation);
+    void targetDeposit() {
+        if (closeSettlement == null && baseLocation == null) targetDeposit = null;
+        else if (closeSettlement != null && baseLocation == null) targetDeposit = closeSettlement;
+        else if (closeSettlement == null && baseLocation != null) targetDeposit = baseLocation;
+        else {
+            Location myLoc = uc.getLocation();
+            int baseDistance = baseLocation.distanceSquared(myLoc);
+            int settlementDistance = closeSettlement.distanceSquared(myLoc);
+
+            if (baseDistance < settlementDistance) targetDeposit = baseLocation;
+            else targetDeposit = closeSettlement;
         }
+    }
+
+    void deposit(){
         if (uc.canDeposit()) {
             uc.deposit();
             if (resourcesLeft != null) {
@@ -202,6 +213,8 @@ public class Worker extends MyUnit {
                 }
             }
             state = "GOTORESOURCE";
+        } else {
+            pathfinder.getNextLocationTarget(targetDeposit);
         }
     }
 
@@ -210,8 +223,7 @@ public class Worker extends MyUnit {
             return false;
         }
 
-        Location settlement = senseSettlement();
-        if (settlement != null) return false;
+        if (closeSettlement != null && myLoc.distanceSquared(closeSettlement) < 50) return false;
 
         int closeResources = 0;
         for(int i = 0; i < resources.length; i++) {
@@ -223,18 +235,6 @@ public class Worker extends MyUnit {
         }
 
         return true;
-    }
-
-    Location senseSettlement() {
-        Location settlement = null;
-        UnitInfo[] allies = uc.senseUnits(myTeam);
-        for(int i = 0; i < allies.length; i++) {
-            if(allies[i].getType() == UnitType.SETTLEMENT) {
-                settlement = allies[i].getLocation();
-                break;
-            }
-        }
-        return settlement;
     }
 
     ResourceInfo getNearestResource() {
@@ -281,6 +281,7 @@ public class Worker extends MyUnit {
         if (state.equals("INI")){
             baseLocation = getBaseLocation();
             state = "EXPLORE";
+            if (baseLocation != null) closeSettlement = baseLocation;
         }
         if (state.equals("EXPLORE")){
             explore();
@@ -340,6 +341,10 @@ public class Worker extends MyUnit {
                     barracksSmokeTurn = round;
                 } else if (type == constants.BARRACKS_ALIVE) {
                     barracksSmokeTurn = round;
+                } else if (type == constants.ECO_MAP || type == constants.SETTLEMENT) {
+                    Location myLoc = uc.getLocation();
+                    int distance = myLoc.distanceSquared(loc);
+                    if (distance < myLoc.distanceSquared(closeSettlement)) closeSettlement = loc;
                 }
             }
         }

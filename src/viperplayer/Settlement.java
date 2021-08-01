@@ -17,18 +17,23 @@ public class Settlement extends MyUnit {
 
     void playRound(){
         myLoc = uc.getLocation();
+        round = uc.getRound();
+        broadCast(justSpawned);
         if (justSpawned) {
-            justSpawned = false;
             senseInitialResources();
-            broadCast();
+            justSpawned = false;
         }
         trySpawn();
     }
 
-    void broadCast() {
+    void broadCast(boolean justSpawned) {
         if (ecoMap) {
-            if (round % 41 == 0 && uc.canMakeSmokeSignal()) {
+            if ((round % 41 == 0 || justSpawned) && uc.canMakeSmokeSignal()) {
                 uc.makeSmokeSignal(smoke.encode(constants.ECO_MAP, myLoc));
+            }
+        } else {
+            if ((round % 41 == 0 || justSpawned) && uc.canMakeSmokeSignal()) {
+                uc.makeSmokeSignal(smoke.encode(constants.SETTLEMENT, myLoc));
             }
         }
     }

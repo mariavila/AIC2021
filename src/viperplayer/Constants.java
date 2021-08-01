@@ -4,11 +4,12 @@ public class Constants {
     // MAX constant is 1944
 
     public int ALLY_BASE = 233;
-    public int ENEMY_BASE = 139;
-    public int RUSH_ATTACK_ENCODING = 173;
-    public int ENEMY_FOUND = 179;
-    public int BARRACKS_BUILT = 181;
-    public int BARRACKS_ALIVE = 191;
-    public int UNDER_ATTACK = 197;
-    public int ECO_MAP = 211;
+    public int ENEMY_BASE = 239;
+    public int RUSH_ATTACK_ENCODING = 241;
+    public int ENEMY_FOUND = 251;
+    public int BARRACKS_BUILT = 257;
+    public int BARRACKS_ALIVE = 263;
+    public int UNDER_ATTACK = 269;
+    public int ECO_MAP = 271;
+    public int SETTLEMENT = 277;
 }
