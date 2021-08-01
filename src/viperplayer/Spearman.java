@@ -15,7 +15,6 @@ public class Spearman extends MyUnit {
     void playRound(){
         if(justSpawned){
             barracks = senseBarracks();
-            enemyBase = tryReadArt();
             pathfinder.setEnemyBase(enemyBase);
             justSpawned = false;
         }

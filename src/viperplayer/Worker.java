@@ -69,7 +69,7 @@ public class Worker extends MyUnit {
         for (ResourceInfo resource: resources) {
             Location resLoc = resource.getLocation();
             if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
-            if (uc.isObstructed(resLoc, uc.getLocation())) continue;
+            if (!uc.isAccessible(resLoc)) continue;
 
             UnitInfo unit;
             if (uc.canSenseLocation(resLoc)) {
@@ -256,9 +256,7 @@ public class Worker extends MyUnit {
                 hasToSendSmokeBarracks = false;
             }
         }
-        //if(barracksBuilt == null){
-            doSmokeStuffProducer();
-        //}
+        doSmokeStuffProducer();
         if (rushAttack && barracksBuilt == null && uc.canMakeSmokeSignal()) {
             barracksBuilt = spawnEmpty(UnitType.BARRACKS);
             if (barracksBuilt != null) {
