@@ -21,6 +21,7 @@ public class SpearmanPathfinder {
     Direction[] myDirs;
     MicroInfo[] microInfo = new MicroInfo[9];
     int baseRange;
+    boolean isEnemies;
 
     SpearmanPathfinder(UnitController uc){
         this.myDirs = Direction.values();
@@ -36,6 +37,7 @@ public class SpearmanPathfinder {
     Boolean getNextLocationTarget(Location target, boolean reckless){
         if (!uc.canMove()) return false;
         if (target == null) return false;
+        isEnemies = false;
 
         //different target? ==> previous data does not help!
         if (prevTarget == null || !target.isEqual(prevTarget)) resetPathfinding();
@@ -63,7 +65,7 @@ public class SpearmanPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && (microInfo[j].numEnemies == 0 || reckless)) {
+                    if (uc.canMove(dir) && (!isEnemies || reckless)) {
                         uc.move(dir);
                         return true;
                     }
@@ -84,7 +86,7 @@ public class SpearmanPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && (microInfo[j].numEnemies == 0 || reckless)) {
+                if (uc.canMove(dir) && (!isEnemies || reckless)) {
                     uc.move(dir);
                     return true;
                 }
@@ -108,13 +110,15 @@ public class SpearmanPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
-        boolean isEnemies = false;
         int length = enemies.length;
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
-            if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) microInfo[i].numEnemies += 10;
+            if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
+                isEnemies = true;
+                microInfo[i].numEnemies += 10;
+            }
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
