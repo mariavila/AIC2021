@@ -59,15 +59,17 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
-        if (round < 1000) {
+        if (round < constants.ROUND_CHECK_ATTACK) {
             spawnSafe(UnitType.SPEARMAN);
             if (2*wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
         }
-        if (round >= 1000 && round < 1800) {
-            if (wood > stone) {
-                spawnSafe(UnitType.SPEARMAN);
-            } else {
-                spawnSafe(UnitType.AXEMAN);
+        if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
+            if(uc.hasResearched(Technology.ROCK_ART, myTeam)) {
+                if (wood > stone) {
+                    spawnSafe(UnitType.SPEARMAN);
+                } else {
+                    spawnSafe(UnitType.AXEMAN);
+                }
             }
         }
     }

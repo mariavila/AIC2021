@@ -274,6 +274,7 @@ public class Worker extends MyUnit {
                 hasToSendSmokeBarracks = false;
             }
         }
+        uc.println(rushAttack);
         doSmokeStuffProducer();
         if (rushAttack && barracksBuilt == null && uc.canMakeSmokeSignal()) {
             barracksBuilt = spawnEmpty(UnitType.BARRACKS);
