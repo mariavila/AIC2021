@@ -69,7 +69,7 @@ public class Worker extends MyUnit {
         for (ResourceInfo resource: resources) {
             Location resLoc = resource.getLocation();
             if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
-            if (!uc.isAccessible(resLoc)) continue;
+            if (uc.isObstructed(resLoc, uc.getLocation())) continue;
 
             UnitInfo unit;
             if (uc.canSenseLocation(resLoc)) {
@@ -104,6 +104,17 @@ public class Worker extends MyUnit {
 
     private void goToResource(){
         int baseRange = UnitType.BASE.getAttackRange();
+        resources = uc.senseResources();
+        if (resources.length > 0) {
+            Location resLoc = resources[0].getLocation();
+            if (uc.getLocation().isEqual(resLoc)) {
+                resourceLocation = resLoc;
+                state = "GATHER";
+                return;
+            } else if (uc.senseUnitAtLocation(resLoc) == null) {
+                resourceLocation = resLoc;
+            }
+        }
 
         if (followingDeer){
             if (uc.canMove()) pathfinder.getNextLocationTarget(lastDeer);
@@ -223,7 +234,7 @@ public class Worker extends MyUnit {
             return false;
         }
 
-        if (closeSettlement != null && myLoc.distanceSquared(closeSettlement) < 50) return false;
+        if (closeSettlement != null && myLoc.distanceSquared(closeSettlement) < 36) return false;
 
         int closeResources = 0;
         for(int i = 0; i < resources.length; i++) {
