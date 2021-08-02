@@ -64,8 +64,8 @@ public class AxemanPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
-                        uc.move(dir);
+                    Location loc = myLoc.add(dir);
+                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && !uc.isObstructed(loc, enemyBase)))) || reckless)) {                        uc.move(dir);
                         return true;
                     }
                     break;
@@ -85,8 +85,8 @@ public class AxemanPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
-                    uc.move(dir);
+                Location loc = myLoc.add(dir);
+                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && !uc.isObstructed(loc, enemyBase)))) || reckless)) {                    uc.move(dir);
                     return true;
                 }
                 break;
@@ -115,7 +115,7 @@ public class AxemanPathfinder {
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {

@@ -65,7 +65,8 @@ public class SpearmanPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
+                    Location loc = myLoc.add(dir);
+                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && !uc.isObstructed(loc, enemyBase)))) || reckless)) {
                         uc.move(dir);
                         return true;
                     }
@@ -86,8 +87,8 @@ public class SpearmanPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
-                    uc.move(dir);
+                Location loc = myLoc.add(dir);
+                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && !uc.isObstructed(loc, enemyBase)))) || reckless)) {                    uc.move(dir);
                     return true;
                 }
                 break;
