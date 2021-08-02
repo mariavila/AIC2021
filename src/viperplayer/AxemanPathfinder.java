@@ -65,7 +65,7 @@ public class AxemanPathfinder {
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && !uc.isObstructed(loc, enemyBase)))) || reckless)) {                        uc.move(dir);
+                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {                        uc.move(dir);
                         return true;
                     }
                     break;
@@ -86,7 +86,7 @@ public class AxemanPathfinder {
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
                 Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && !uc.isObstructed(loc, enemyBase)))) || reckless)) {                    uc.move(dir);
+                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {                    uc.move(dir);
                     return true;
                 }
                 break;
