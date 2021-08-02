@@ -185,9 +185,14 @@ public abstract class MyUnit {
     void lightTorch(){
         if (torchTurn -1 == round) randomThrow();
 
-        if ((torchTurn == 0 || torchTurn -1 <= round) && uc.canLightTorch()) {
-            torchTurn = round + GameConstants.TORCH_DURATION;
-            uc.lightTorch();
+        UnitInfo[] units = uc.senseUnits(myTeam);
+        UnitType myType = uc.getType();
+
+        if (UnitType.WORKER == myType || UnitType.EXPLORER == myType || units.length < 3) {
+            if ((torchTurn == 0 || torchTurn -1 <= round) && uc.canLightTorch()) {
+                torchTurn = round + GameConstants.TORCH_DURATION;
+                uc.lightTorch();
+            }
         }
     }
 }

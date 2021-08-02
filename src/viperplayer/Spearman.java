@@ -5,7 +5,7 @@ import aic2021.user.*;
 public class Spearman extends MyUnit {
 
     SpearmanPathfinder pathfinder;
-    int roundAttack = 1600;
+    int roundAttack = 1970;
 
     Spearman(UnitController uc){
         super(uc);

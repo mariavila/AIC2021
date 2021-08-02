@@ -194,7 +194,7 @@ public class Base extends MyUnit {
             researchWheel();
         }
         if(techLevel >= 1) {
-            if(!ecoMap && !rushAttack){
+            if(!isBaseClose){
                 if(!uc.hasResearched(Technology.JOBS, myTeam)) {
                     if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
                 }

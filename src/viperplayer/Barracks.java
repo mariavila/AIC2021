@@ -59,16 +59,33 @@ public class Barracks extends MyUnit {
     }
 
     private void trySpawn(){
-        if (round < constants.ROUND_CHECK_ATTACK) {
-            spawnSafe(UnitType.SPEARMAN);
-            if (2*wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
+        UnitInfo[] units = uc.senseUnits(myTeam);
+        UnitInfo[] enemies = uc.senseUnits(myTeam.getOpponent());
+        int soldiers = 0;
+        int enemySoldiers = 0;
+
+        for (UnitInfo unit: units) {
+            UnitType myType = unit.getType();
+            if (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN) soldiers++;
         }
-        if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
-            if(uc.hasResearched(Technology.ROCK_ART, myTeam)) {
-                if (wood > stone) {
-                    spawnSafe(UnitType.SPEARMAN);
-                } else {
-                    spawnSafe(UnitType.AXEMAN);
+
+        for (UnitInfo enemy: enemies) {
+            UnitType myType = enemy.getType();
+            if (!uc.isObstructed(myLoc, enemy.getLocation()) && (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN)) enemySoldiers++;
+        }
+
+        if (soldiers < 1 || enemySoldiers != 0) {
+            if (round < constants.ROUND_CHECK_ATTACK) {
+                spawnSafe(UnitType.SPEARMAN);
+                if (2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
+            }
+            if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
+                if (uc.hasResearched(Technology.ROCK_ART, myTeam)) {
+                    if (wood > stone) {
+                        spawnSafe(UnitType.SPEARMAN);
+                    } else {
+                        spawnSafe(UnitType.AXEMAN);
+                    }
                 }
             }
         }

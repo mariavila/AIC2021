@@ -1,5 +1,6 @@
 package viperplayer;
 
+import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public class Worker extends MyUnit {
@@ -41,6 +42,7 @@ public class Worker extends MyUnit {
         smokeSignals = tryReadSmoke();
 
         if (round != 10 || smokeSignals.length > 0) {
+            refreshSettlement();
             tryBarracks();
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
             tryMove();
@@ -49,6 +51,22 @@ public class Worker extends MyUnit {
 
             if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer))
                 attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
+        }
+    }
+
+    private void refreshSettlement() {
+        if (baseLocation != null && uc.canSenseLocation(baseLocation)) {
+            UnitInfo base = uc.senseUnitAtLocation(baseLocation);
+            if (base == null || (base.getType() != UnitType.BASE && base.getType() != UnitType.SETTLEMENT)) {
+                baseLocation = null;
+            }
+        }
+
+        if (closeSettlement != null && uc.canSenseLocation(closeSettlement)) {
+            UnitInfo settlement = uc.senseUnitAtLocation(closeSettlement);
+            if (settlement == null || (settlement.getType() != UnitType.BASE && settlement.getType() != UnitType.SETTLEMENT)) {
+                closeSettlement = null;
+            }
         }
     }
 
@@ -229,29 +247,24 @@ public class Worker extends MyUnit {
     }
 
     boolean canSpawnSettlement(Location myLoc){
-        if(myLoc.distanceSquared(baseLocation) < 30 && !uc.isObstructed(myLoc, baseLocation)) {
-            return false;
-        }
+        int baseDist = myLoc.distanceSquared(baseLocation);
 
+        if (baseDist < 36) return false;
         if (closeSettlement != null && myLoc.distanceSquared(closeSettlement) < 36) return false;
 
         UnitInfo[] allies = uc.senseUnits(myTeam);
         for(int i = 0; i < allies.length; i++) {
-            if(allies[i].getType() == UnitType.SETTLEMENT) {
-                if(uc.isAccessible(allies[i].getLocation())) return false;
-            }
+            if (allies[i].getType() == UnitType.SETTLEMENT) return false;
         }
 
-        if(myLoc.distanceSquared(baseLocation) > 100) return true;
+        if (baseDist > 100 && (closeSettlement == null || myLoc.distanceSquared(closeSettlement) > 100)) return true;
 
         int closeResources = 0;
         for(int i = 0; i < resources.length; i++) {
             closeResources += resources[i].getAmount();
             if (closeResources > 600) break;
         }
-        if(closeResources < 600) {
-            return false;
-        }
+        if(closeResources < 600) return false;
 
         return true;
     }
@@ -297,13 +310,9 @@ public class Worker extends MyUnit {
 
     private void tryEcoBuilding() {
         if(round < 1700 && uc.hasResearched(Technology.JOBS, myTeam)) {
-            if (food > 500 && wood > 500) {
-                spawnEmpty(UnitType.QUARRY);
-            } else if (wood > 500 && stone > 500) {
-                spawnEmpty(UnitType.FARM);
-            } else if (food > 500 && stone > 500) {
-                spawnEmpty(UnitType.SAWMILL);
-            }
+            spawnEmpty(UnitType.QUARRY);
+            spawnEmpty(UnitType.FARM);
+            spawnEmpty(UnitType.SAWMILL);
         }
     }
 

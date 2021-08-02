@@ -5,7 +5,7 @@ import aic2021.user.*;
 public class Axeman extends MyUnit {
 
     AxemanPathfinder pathfinder;
-    int roundAttack = 1600;
+    int roundAttack = 1970;
 
     Axeman(UnitController uc){
         super(uc);
