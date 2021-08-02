@@ -180,6 +180,8 @@ public class AxemanPathfinder {
         }
 
         boolean isBetter(MicroInfo m) {
+            if (numEnemies > 9 && m.numEnemies <= 9) return false;
+            if (numEnemies <= 9 && m.numEnemies > 9) return true;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
                 return minDistToEnemy >= m.minDistToEnemy;
