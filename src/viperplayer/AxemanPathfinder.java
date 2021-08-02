@@ -64,7 +64,7 @@ public class AxemanPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && (!isEnemies || reckless)) {
+                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
                         uc.move(dir);
                         return true;
                     }
@@ -85,7 +85,7 @@ public class AxemanPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && (!isEnemies || reckless)) {
+                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
                     uc.move(dir);
                     return true;
                 }
@@ -115,7 +115,6 @@ public class AxemanPathfinder {
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                isEnemies = true;
                 microInfo[i].numEnemies += 10;
             }
 
@@ -181,8 +180,6 @@ public class AxemanPathfinder {
         }
 
         boolean isBetter(MicroInfo m) {
-            if(numEnemies < m.numEnemies) return true;
-            if(numEnemies > m.numEnemies) return false;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
                 return minDistToEnemy >= m.minDistToEnemy;

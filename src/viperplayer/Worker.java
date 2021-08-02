@@ -349,9 +349,8 @@ public class Worker extends MyUnit {
                     barracksSmokeTurn = round;
                     if (enemyBase == null) {
                         enemyBase = loc;
-                        pathfinder.setEnemyBase(enemyBase);
                         if (enemyBase != null) {
-                            move.setEnemyBase(enemyBase);
+                            pathfinder.setEnemyBase(enemyBase);
                         }
                     }
                 } else if (type == constants.ENEMY_FOUND) {

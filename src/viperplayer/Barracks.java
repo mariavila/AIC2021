@@ -39,7 +39,7 @@ public class Barracks extends MyUnit {
             if (signal == null) continue;
             loc = signal.getLoc();
             type = signal.getType();
-            if (type == constants.ENEMY_BASE && enemyBase == null) {
+            if ((type == constants.ENEMY_BASE || type == constants.RUSH_ATTACK_ENCODING) && enemyBase == null) {
                 enemyBase = loc;
                 if (enemyBase != null) {
                     move.setEnemyBase(enemyBase);

@@ -78,7 +78,7 @@ public class Base extends MyUnit {
 
     void broadCast() {
         if (enemyBase != null) {
-            if ((roundSpawn + 10 == round) && uc.canMakeSmokeSignal()) {
+            if ((roundSpawn + 11 == round) && uc.canMakeSmokeSignal()) {
                 if (rushAttack) uc.makeSmokeSignal(smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase));
                 else uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
             }
@@ -161,7 +161,7 @@ public class Base extends MyUnit {
             }
 
             if (rushAttack) {
-                if (barracksBuilt == null && round % 100 == 0) {
+                if (barracksBuilt == null && round % 100 == 0 && round > 300) {
                     spawnSafe(UnitType.WORKER);
                     workers++;
                 }
