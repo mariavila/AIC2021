@@ -24,6 +24,12 @@ public class Base extends MyUnit {
     int enemyTrappers = 0;
     int enemyWolves = 0;
 
+    int allySpearmen = 0;
+    int allyAxemen = 0;
+    int allyTrappers = 0;
+    int allyWolves = 0;
+    int allyWorkers = 0;
+
     int initialFood = 0;
     int initialWood = 0;
     int initialStone = 0;
@@ -61,6 +67,7 @@ public class Base extends MyUnit {
         broadCast();
 
         senseEnemyUnits();
+        senseAllyUnits();
         calcIdealWorkers();
         getResources();
         smokeSignals = tryReadSmoke();
@@ -154,8 +161,10 @@ public class Base extends MyUnit {
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
 
+        if (uc.hasResearched(Technology.JOBS, myTeam) && allyWorkers == 0) spawnSafe(UnitType.WORKER);
+
         if (enemyAxemen+enemySpearmen+enemyWolves == 0) {
-            if (workers < idealWorkers){
+            if (workers < idealWorkers) {
                 if (spawnSafe(UnitType.WORKER)) {
                     workers++;
                     trySpawn();
@@ -167,14 +176,9 @@ public class Base extends MyUnit {
                     spawnSafe(UnitType.WORKER);
                     workers++;
                 }
-                if (wolves < 5 || uc.hasResearched(Technology.EUGENICS, myTeam)) {
-                    if (round < constants.ROUND_CHECK_ATTACK || uc.hasResearched(Technology.ROCK_ART, myTeam)) {
-                        spawnSafe(UnitType.WOLF);
-                        wolves++;
-                    }
-                }
             }
-        } else {
+        }
+        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves) || (allyWolves == 0 && round % 50 == 0 && uc.hasResearched(Technology.JOBS, myTeam))) {
             spawnSafe(UnitType.WOLF);
             wolves++;
         }
@@ -197,6 +201,7 @@ public class Base extends MyUnit {
         if(techLevel >= 1) {
             if(!uc.hasResearched(Technology.JOBS, myTeam)) {
                 if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
+                return;
             }
             if(!uc.hasResearched(Technology.TACTICS, myTeam)) {
                 if (uc.canResearchTechnology(Technology.TACTICS)) uc.researchTechnology(Technology.TACTICS);
@@ -227,11 +232,21 @@ public class Base extends MyUnit {
                 }
             }*/
             if(rushAttack && waterReady){
+                if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
+                    if (food >= 150 && wood >= 300 && stone >= 250) {
+                        if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+                    }
+                }
                 if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
                     uc.researchTechnology(Technology.DOMESTICATION);
                 }
             }
             if(normalAttack) {
+                if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
+                    if (food >= 150 && wood >= 300 && stone >= 250) {
+                        if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+                    }
+                }
                 if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
                     uc.researchTechnology(Technology.DOMESTICATION);
                 }
@@ -392,6 +407,25 @@ public class Base extends MyUnit {
         }
     }
 
+    private void senseAllyUnits() {
+        allySpearmen = 0;
+        allyAxemen = 0;
+        allyTrappers = 0;
+        allyWolves = 0;
+        allyWorkers = 0;
+        UnitInfo[] allies = uc.senseUnits(myTeam);
+        for (int i = 0; i < allies.length; i++) {
+            if (!uc.isObstructed(baseLocation, allies[i].getLocation())) {
+                UnitType type = allies[i].getType();
+                if (type == UnitType.AXEMAN) allyAxemen++;
+                else if (type == UnitType.SPEARMAN) allySpearmen++;
+                else if (type == UnitType.TRAPPER) allyTrappers++;
+                else if (type == UnitType.WOLF) allyWolves++;
+                else if (type == UnitType.WORKER) allyWorkers++;
+            }
+        }
+    }
+
     private void senseInitialConditions() {
         senseInitialWater();
         senseInitialResources();
@@ -405,7 +439,7 @@ public class Base extends MyUnit {
             waterTile = initialWaterTiles[i];
             /*if(uc.isAccessible(waterTile.add(waterTile.directionTo(baseLocation))))*/ waterTiles++;
         }
-        if (waterTiles > 7) {
+        if (waterTiles > 19) {
             hasWater = true;
             waterReady = false;
         }

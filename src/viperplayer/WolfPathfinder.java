@@ -109,7 +109,7 @@ public class WolfPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
-        int length = enemies.length;
+        int length = Math.min(enemies.length, 10);
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));

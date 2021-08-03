@@ -79,7 +79,7 @@ public class Barracks extends MyUnit {
             }
         }
 
-        if ((soldiers < 1 && (round <= 400 || (round > 500 && round % 50 == 0))) || enemySoldiers != 0) {
+        if ((soldiers < 1 && (round <= 400 || (round > 500 && round % 50 == 0 && uc.hasResearched(Technology.JOBS, myTeam)))) || enemySoldiers > soldiers) {
             Location spawn = null;
             if (round < constants.ROUND_CHECK_ATTACK) {
                 if (!wolves) spawn = spawnSafe(UnitType.SPEARMAN);

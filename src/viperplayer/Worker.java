@@ -30,13 +30,14 @@ public class Worker extends MyUnit {
     }
 
     void playRound(){
+        round = uc.getRound();
+
         if(justSpawned){
             tryReadArt();
             move.init();
             justSpawned = false;
         }
 
-        round = uc.getRound();
         lightTorch();
         resources = uc.senseResources();
 
@@ -282,6 +283,7 @@ public class Worker extends MyUnit {
     }
 
     private void tryBarracks(){
+        if (uc.hasResearched(Technology.JOBS, myTeam)) return;
         if (hasToSendSmokeBarracks) {
             if(uc.canMakeSmokeSignal()) {
                 int drawing = smoke.encode(constants.BARRACKS_BUILT, barracksBuilt);
