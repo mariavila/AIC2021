@@ -74,8 +74,8 @@ public class Barracks extends MyUnit {
             if (!uc.isObstructed(myLoc, enemy.getLocation()) && (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN)) enemySoldiers++;
         }
 
-        if (soldiers < 1 || enemySoldiers != 0) {
-            Location spawn = null;
+        if ((soldiers < 1 && round % 20 == 0) || enemySoldiers != 0) {
+            Location spawn;
             if (round < constants.ROUND_CHECK_ATTACK) {
                 spawn = spawnSafe(UnitType.SPEARMAN);
                 if (spawn == null && 2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
