@@ -15,6 +15,7 @@ public class Constants {
     public int WATER = 281;
     public int ATTACK_BASE = 283;
     public int ENEMY_BARRACKS = 293;
-    public int ROUND_CHECK_ATTACK = 1000;
-    public int ROUND_STOP_SOLDIERS = 1800;
+    public int ROUND_BUILD_JOBS = 500;
+    public int ROUND_CHECK_ATTACK = 700;
+    public int ROUND_STOP_SOLDIERS = 1750;
 }

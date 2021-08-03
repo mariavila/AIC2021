@@ -39,9 +39,10 @@ public class Settlement extends MyUnit {
     }
 
     private void trySpawn(){
-        if (ecoMap && workers < 3) {
-            spawnEmpty(UnitType.WORKER);
-            workers++;
+        Location workerSpawn;
+        if (workers < 1 || ecoMap && workers < 3) {
+            workerSpawn = spawnEmpty(UnitType.WORKER);
+            if(workerSpawn!=null) workers++;
         }
     }
 

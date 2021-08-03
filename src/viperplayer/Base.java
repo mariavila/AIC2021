@@ -51,6 +51,8 @@ public class Base extends MyUnit {
                 uc.makeSmokeSignal(drawing);
                 smokeAttack = true;
             }
+        } else if(smokeAttack && round % 350 == 0) {
+            smokeAttack = false;
         }
         if (isBaseClose && !rushAttack && uc.isAccessible(enemyBase)) {
             rushAttack = true;
@@ -194,10 +196,8 @@ public class Base extends MyUnit {
             researchWheel();
         }
         if(techLevel >= 1) {
-            if(!isBaseClose){
-                if(!uc.hasResearched(Technology.JOBS, myTeam)) {
-                    if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
-                }
+            if(!uc.hasResearched(Technology.JOBS, myTeam)) {
+                if (uc.canResearchTechnology(Technology.JOBS)) uc.researchTechnology(Technology.JOBS);
             }
             if(!uc.hasResearched(Technology.TACTICS, myTeam)) {
                 if (uc.canResearchTechnology(Technology.TACTICS)) uc.researchTechnology(Technology.TACTICS);
@@ -205,16 +205,18 @@ public class Base extends MyUnit {
             if(!uc.hasResearched(Technology.COOKING, myTeam)) {
                 if (uc.canResearchTechnology(Technology.COOKING)) uc.researchTechnology(Technology.COOKING);
             }
-            if(uc.hasResearched(Technology.DOMESTICATION, myTeam) && !uc.hasResearched(Technology.EUGENICS, myTeam)) {
+            /*if(uc.hasResearched(Technology.DOMESTICATION, myTeam) && !uc.hasResearched(Technology.EUGENICS, myTeam)) {
                 if(uc.canResearchTechnology(Technology.EUGENICS)) uc.researchTechnology(Technology.EUGENICS);
-            }
-            if(uc.hasResearched(Technology.COOKING, myTeam) && !uc.hasResearched(Technology.SHARPENERS, myTeam)) {
+            }*/
+            /*if(uc.hasResearched(Technology.COOKING, myTeam) && !uc.hasResearched(Technology.SHARPENERS, myTeam)) {
                 if (uc.canResearchTechnology(Technology.SHARPENERS)) uc.researchTechnology(Technology.SHARPENERS);
-            }
+            }*/
         }
         if(techLevel >= 0) {
-            if(round > constants.ROUND_CHECK_ATTACK && uc.canResearchTechnology(Technology.ROCK_ART)) {
-                uc.researchTechnology(Technology.ROCK_ART);
+            if(round > constants.ROUND_CHECK_ATTACK || (round > constants.ROUND_BUILD_JOBS && techLevel == 0)) {
+                if(uc.canResearchTechnology(Technology.ROCK_ART)) {
+                    uc.researchTechnology(Technology.ROCK_ART);
+                }
             }
             if(hasWater && uc.canResearchTechnology(Technology.RAFTS)) {
                 uc.researchTechnology(Technology.RAFTS);
@@ -241,12 +243,12 @@ public class Base extends MyUnit {
                 }
             }
             if(ecoMap){
-                if(!rushAttack || round > 600) {
-                    if (!uc.hasResearched(Technology.BOXES, myTeam)) {
-                        if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
-                    }
+                if(round > 300) {
                     if (!uc.hasResearched(Technology.UTENSILS, myTeam)) {
                         if (uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
+                    }
+                    if (round > 500 && !uc.hasResearched(Technology.BOXES, myTeam)) {
+                        if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
                     }
                 }
             } else{
@@ -407,7 +409,7 @@ public class Base extends MyUnit {
         Location waterTile;
         for(int i=0; i<initialWaterTiles.length; i++) {
             waterTile = initialWaterTiles[i];
-            if(uc.isAccessible(waterTile.add(waterTile.directionTo(baseLocation)))) waterTiles++;
+            /*if(uc.isAccessible(waterTile.add(waterTile.directionTo(baseLocation))))*/ waterTiles++;
         }
         if (waterTiles > 7) {
             hasWater = true;

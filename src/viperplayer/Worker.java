@@ -310,9 +310,11 @@ public class Worker extends MyUnit {
 
     private void tryEcoBuilding() {
         if(round < 1700 && uc.hasResearched(Technology.JOBS, myTeam)) {
-            spawnEmpty(UnitType.QUARRY);
-            spawnEmpty(UnitType.FARM);
-            spawnEmpty(UnitType.SAWMILL);
+            if(uc.getTechLevel(myTeam) < 3) {
+                spawnEmpty(UnitType.QUARRY);
+                spawnEmpty(UnitType.FARM);
+                spawnEmpty(UnitType.SAWMILL);
+            }
         }
     }
 
