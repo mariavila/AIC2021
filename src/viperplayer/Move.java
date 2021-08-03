@@ -26,9 +26,13 @@ public class Move {
     boolean edgesFound = false;
     Location edgeTarget = null;
     int x1 = -1;
-    int x2 = 1100;
+    int x2 = 1051;
     int y1 = -1;
-    int y2 = 1100;
+    int y2 = 1051;
+    boolean x1found = false;
+    boolean x2found = false;
+    boolean y1found = false;
+    boolean y2found = false;
     int counter = 0;
 
     void moveTo(Location target, boolean reckless) {
@@ -170,26 +174,16 @@ public class Move {
 
     Location explore(){
         findMapEdges();
-        if (edgeTarget != null && uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 20) {
+        if (edgeTarget != null && uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 50) {
             edgeTarget = null;
             counter = 0;
         } else counter++;
 
-        if (edgeTarget == null && !edgesFound) {
-            if (y1 == -1 && x1 == -1) edgeTarget = new Location(x1, y1);
-            else if (y2 == -1 && x2 == -1) edgeTarget = new Location(x2, y2);
-            else if (x1 == -1 && y2 == 1100) edgeTarget = new Location(x1, y2);
-            else if (x2 == 1100 && y1 == -1) edgeTarget = new Location(x2, y1);
-            else if (x1 != -1 && y1 != -1 && x2 != 1100 && y2 != 1100) edgesFound = true;
-            else {
-                if (x1 == -1) edgeTarget = new Location(x1, getRandomNumber(y1, y2));
-                else if (x2 == 1100) edgeTarget = new Location(x2, getRandomNumber(y1, y2));
-                else if (y1 == -1) edgeTarget = new Location(getRandomNumber(x1, x2), y1);
-                else if (y2 == 1100) edgeTarget = new Location(getRandomNumber(x1, x2), y2);
-            }
+        if (!edgesFound) {
+            if (x1found && x2found && y1found && y2found) edgesFound = true;
         }
 
-        if (edgesFound && edgeTarget == null) edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
+        if (edgeTarget == null) edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
 
         return edgeTarget;
     }
@@ -208,10 +202,12 @@ public class Move {
                     if (myLoc.y > loc.y && loc.y > y1) {
                         y1 = loc.y + 1;
                         edgeTarget = null;
+                        y1found = true;
                     }
                     if (myLoc.y < loc.y && loc.y < y2) {
                         y2 = loc.y - 1;
                         edgeTarget = null;
+                        y2found = true;
                     }
                 }
             }
@@ -220,14 +216,25 @@ public class Move {
                     if (myLoc.x > loc.x && loc.x > x1) {
                         x1 = loc.x + 1;
                         edgeTarget = null;
+                        x1found = true;
                     }
                     if (myLoc.x < loc.x && loc.x < x2) {
                         x2 = loc.x - 1;
                         edgeTarget = null;
+                        x2found = true;
                     }
                 }
             }
         }
+    }
+
+    void init() {
+        Location myLoc = uc.getLocation();
+
+        x1 = myLoc.x - 50;
+        x2 = myLoc.x + 50;
+        y1 = myLoc.y - 50;
+        y2 = myLoc.y + 50;
     }
 
     Direction rotateClosest(Direction dirEscape, Direction dirTarget, int times) {

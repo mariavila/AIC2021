@@ -21,6 +21,7 @@ public class Explorer extends MyUnit {
 
     void playRound(){
         round = uc.getRound();
+        move.init();
         lightTorch();
         senseEnemyBarracks();
         if (!hasWater) senseWater();

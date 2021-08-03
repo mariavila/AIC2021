@@ -32,6 +32,7 @@ public class Worker extends MyUnit {
     void playRound(){
         if(justSpawned){
             tryReadArt();
+            move.init();
             justSpawned = false;
         }
 

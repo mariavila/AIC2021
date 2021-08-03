@@ -5,7 +5,7 @@ import aic2021.user.*;
 public class Wolf extends MyUnit {
 
     WolfPathfinder pathfinder;
-    int roundAttack = 1600;
+    int roundAttack = 1950;
 
     Wolf(UnitController uc){
         super(uc);
@@ -17,6 +17,7 @@ public class Wolf extends MyUnit {
         if(justSpawned){
             barracks = senseBarracks();
             pathfinder.setEnemyBase(enemyBase);
+            move.init();
             justSpawned = false;
         }
 

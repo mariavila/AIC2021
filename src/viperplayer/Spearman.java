@@ -17,6 +17,7 @@ public class Spearman extends MyUnit {
         if(justSpawned){
             barracks = senseBarracks();
             pathfinder.setEnemyBase(enemyBase);
+            move.init();
             justSpawned = false;
         }
 
