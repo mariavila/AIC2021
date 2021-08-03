@@ -63,6 +63,7 @@ public class Barracks extends MyUnit {
         UnitInfo[] enemies = uc.senseUnits(myTeam.getOpponent());
         int soldiers = 0;
         int enemySoldiers = 0;
+        boolean wolves = false;
 
         for (UnitInfo unit: units) {
             UnitType myType = unit.getType();
@@ -72,17 +73,21 @@ public class Barracks extends MyUnit {
         for (UnitInfo enemy: enemies) {
             UnitType myType = enemy.getType();
             if (!uc.isObstructed(myLoc, enemy.getLocation()) && (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN)) enemySoldiers++;
+            if (!uc.isObstructed(myLoc, enemy.getLocation()) && myType == UnitType.WOLF) {
+                wolves = true;
+                enemySoldiers++;
+            }
         }
 
         if ((soldiers < 1 && (round <= 400 || (round > 500 && round % 50 == 0))) || enemySoldiers != 0) {
-            Location spawn;
+            Location spawn = null;
             if (round < constants.ROUND_CHECK_ATTACK) {
-                spawn = spawnSafe(UnitType.SPEARMAN);
+                if (!wolves) spawn = spawnSafe(UnitType.SPEARMAN);
                 if (spawn == null && 2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
             }
             else if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
                 if (uc.hasResearched(Technology.ROCK_ART, myTeam)) {
-                    if (wood > stone) {
+                    if (wood > stone && !wolves) {
                         spawnSafe(UnitType.SPEARMAN);
                     } else {
                         spawnSafe(UnitType.AXEMAN);

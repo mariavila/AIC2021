@@ -150,44 +150,69 @@ public class WolfPathfinder {
 
     class MicroInfo {
         int numEnemies;
-        int minDistToEnemy;
+        int minDistToUnit;
+        int minDistToBuilding;
+        int illumination;
         Location loc;
 
         public MicroInfo(Location loc) {
             this.loc = loc;
+            this.illumination = uc.senseIllumination(loc);
             numEnemies = 0;
-            minDistToEnemy = 100000;
+            minDistToUnit = 100000;
+            minDistToBuilding = 100000;
         }
 
         void updateSafe(int distance, UnitType enemyType) {
             if (enemyType == UnitType.WORKER) {
                 if (distance < 14) numEnemies++;
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.WOLF) {
                 if (distance < 9) numEnemies++;
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.SPEARMAN) {
-                if (distance < 33) numEnemies++;
+                if (distance < 33)
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.AXEMAN) {
                 if (distance < 14) numEnemies++;
+                if (distance < minDistToUnit) minDistToUnit = distance;
+            } else if (enemyType == UnitType.TRAPPER) {
+                if (distance < minDistToUnit) minDistToUnit = distance;
+            } else if (enemyType == UnitType.EXPLORER) {
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.BASE) {
                 if (distance < 19) numEnemies += 10;
+            } else {
+                if (distance < minDistToBuilding) minDistToBuilding = distance;
             }
-
-            if (distance < minDistToEnemy) minDistToEnemy = distance;
         }
 
-        boolean canAttack() {
-            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
+        boolean canAttackUnit() {
+            return uc.getType().getAttackRange() >= minDistToUnit && minDistToUnit >= uc.getType().getMinAttackRange();
+        }
+
+        boolean canAttackBuilding() {
+            return uc.getType().getAttackRange() >= minDistToBuilding && minDistToBuilding >= uc.getType().getMinAttackRange();
         }
 
         boolean isBetter(MicroInfo m) {
             if (numEnemies > 9 && m.numEnemies <= 9) return false;
             if (numEnemies <= 9 && m.numEnemies > 9) return true;
-            if (canAttack()) {
-                if (!m.canAttack()) return true;
-                return minDistToEnemy >= m.minDistToEnemy;
+            if (canAttackUnit()) {
+                if (!m.canAttackUnit()) return true;
+                if (numEnemies < m.numEnemies) return true;
+                if (numEnemies > m.numEnemies) return false;
+                return illumination < m.illumination;
             }
-            if (m.canAttack()) return false;
-            return minDistToEnemy <= m.minDistToEnemy;
+            if (m.canAttackUnit()) return false;
+            if (minDistToUnit == 100000 && m.minDistToUnit == 100000) {
+                if (canAttackBuilding()) {
+                    if (!m.canAttackBuilding()) return true;
+                    return minDistToBuilding > m.minDistToBuilding;
+                }
+                if (m.canAttackBuilding()) return false;
+                return minDistToBuilding < m.minDistToBuilding;
+            } else return minDistToUnit < m.minDistToUnit;
         }
     }
 }

@@ -178,7 +178,6 @@ public class Base extends MyUnit {
             spawnSafe(UnitType.WOLF);
             wolves++;
         }
-
     }
 
     private void tryResearch() {
@@ -228,18 +227,13 @@ public class Base extends MyUnit {
                 }
             }*/
             if(rushAttack && waterReady){
-                if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
-                    if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
-                }
-                if(isBaseClose) {
-                    if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
-                        uc.researchTechnology(Technology.DOMESTICATION);
-                    }
+                if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
+                    uc.researchTechnology(Technology.DOMESTICATION);
                 }
             }
             if(normalAttack) {
-                if (!uc.hasResearched(Technology.MILITARY_TRAINING, myTeam)) {
-                    if(uc.canResearchTechnology(Technology.MILITARY_TRAINING)) uc.researchTechnology(Technology.MILITARY_TRAINING);
+                if(!uc.hasResearched(Technology.DOMESTICATION, myTeam) && uc.canResearchTechnology(Technology.DOMESTICATION)) {
+                    uc.researchTechnology(Technology.DOMESTICATION);
                 }
             }
             if(ecoMap){
