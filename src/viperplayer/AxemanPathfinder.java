@@ -127,7 +127,7 @@ public class AxemanPathfinder {
 
             for (int j = 0; j < length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
-                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && uc.isObstructed(enemyLoc, target)) continue;
+                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
                 isEnemies = true;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();

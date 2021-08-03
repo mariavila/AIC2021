@@ -64,7 +64,8 @@ public class ExplorerPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && !isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) {
+                    Location loc = myLoc.add(dir);
+                    if (uc.canMove(dir) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {                        uc.move(dir);
                         uc.move(dir);
                         return true;
                     }
@@ -85,7 +86,8 @@ public class ExplorerPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && !isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) {
+                Location loc = myLoc.add(dir);
+                if (uc.canMove(dir) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {                        uc.move(dir);
                     uc.move(dir);
                     return true;
                 }
@@ -115,7 +117,7 @@ public class ExplorerPathfinder {
             microInfo[i] = new MicroInfo(target);
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {
@@ -127,7 +129,7 @@ public class ExplorerPathfinder {
 
             for (int j = 0; j < length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
-                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && uc.isObstructed(enemyLoc, target)) continue;
+                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
                 isEnemies = true;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();

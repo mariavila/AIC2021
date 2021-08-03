@@ -311,11 +311,44 @@ public class Worker extends MyUnit {
     private void tryEcoBuilding() {
         if(round < 1700 && uc.hasResearched(Technology.JOBS, myTeam)) {
             if(uc.getTechLevel(myTeam) < 3) {
-                spawnEmpty(UnitType.QUARRY);
-                spawnEmpty(UnitType.FARM);
-                spawnEmpty(UnitType.SAWMILL);
+                spawnEmptySpaced(UnitType.QUARRY);
+                spawnEmptySpaced(UnitType.FARM);
+                spawnEmptySpaced(UnitType.SAWMILL);
             }
         }
+    }
+
+    Location spawnEmptySpaced(UnitType t){
+        ResourceInfo[] res;
+        Location myLoc = uc.getLocation();
+        Location[] traps = uc.senseTraps(2);
+        boolean hasResource;
+
+        outerloop:
+        for (Direction dir : dirs){
+            if (dir == Direction.ZERO) continue;
+
+            Location target = myLoc.add(dir);
+            if ((target.x + target.y) % 2 == 0) continue;
+
+            for (Location trap: traps) {
+                if (target.isEqual(trap)) continue outerloop;
+            }
+
+            if (uc.canSenseLocation(target)) {
+                res = uc.senseResourceInfo(target);
+
+                hasResource = res[0] != null;
+                if (res[1] != null) hasResource = true;
+                if (res[2] != null) hasResource = true;
+
+                if (!hasResource && (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+4) && uc.canSpawn(t, dir)){
+                    uc.spawn(t, dir);
+                    return myLoc.add(dir);
+                }
+            }
+        }
+        return null;
     }
 
     private void tryMove() {

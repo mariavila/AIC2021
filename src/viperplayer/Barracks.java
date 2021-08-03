@@ -75,11 +75,12 @@ public class Barracks extends MyUnit {
         }
 
         if (soldiers < 1 || enemySoldiers != 0) {
+            Location spawn = null;
             if (round < constants.ROUND_CHECK_ATTACK) {
-                spawnSafe(UnitType.SPEARMAN);
-                if (2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
+                spawn = spawnSafe(UnitType.SPEARMAN);
+                if (spawn == null && 2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
             }
-            if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
+            else if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
                 if (uc.hasResearched(Technology.ROCK_ART, myTeam)) {
                     if (wood > stone) {
                         spawnSafe(UnitType.SPEARMAN);
@@ -91,7 +92,7 @@ public class Barracks extends MyUnit {
         }
     }
 
-    void spawnSafe(UnitType t) {
+    Location spawnSafe(UnitType t) {
         Location[] traps = uc.senseTraps(2);
 
         outerloop:
@@ -105,11 +106,13 @@ public class Barracks extends MyUnit {
             }
 
             if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
-                uc.spawn(t, dir);
                 if (t == UnitType.AXEMAN) axemen++;
                 else if (t == UnitType.SPEARMAN) spearmen++;
+                uc.spawn(t, dir);
+                return myLoc.add(dir);
             }
         }
+        return null;
     }
 
     Location barracksRead() {
