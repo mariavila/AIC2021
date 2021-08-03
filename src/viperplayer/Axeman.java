@@ -16,7 +16,6 @@ public class Axeman extends MyUnit {
     void playRound(){
         if(justSpawned){
             barracks = senseBarracks();
-            pathfinder.setEnemyBase(enemyBase);
             move.init();
             justSpawned = false;
         }
@@ -62,6 +61,7 @@ public class Axeman extends MyUnit {
                 if (enemyBase != null) {
                     needsToSend = false;
                     pathfinder.setEnemyBase(enemyBase);
+                    move.setEnemyBase(enemyBase);
                 }
             } else if (type == constants.ATTACK_BASE) {
                 enemyBase = loc;

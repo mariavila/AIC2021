@@ -387,6 +387,7 @@ public class Worker extends MyUnit {
                         enemyBase = loc;
                         if (enemyBase != null) {
                             pathfinder.setEnemyBase(enemyBase);
+                            move.setEnemyBase(enemyBase);
                             rushAttack = true;
                         }
                     }
@@ -396,6 +397,7 @@ public class Worker extends MyUnit {
                         enemyBase = loc;
                         if (enemyBase != null) {
                             pathfinder.setEnemyBase(enemyBase);
+                            move.setEnemyBase(enemyBase);
                         }
                     }
                 } else if (type == constants.ENEMY_FOUND) {

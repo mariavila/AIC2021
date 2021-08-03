@@ -16,7 +16,6 @@ public class Wolf extends MyUnit {
     void playRound(){
         if(justSpawned){
             barracks = senseBarracks();
-            pathfinder.setEnemyBase(enemyBase);
             move.init();
             justSpawned = false;
         }
@@ -25,6 +24,7 @@ public class Wolf extends MyUnit {
         if (enemyBase == null) {
             enemyBase = lookForEnemyBase();
             pathfinder.setEnemyBase(enemyBase);
+            move.setEnemyBase(enemyBase);
         }
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));

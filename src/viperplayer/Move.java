@@ -173,8 +173,9 @@ public class Move {
     }
 
     Location explore(){
+        Location myLoc = uc.getLocation();
         findMapEdges();
-        if (edgeTarget != null && uc.getLocation().distanceSquared(edgeTarget) <= 8 || counter > 50) {
+        if (edgeTarget != null && myLoc.distanceSquared(edgeTarget) <= 8 || counter > 50) {
             edgeTarget = null;
             counter = 0;
         } else counter++;
@@ -183,7 +184,9 @@ public class Move {
             if (x1found && x2found && y1found && y2found) edgesFound = true;
         }
 
-        if (edgeTarget == null) edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
+        while (edgeTarget == null || (enemyBase != null && edgeTarget.distanceSquared(enemyBase) <= 50)) {
+            edgeTarget = new Location(getRandomNumber(x1, x2), getRandomNumber(y1, y2));
+        }
 
         return edgeTarget;
     }

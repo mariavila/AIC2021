@@ -52,6 +52,7 @@ public class Explorer extends MyUnit {
         for(UnitInfo unit:units){
             if(unit.getType() == UnitType.BASE){
                 pathfinder.setEnemyBase(unit.getLocation());
+                move.setEnemyBase(enemyBase);
                 return unit.getLocation();
             }
         }
