@@ -130,7 +130,7 @@ public class WorkerPathfinder {
 
             for (int j = 0; j < length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
-                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && uc.isObstructed(enemyLoc, target)) continue;
+                if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
                 UnitType type = enemies[j].getType();
                 if (type == UnitType.AXEMAN || type == UnitType.SPEARMAN || type == UnitType.WOLF) isEnemies = true;
                 UnitInfo enemy = enemies[j];
