@@ -437,7 +437,7 @@ public class Base extends MyUnit {
             waterTile = initialWaterTiles[i];
             /*if(uc.isAccessible(waterTile.add(waterTile.directionTo(baseLocation))))*/ waterTiles++;
         }
-        if (waterTiles > 19) {
+        if (waterTiles > 15) {
             hasWater = true;
             waterReady = false;
         }

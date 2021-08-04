@@ -32,7 +32,7 @@ public class Explorer extends MyUnit {
         Location[] waterTiles = uc.senseWater(uc.getType().getVisionRange());
         if (waterTiles.length > 15 && uc.canMakeSmokeSignal()) {
             hasWater = true;
-            int drawing = smoke.encode(constants.ENEMY_FOUND, uc.getLocation());
+            int drawing = smoke.encode(constants.WATER, uc.getLocation());
             uc.makeSmokeSignal(drawing);
         }
     }
