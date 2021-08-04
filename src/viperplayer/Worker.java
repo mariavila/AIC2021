@@ -124,15 +124,11 @@ public class Worker extends MyUnit {
 
     private void goToResource(){
         int baseRange = UnitType.BASE.getAttackRange();
-        resources = uc.senseResources();
-        if (resources.length > 0) {
-            Location resLoc = resources[0].getLocation();
-            if (uc.getLocation().isEqual(resLoc)) {
-                resourceLocation = resLoc;
+
+        if (resourceLocation != null) {
+            if (uc.getLocation().isEqual(resourceLocation)) {
                 state = "GATHER";
                 return;
-            } else if (uc.senseUnitAtLocation(resLoc) == null) {
-                resourceLocation = resLoc;
             }
         }
 

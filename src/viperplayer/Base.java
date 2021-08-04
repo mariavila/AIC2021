@@ -42,6 +42,7 @@ public class Base extends MyUnit {
     boolean hasWater = false;
     boolean waterReady = true;
     boolean ecoMap = false;
+    boolean bigResources = false;
     boolean baseCorner = false;
     boolean smokeAttack = false;
 
@@ -252,11 +253,11 @@ public class Base extends MyUnit {
                 }
             }
             if(ecoMap){
-                if(round > 300) {
+                if(round > 25) {
                     if (!uc.hasResearched(Technology.UTENSILS, myTeam)) {
                         if (uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
                     }
-                    if (round > 500 && !uc.hasResearched(Technology.BOXES, myTeam)) {
+                    if (round > 300 && !uc.hasResearched(Technology.BOXES, myTeam)) {
                         if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
                     }
                 }
@@ -353,7 +354,9 @@ public class Base extends MyUnit {
 
     private void calcIdealWorkers() {
         if(round > 25) {
-            if (ecoMap) {
+            if (bigResources) {
+                idealWorkers = 12;
+            } else if (ecoMap) {
                 idealWorkers = 8;
             } else {
                 idealWorkers = 5;
@@ -456,7 +459,10 @@ public class Base extends MyUnit {
                 initialStone += initialResources[i].amount;
             }
         }
-        if (initialFood + initialWood + initialStone > 1000) {
+        if (initialFood + initialWood + initialStone > 2000) {
+            ecoMap = true;
+            bigResources = true;
+        } else if (initialFood + initialWood + initialStone > 1000) {
             ecoMap = true;
         }
     }
