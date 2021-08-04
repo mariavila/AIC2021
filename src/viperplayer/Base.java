@@ -17,7 +17,6 @@ public class Base extends MyUnit {
     int idealWorkers = 3;
     int techLevel = 0;
     int enemyTechLevel = 0;
-    int roundSpawn = 0;
 
     int enemySpearmen = 0;
     int enemyAxemen = 0;
@@ -73,7 +72,7 @@ public class Base extends MyUnit {
         smokeSignals = tryReadSmoke();
 
         checkAttackRush();
-        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        if (round > 9) attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if(!enemyExplorer) senseExplorers();
         trySpawn();
         tryResearch();
@@ -87,7 +86,7 @@ public class Base extends MyUnit {
 
     void broadCast() {
         if (enemyBase != null) {
-            if ((roundSpawn + 11 == round) && uc.canMakeSmokeSignal()) {
+            if (round % 41 == 0 && round != 0 && uc.canMakeSmokeSignal()) {
                 if (rushAttack) uc.makeSmokeSignal(smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase));
                 else uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
             }
@@ -149,7 +148,7 @@ public class Base extends MyUnit {
     }
 
     private void checkAttackRush(){
-        if (isBaseClose && round == 10) {
+        if (isBaseClose && round == 9 && uc.canMakeSmokeSignal()) {
             int drawing = smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase);
             uc.makeSmokeSignal(drawing);
         }
@@ -161,7 +160,7 @@ public class Base extends MyUnit {
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
 
-        if (uc.hasResearched(Technology.JOBS, myTeam) && allyWorkers == 0) spawnSafe(UnitType.WORKER);
+        if (uc.hasResearched(Technology.JOBS, myTeam) && allyWorkers == 0 && round < 1700) spawnSafe(UnitType.WORKER);
 
         if (enemyAxemen+enemySpearmen+enemyWolves == 0) {
             if (workers < idealWorkers) {
@@ -178,7 +177,7 @@ public class Base extends MyUnit {
                 }
             }
         }
-        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves) || (allyWolves == 0 && round % 50 == 0 && uc.hasResearched(Technology.JOBS, myTeam))) {
+        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves)) {
             spawnSafe(UnitType.WOLF);
             wolves++;
         }
@@ -386,7 +385,6 @@ public class Base extends MyUnit {
         int random = (int)(uc.getRandomDouble()*index);
 
         uc.spawn(t, myDirs[random]);
-        roundSpawn = round;
         return true;
     }
 

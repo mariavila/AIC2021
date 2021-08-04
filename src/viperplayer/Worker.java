@@ -32,7 +32,6 @@ public class Worker extends MyUnit {
         round = uc.getRound();
 
         if(justSpawned){
-            tryReadArt();
             move.init();
             justSpawned = false;
         }
@@ -42,9 +41,16 @@ public class Worker extends MyUnit {
 
         smokeSignals = tryReadSmoke();
 
-        if (round != 10 || smokeSignals.length > 0) {
+        if (round != 9 || smokeSignals.length > 0) {
             refreshSettlement();
             tryBarracks();
+            doSmokeStuffProducer();
+            Location readArt = tryReadArt();
+            if (readArt != null) {
+                enemyBase = readArt;
+                move.setEnemyBase(enemyBase);
+                pathfinder.setEnemyBase(enemyBase);
+            }
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
             tryGather();
             tryMove();
@@ -91,46 +97,10 @@ public class Worker extends MyUnit {
     }
 
     private void explore(){
-        deers = uc.senseUnits(Team.NEUTRAL);
         int baseRange = UnitType.BASE.getAttackRange();
-
-        Location bestRes = null;
-        Resource bestType = null;
-
-        for (ResourceInfo resource: resources) {
-            Location resLoc = resource.getLocation();
-            Resource resType = resource.getResourceType();
-            if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
-            if (uc.isObstructed(resLoc, uc.getLocation())) continue;
-
-            UnitInfo unit;
-            if (uc.canSenseLocation(resLoc)) {
-                unit = uc.senseUnitAtLocation(resLoc);
-                if (unit == null || unit.getType() != UnitType.WORKER) {
-                    if (resType == Resource.FOOD && bestType != Resource.FOOD) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    } else if (resType == Resource.WOOD && bestType != Resource.FOOD && bestType != Resource.WOOD) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    } else if (resType == Resource.STONE && bestType == null) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    }
-                }
-            }
-        }
-
-        if (bestRes != null) {
-            resourceLocation = bestRes;
-            followingDeer = false;
-            state = "GOTORESOURCE";
-            return;
-        }
-
-        resourceLocation = null;
+        deers = uc.senseUnits(Team.NEUTRAL);
+        checkForBestResource();
         followingDeer = false;
-        state = "EXPLORE";
 
         for (UnitInfo deer: deers) {
             Location deerLoc = deer.getLocation();
@@ -146,8 +116,9 @@ public class Worker extends MyUnit {
         pathfinder.getNextLocationTarget(move.explore());
     }
 
-    private void goToResource(){
+    void checkForBestResource() {
         int baseRange = UnitType.BASE.getAttackRange();
+        Location myLoc = uc.getLocation();
         resources = uc.senseResources();
 
         Location bestRes = null;
@@ -162,7 +133,7 @@ public class Worker extends MyUnit {
             UnitInfo unit;
             if (uc.canSenseLocation(resLoc)) {
                 unit = uc.senseUnitAtLocation(resLoc);
-                if (unit == null || unit.getType() != UnitType.WORKER) {
+                if (unit == null || unit.getType() != UnitType.WORKER || myLoc.isEqual(unit.getLocation())) {
                     if (resType == Resource.FOOD && bestType != Resource.FOOD) {
                         bestRes = resLoc;
                         bestType = resType;
@@ -180,10 +151,19 @@ public class Worker extends MyUnit {
         if (bestRes != null) {
             resourceLocation = bestRes;
             followingDeer = false;
-            state = "GOTORESOURCE";
-        } else {
+            if (uc.getLocation().isEqual(bestRes)) state = "GATHER";
+            else state = "GOTORESOURCE";
+        } else if (resourceLocation == null || (resourceLocation != null && uc.canSenseLocation(resourceLocation))) {
             resourceLocation = null;
+            state = "EXPLORE";
+        } else {
+            state = "GOTORESOURCE";
         }
+    }
+
+    private void goToResource(){
+        int baseRange = UnitType.BASE.getAttackRange();
+        checkForBestResource();
 
         if (resources.length > 0) {
             if (uc.getLocation().isEqual(resourceLocation)) {
@@ -240,6 +220,7 @@ public class Worker extends MyUnit {
 
     void gather(){
         Location myLoc = uc.getLocation();
+        checkForBestResource();
         resources = uc.senseResources();
 
         if (resources.length > 0 && resources[0].getLocation().isEqual(myLoc)) {
@@ -298,9 +279,12 @@ public class Worker extends MyUnit {
             if (resourcesLeft != null) {
                 if ((resourcesLeft.getAmount() < 100 && resourcesLeft.getResourceType() == Resource.FOOD) || resourcesLeft.getAmount() == 0) {
                     resourcesLeft = null;
+                    state = "EXPLORE";
+                } else {
+                    resourceLocation = resourcesLeft.location;
+                    state = "GOTORESOURCE";
                 }
             }
-            state = "GOTORESOURCE";
         } else {
             pathfinder.getNextLocationTarget(targetDeposit);
         }
@@ -322,9 +306,9 @@ public class Worker extends MyUnit {
         int closeResources = 0;
         for(int i = 0; i < resources.length; i++) {
             closeResources += resources[i].getAmount();
-            if (closeResources > 600) break;
+            if (closeResources >= 350) break;
         }
-        if(closeResources < 600) return false;
+        if(closeResources < 350) return false;
 
         return true;
     }
@@ -350,7 +334,6 @@ public class Worker extends MyUnit {
             }
         }
 
-        doSmokeStuffProducer();
         if (rushAttack && barracksBuilt == null && uc.canMakeSmokeSignal()) {
             barracksBuilt = spawnEmpty(UnitType.BARRACKS);
             if (barracksBuilt != null) {
@@ -360,21 +343,15 @@ public class Worker extends MyUnit {
                     uc.makeSmokeSignal(drawing);
                 } else hasToSendSmokeBarracks = true;
             }
-            if (barracksBuilt != null && enemyBase != null) {
-                int drawing = smoke.encode(1, enemyBase);
-                if(uc.canDraw(drawing)){
-                    uc.draw(drawing);
-                }
-            }
         }
     }
 
     private void tryEcoBuilding() {
         if(round < 1700 && uc.hasResearched(Technology.JOBS, myTeam)) {
             if(uc.getTechLevel(myTeam) < 3) {
-                spawnEmptySpaced(UnitType.QUARRY);
                 spawnEmptySpaced(UnitType.FARM);
                 spawnEmptySpaced(UnitType.SAWMILL);
+                spawnEmptySpaced(UnitType.QUARRY);
             }
         }
     }

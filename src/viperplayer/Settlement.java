@@ -59,7 +59,7 @@ public class Settlement extends MyUnit {
         }
 
         Location workerSpawn;
-        if (workers < 1 || ecoMap && workers < 3) {
+        if ((workers < 1 || (ecoMap && workers < 3)) && round < 1700) {
             workerSpawn = spawnEmpty(UnitType.WORKER);
             if(workerSpawn != null) workers++;
         }

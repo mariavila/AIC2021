@@ -76,25 +76,35 @@ public abstract class MyUnit {
     Location tryReadArt(){
         UnitInfo[] units = uc.senseUnits(uc.getTeam());
         Direction[] myDirs = Direction.values();
+        Location baseLoc = null;
+        Location myLoc = uc.getLocation();
         int signal;
 
         for (UnitInfo unit: units) {
             UnitType myType = unit.getType();
-            if (myType == UnitType.BARRACKS) {
-                Location barracks = unit.getLocation();
+            if (myType == UnitType.BASE) {
+                baseLoc = unit.getLocation();
                 for (Direction dir: myDirs) {
-                    Location target = barracks.add(dir);
+                    Location target = baseLoc.add(dir);
                     if (uc.canRead(target)) {
                         signal = uc.read(target);
                         if (signal != 0) {
-                            return smoke.decode(signal);
+                            Location offset = smoke.decode(signal);
+                            return new Location(baseLoc.x - offset.x, baseLoc.y - offset.y);
                         }
                     }
                 }
             }
         }
 
-        return null;
+        if (enemyBase != null && baseLoc != null && myLoc.distanceSquared(baseLoc) <= 2) {
+            int drawing = smoke.encode(1, new Location(baseLocation.x - enemyBase.x, baseLocation.y - enemyBase.y));
+            if (uc.canDraw(drawing)) {
+                uc.draw(drawing);
+            }
+        }
+
+        return enemyBase;
     }
 
     Location spawnEmpty(UnitType t){

@@ -69,7 +69,7 @@ public class Explorer extends MyUnit {
     }
 
     private void drawEnemyBaseLoc(){
-        int drawing = smoke.encode(1, enemyBase);
+        int drawing = smoke.encode(1, new Location(baseLocation.x - enemyBase.x, baseLocation.y - enemyBase.y));
         if(uc.canDraw(drawing)){
             uc.draw(drawing);
         }
