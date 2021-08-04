@@ -178,7 +178,7 @@ public class SpearmanPathfinder {
         }
 
         boolean canAttack() {
-            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
+            return UnitType.SPEARMAN.attackRange >= minDistToEnemy && minDistToEnemy >= UnitType.SPEARMAN.minAttackRange;
         }
 
         boolean isBetter(MicroInfo m) {

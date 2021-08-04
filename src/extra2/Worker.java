@@ -1,4 +1,4 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
@@ -46,21 +46,12 @@ public class Worker extends MyUnit {
             refreshSettlement();
             tryBarracks();
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-            tryGather();
             tryMove();
-            tryGather();
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-            attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
             tryEcoBuilding();
 
             if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer))
                 attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
-        }
-    }
-
-    private void tryGather() {
-        if (uc.canGatherResources()){
-            uc.gatherResources();
         }
     }
 
@@ -94,12 +85,8 @@ public class Worker extends MyUnit {
         deers = uc.senseUnits(Team.NEUTRAL);
         int baseRange = UnitType.BASE.getAttackRange();
 
-        Location bestRes = null;
-        Resource bestType = null;
-
         for (ResourceInfo resource: resources) {
             Location resLoc = resource.getLocation();
-            Resource resType = resource.getResourceType();
             if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
             if (uc.isObstructed(resLoc, uc.getLocation())) continue;
 
@@ -107,30 +94,18 @@ public class Worker extends MyUnit {
             if (uc.canSenseLocation(resLoc)) {
                 unit = uc.senseUnitAtLocation(resLoc);
                 if (unit == null || unit.getType() != UnitType.WORKER) {
-                    if (resType == Resource.FOOD && bestType != Resource.FOOD) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    } else if (resType == Resource.WOOD && bestType != Resource.FOOD && bestType != Resource.WOOD) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    } else if (resType == Resource.STONE && bestType == null) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    }
+                    resourceLocation = resLoc;
+                    followingDeer = false;
+                    state = "GOTORESOURCE";
+                    return;
                 }
+            } else {
+                resourceLocation = resLoc;
+                followingDeer = false;
+                state = "GOTORESOURCE";
+                return;
             }
         }
-
-        if (bestRes != null) {
-            resourceLocation = bestRes;
-            followingDeer = false;
-            state = "GOTORESOURCE";
-            return;
-        }
-
-        resourceLocation = null;
-        followingDeer = false;
-        state = "EXPLORE";
 
         for (UnitInfo deer: deers) {
             Location deerLoc = deer.getLocation();
@@ -149,48 +124,14 @@ public class Worker extends MyUnit {
     private void goToResource(){
         int baseRange = UnitType.BASE.getAttackRange();
         resources = uc.senseResources();
-
-        Location bestRes = null;
-        Resource bestType = null;
-
-        for (ResourceInfo resource: resources) {
-            Location resLoc = resource.getLocation();
-            Resource resType = resource.getResourceType();
-            if (enemyBase != null && resLoc.distanceSquared(enemyBase) <= baseRange) continue;
-            if (uc.isObstructed(resLoc, uc.getLocation())) continue;
-
-            UnitInfo unit;
-            if (uc.canSenseLocation(resLoc)) {
-                unit = uc.senseUnitAtLocation(resLoc);
-                if (unit == null || unit.getType() != UnitType.WORKER) {
-                    if (resType == Resource.FOOD && bestType != Resource.FOOD) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    } else if (resType == Resource.WOOD && bestType != Resource.FOOD && bestType != Resource.WOOD) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    } else if (resType == Resource.STONE && bestType == null) {
-                        bestRes = resLoc;
-                        bestType = resType;
-                    }
-                }
-            }
-        }
-
-        if (bestRes != null) {
-            resourceLocation = bestRes;
-            followingDeer = false;
-            state = "GOTORESOURCE";
-        } else {
-            resourceLocation = null;
-        }
-
         if (resources.length > 0) {
-            if (uc.getLocation().isEqual(resourceLocation)) {
+            Location resLoc = resources[0].getLocation();
+            if (uc.getLocation().isEqual(resLoc)) {
+                resourceLocation = resLoc;
                 state = "GATHER";
                 return;
-            } else if (uc.senseUnitAtLocation(resourceLocation) != null) {
-                resourceLocation = null;
+            } else if (uc.senseUnitAtLocation(resLoc) == null) {
+                resourceLocation = resLoc;
             }
         }
 

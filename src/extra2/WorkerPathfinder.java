@@ -1,4 +1,4 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
@@ -178,7 +178,7 @@ public class WorkerPathfinder {
         }
 
         boolean canAttack() {
-            return UnitType.WORKER.attackRange >= minDistToEnemy;
+            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
         }
 
         boolean isBetter(MicroInfo m) {
