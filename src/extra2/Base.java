@@ -1,4 +1,4 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
@@ -17,6 +17,7 @@ public class Base extends MyUnit {
     int idealWorkers = 3;
     int techLevel = 0;
     int enemyTechLevel = 0;
+    int roundSpawn = 0;
 
     int enemySpearmen = 0;
     int enemyAxemen = 0;
@@ -41,7 +42,6 @@ public class Base extends MyUnit {
     boolean hasWater = false;
     boolean waterReady = true;
     boolean ecoMap = false;
-    boolean bigResources = false;
     boolean baseCorner = false;
     boolean smokeAttack = false;
 
@@ -73,7 +73,7 @@ public class Base extends MyUnit {
         smokeSignals = tryReadSmoke();
 
         checkAttackRush();
-        if (round > 9) attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
         if(!enemyExplorer) senseExplorers();
         trySpawn();
         tryResearch();
@@ -87,7 +87,7 @@ public class Base extends MyUnit {
 
     void broadCast() {
         if (enemyBase != null) {
-            if (round % 41 == 0 && round != 0 && uc.canMakeSmokeSignal()) {
+            if ((roundSpawn + 11 == round) && uc.canMakeSmokeSignal()) {
                 if (rushAttack) uc.makeSmokeSignal(smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase));
                 else uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
             }
@@ -149,7 +149,7 @@ public class Base extends MyUnit {
     }
 
     private void checkAttackRush(){
-        if (isBaseClose && round == 9 && uc.canMakeSmokeSignal()) {
+        if (isBaseClose && round == 10) {
             int drawing = smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase);
             uc.makeSmokeSignal(drawing);
         }
@@ -161,7 +161,7 @@ public class Base extends MyUnit {
             if(spawnSafe(UnitType.EXPLORER)) ++explorers;
         }
 
-        if (uc.hasResearched(Technology.JOBS, myTeam) && allyWorkers == 0 && round < 1700) spawnSafe(UnitType.WORKER);
+        if (uc.hasResearched(Technology.JOBS, myTeam) && allyWorkers == 0) spawnSafe(UnitType.WORKER);
 
         if (enemyAxemen+enemySpearmen+enemyWolves == 0) {
             if (workers < idealWorkers) {
@@ -178,7 +178,7 @@ public class Base extends MyUnit {
                 }
             }
         }
-        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves)) {
+        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves) || (allyWolves == 0 && round % 50 == 0 && uc.hasResearched(Technology.JOBS, myTeam))) {
             spawnSafe(UnitType.WOLF);
             wolves++;
         }
@@ -252,11 +252,11 @@ public class Base extends MyUnit {
                 }
             }
             if(ecoMap){
-                if(round > 25) {
+                if(round > 300) {
                     if (!uc.hasResearched(Technology.UTENSILS, myTeam)) {
                         if (uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
                     }
-                    if (round > 300 && !uc.hasResearched(Technology.BOXES, myTeam)) {
+                    if (round > 500 && !uc.hasResearched(Technology.BOXES, myTeam)) {
                         if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
                     }
                 }
@@ -353,9 +353,7 @@ public class Base extends MyUnit {
 
     private void calcIdealWorkers() {
         if(round > 25) {
-            if (bigResources) {
-                idealWorkers = 12;
-            } else if (ecoMap) {
+            if (ecoMap) {
                 idealWorkers = 8;
             } else {
                 idealWorkers = 5;
@@ -388,6 +386,7 @@ public class Base extends MyUnit {
         int random = (int)(uc.getRandomDouble()*index);
 
         uc.spawn(t, myDirs[random]);
+        roundSpawn = round;
         return true;
     }
 
@@ -457,10 +456,7 @@ public class Base extends MyUnit {
                 initialStone += initialResources[i].amount;
             }
         }
-        if (initialFood + initialWood + initialStone > 2000) {
-            ecoMap = true;
-            bigResources = true;
-        } else if (initialFood + initialWood + initialStone > 1000) {
+        if (initialFood + initialWood + initialStone > 1000) {
             ecoMap = true;
         }
     }

@@ -132,7 +132,7 @@ public class WorkerPathfinder {
                 Location enemyLoc = enemies[j].getLocation();
                 if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
                 UnitType type = enemies[j].getType();
-                if (type == UnitType.AXEMAN || type == UnitType.SPEARMAN || type == UnitType.WOLF) isEnemies = true;
+                if (type != UnitType.EXPLORER && type != UnitType.BASE) isEnemies = true;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();
                 int distance = microInfo[i].loc.distanceSquared(enemy.getLocation());
@@ -156,6 +156,7 @@ public class WorkerPathfinder {
         int numEnemies;
         int minDistToEnemy;
         Location loc;
+        boolean noSoldiers = true;
 
         public MicroInfo(Location loc) {
             this.loc = loc;
@@ -165,11 +166,20 @@ public class WorkerPathfinder {
 
         void updateSafe(int distance, UnitType enemyType) {
             if (enemyType == UnitType.WOLF) {
-                if (distance < 9) numEnemies++;
+                if (distance < 9) {
+                    numEnemies++;
+                    noSoldiers = false;
+                }
             } else if (enemyType == UnitType.SPEARMAN) {
-                if (distance < 33) numEnemies++;
+                if (distance < 33) {
+                    numEnemies++;
+                    noSoldiers = false;
+                }
             } else if (enemyType == UnitType.AXEMAN) {
-                if (distance < 14) numEnemies++;
+                if (distance < 14) {
+                    numEnemies++;
+                    noSoldiers = false;
+                }
             } else if (enemyType == UnitType.BASE) {
                 if (distance < 19) numEnemies += 10;
             }
@@ -178,17 +188,19 @@ public class WorkerPathfinder {
         }
 
         boolean canAttack() {
-            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
+            return UnitType.WORKER.attackRange >= minDistToEnemy;
         }
 
         boolean isBetter(MicroInfo m) {
-            if (numEnemies > 9 && m.numEnemies <= 9) return false;
-            if (numEnemies <= 9 && m.numEnemies > 9) return true;
+            if (numEnemies > m.numEnemies) return false;
+            if (numEnemies < m.numEnemies) return true;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
                 return minDistToEnemy >= m.minDistToEnemy;
             }
             if (m.canAttack()) return false;
+            if (noSoldiers && !m.noSoldiers) return true;
+            if (!noSoldiers && m.noSoldiers) return false;
             return minDistToEnemy <= m.minDistToEnemy;
         }
     }

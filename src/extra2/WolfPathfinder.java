@@ -1,8 +1,8 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
-public class SpearmanPathfinder {
+public class WolfPathfinder {
 
     UnitController uc;
 
@@ -23,7 +23,7 @@ public class SpearmanPathfinder {
     int baseRange;
     boolean isEnemies;
 
-    SpearmanPathfinder(UnitController uc){
+    WolfPathfinder(UnitController uc){
         this.myDirs = Direction.values();
         this.uc = uc;
         this.myTeam = uc.getTeam();
@@ -38,7 +38,6 @@ public class SpearmanPathfinder {
         if (!uc.canMove()) return false;
         if (target == null) return false;
         isEnemies = false;
-
         //different target? ==> previous data does not help!
         if (prevTarget == null || !target.isEqual(prevTarget)) resetPathfinding();
 
@@ -65,8 +64,7 @@ public class SpearmanPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    Location loc = myLoc.add(dir);
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {
+                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
                         uc.move(dir);
                         return true;
                     }
@@ -87,8 +85,8 @@ public class SpearmanPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {                    uc.move(dir);
+                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
+                    uc.move(dir);
                     return true;
                 }
                 break;
@@ -111,18 +109,18 @@ public class SpearmanPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
-        int length = enemies.length;
+        int length = Math.min(enemies.length, 10);
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
-                    microInfo[i].numEnemies += 100;
+                    microInfo[i].numEnemies = 100;
                     break;
                 }
             }
@@ -152,44 +150,69 @@ public class SpearmanPathfinder {
 
     class MicroInfo {
         int numEnemies;
-        int minDistToEnemy;
+        int minDistToUnit;
+        int minDistToBuilding;
+        int illumination;
         Location loc;
 
         public MicroInfo(Location loc) {
             this.loc = loc;
+            this.illumination = uc.senseIllumination(loc);
             numEnemies = 0;
-            minDistToEnemy = 100000;
+            minDistToUnit = 100000;
+            minDistToBuilding = 100000;
         }
 
         void updateSafe(int distance, UnitType enemyType) {
             if (enemyType == UnitType.WORKER) {
                 if (distance < 14) numEnemies++;
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.WOLF) {
                 if (distance < 9) numEnemies++;
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.SPEARMAN) {
-                if (distance < 33) numEnemies++;
+                if (distance < 33)
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.AXEMAN) {
                 if (distance < 14) numEnemies++;
+                if (distance < minDistToUnit) minDistToUnit = distance;
+            } else if (enemyType == UnitType.TRAPPER) {
+                if (distance < minDistToUnit) minDistToUnit = distance;
+            } else if (enemyType == UnitType.EXPLORER) {
+                if (distance < minDistToUnit) minDistToUnit = distance;
             } else if (enemyType == UnitType.BASE) {
                 if (distance < 19) numEnemies += 10;
+            } else {
+                if (distance < minDistToBuilding) minDistToBuilding = distance;
             }
-
-            if (distance < minDistToEnemy) minDistToEnemy = distance;
         }
 
-        boolean canAttack() {
-            return UnitType.SPEARMAN.attackRange >= minDistToEnemy && minDistToEnemy >= UnitType.SPEARMAN.minAttackRange;
+        boolean canAttackUnit() {
+            return uc.getType().getAttackRange() >= minDistToUnit && minDistToUnit >= uc.getType().getMinAttackRange();
+        }
+
+        boolean canAttackBuilding() {
+            return uc.getType().getAttackRange() >= minDistToBuilding && minDistToBuilding >= uc.getType().getMinAttackRange();
         }
 
         boolean isBetter(MicroInfo m) {
-            if(numEnemies < m.numEnemies) return true;
-            if(numEnemies > m.numEnemies) return false;
-            if (canAttack()) {
-                if (!m.canAttack()) return true;
-                return minDistToEnemy >= m.minDistToEnemy;
+            if (numEnemies > 9 && m.numEnemies <= 9) return false;
+            if (numEnemies <= 9 && m.numEnemies > 9) return true;
+            if (canAttackUnit()) {
+                if (!m.canAttackUnit()) return true;
+                if (numEnemies < m.numEnemies) return true;
+                if (numEnemies > m.numEnemies) return false;
+                return illumination < m.illumination;
             }
-            if (m.canAttack()) return false;
-            return minDistToEnemy <= m.minDistToEnemy;
+            if (m.canAttackUnit()) return false;
+            if (minDistToUnit == 100000 && m.minDistToUnit == 100000) {
+                if (canAttackBuilding()) {
+                    if (!m.canAttackBuilding()) return true;
+                    return minDistToBuilding > m.minDistToBuilding;
+                }
+                if (m.canAttackBuilding()) return false;
+                return minDistToBuilding < m.minDistToBuilding;
+            } else return minDistToUnit < m.minDistToUnit;
         }
     }
 }

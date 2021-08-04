@@ -1,8 +1,8 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
-public class SpearmanPathfinder {
+public class AxemanPathfinder {
 
     UnitController uc;
 
@@ -23,7 +23,7 @@ public class SpearmanPathfinder {
     int baseRange;
     boolean isEnemies;
 
-    SpearmanPathfinder(UnitController uc){
+    AxemanPathfinder(UnitController uc){
         this.myDirs = Direction.values();
         this.uc = uc;
         this.myTeam = uc.getTeam();
@@ -38,7 +38,6 @@ public class SpearmanPathfinder {
         if (!uc.canMove()) return false;
         if (target == null) return false;
         isEnemies = false;
-
         //different target? ==> previous data does not help!
         if (prevTarget == null || !target.isEqual(prevTarget)) resetPathfinding();
 
@@ -66,8 +65,7 @@ public class SpearmanPathfinder {
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {
-                        uc.move(dir);
+                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {                        uc.move(dir);
                         return true;
                     }
                     break;
@@ -117,12 +115,12 @@ public class SpearmanPathfinder {
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
-                    microInfo[i].numEnemies += 100;
+                    microInfo[i].numEnemies = 100;
                     break;
                 }
             }
@@ -178,12 +176,12 @@ public class SpearmanPathfinder {
         }
 
         boolean canAttack() {
-            return UnitType.SPEARMAN.attackRange >= minDistToEnemy && minDistToEnemy >= UnitType.SPEARMAN.minAttackRange;
+            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
         }
 
         boolean isBetter(MicroInfo m) {
-            if(numEnemies < m.numEnemies) return true;
-            if(numEnemies > m.numEnemies) return false;
+            if (numEnemies > 9 && m.numEnemies <= 9) return false;
+            if (numEnemies <= 9 && m.numEnemies > 9) return true;
             if (canAttack()) {
                 if (!m.canAttack()) return true;
                 return minDistToEnemy >= m.minDistToEnemy;

@@ -1,4 +1,4 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
@@ -178,7 +178,7 @@ public class SpearmanPathfinder {
         }
 
         boolean canAttack() {
-            return UnitType.SPEARMAN.attackRange >= minDistToEnemy && minDistToEnemy >= UnitType.SPEARMAN.minAttackRange;
+            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
         }
 
         boolean isBetter(MicroInfo m) {

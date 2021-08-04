@@ -1,15 +1,14 @@
-package viperplayer;
+package extra2;
 
 import aic2021.user.*;
 
 public class Settlement extends MyUnit {
 
     Location myLoc = null;
-    int nearbyFood = 0;
-    int nearbyWood = 0;
-    int nearbyStone = 0;
+    int initialFood = 0;
+    int initialWood = 0;
+    int initialStone = 0;
     int workers = 0;
-    int roundsAlive = 0;
     boolean ecoMap = false;
 
     Settlement(UnitController uc){
@@ -21,11 +20,10 @@ public class Settlement extends MyUnit {
         round = uc.getRound();
         broadCast(justSpawned);
         if (justSpawned) {
+            senseInitialResources();
             justSpawned = false;
         }
-        senseInitialResources();
         trySpawn();
-        roundsAlive++;
     }
 
     void broadCast(boolean justSpawned) {
@@ -45,11 +43,10 @@ public class Settlement extends MyUnit {
         UnitInfo[] enemies = uc.senseUnits(myTeam.getOpponent());
         int soldiers = 0;
         int enemySoldiers = 0;
-        int nearbyWorkers = 0;
+
         for (UnitInfo unit: units) {
             UnitType myType = unit.getType();
             if (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN  || myType == UnitType.WOLF) soldiers++;
-            if (myType == UnitType.WORKER) nearbyWorkers++;
         }
 
         for (UnitInfo enemy: enemies) {
@@ -62,8 +59,7 @@ public class Settlement extends MyUnit {
         }
 
         Location workerSpawn;
-        if ((workers < 1 || ecoMap && workers < 3) && roundsAlive < 50 && nearbyWorkers < 4
-                && nearbyFood + nearbyWood + nearbyStone > 500 && round < 1700) {
+        if (workers < 1 || ecoMap && workers < 3) {
             workerSpawn = spawnEmpty(UnitType.WORKER);
             if(workerSpawn != null) workers++;
         }
@@ -92,19 +88,16 @@ public class Settlement extends MyUnit {
 
     private void senseInitialResources() {
         ResourceInfo[] initialResources = uc.senseResources();
-        nearbyFood = 0;
-        nearbyWood = 0;
-        nearbyStone = 0;
         for(int i=0; i<initialResources.length; i++) {
             if (initialResources[i].resourceType == Resource.FOOD) {
-                nearbyFood += initialResources[i].amount;
+                initialFood += initialResources[i].amount;
             } else if (initialResources[i].resourceType == Resource.WOOD) {
-                nearbyWood += initialResources[i].amount;
+                initialWood += initialResources[i].amount;
             } else {
-                nearbyStone += initialResources[i].amount;
+                initialStone += initialResources[i].amount;
             }
         }
-        if (nearbyFood + nearbyWood + nearbyStone > 1200) {
+        if (initialFood + initialWood + initialStone > 1200) {
             ecoMap = true;
         }
     }

@@ -1,6 +1,5 @@
-package viperplayer;
+package extra2;
 
-import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public abstract class MyUnit {
@@ -76,35 +75,25 @@ public abstract class MyUnit {
     Location tryReadArt(){
         UnitInfo[] units = uc.senseUnits(uc.getTeam());
         Direction[] myDirs = Direction.values();
-        Location baseLoc = null;
-        Location myLoc = uc.getLocation();
         int signal;
 
         for (UnitInfo unit: units) {
             UnitType myType = unit.getType();
-            if (myType == UnitType.BASE) {
-                baseLoc = unit.getLocation();
+            if (myType == UnitType.BARRACKS) {
+                Location barracks = unit.getLocation();
                 for (Direction dir: myDirs) {
-                    Location target = baseLoc.add(dir);
+                    Location target = barracks.add(dir);
                     if (uc.canRead(target)) {
                         signal = uc.read(target);
                         if (signal != 0) {
-                            Location offset = smoke.decode(signal);
-                            return new Location(baseLoc.x - offset.x, baseLoc.y - offset.y);
+                            return smoke.decode(signal);
                         }
                     }
                 }
             }
         }
 
-        if (enemyBase != null && baseLoc != null && myLoc.distanceSquared(baseLoc) <= 2) {
-            int drawing = smoke.encode(1, new Location(baseLocation.x - enemyBase.x, baseLocation.y - enemyBase.y));
-            if (uc.canDraw(drawing)) {
-                uc.draw(drawing);
-            }
-        }
-
-        return enemyBase;
+        return null;
     }
 
     Location spawnEmpty(UnitType t){

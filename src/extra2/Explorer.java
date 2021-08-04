@@ -1,6 +1,9 @@
-package viperplayer;
+package extra2;
 
-import aic2021.user.*;
+import aic2021.user.Location;
+import aic2021.user.UnitController;
+import aic2021.user.UnitInfo;
+import aic2021.user.UnitType;
 
 public class Explorer extends MyUnit {
 
@@ -69,7 +72,7 @@ public class Explorer extends MyUnit {
     }
 
     private void drawEnemyBaseLoc(){
-        int drawing = smoke.encode(1, new Location(baseLocation.x - enemyBase.x, baseLocation.y - enemyBase.y));
+        int drawing = smoke.encode(1, enemyBase);
         if(uc.canDraw(drawing)){
             uc.draw(drawing);
         }

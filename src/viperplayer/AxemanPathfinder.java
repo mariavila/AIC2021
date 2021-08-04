@@ -176,7 +176,7 @@ public class AxemanPathfinder {
         }
 
         boolean canAttack() {
-            return uc.getType().getAttackRange() >= minDistToEnemy && minDistToEnemy >= uc.getType().getMinAttackRange();
+            return UnitType.AXEMAN.attackRange >= minDistToEnemy;
         }
 
         boolean isBetter(MicroInfo m) {

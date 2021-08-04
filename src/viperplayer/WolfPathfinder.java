@@ -188,11 +188,11 @@ public class WolfPathfinder {
         }
 
         boolean canAttackUnit() {
-            return uc.getType().getAttackRange() >= minDistToUnit && minDistToUnit >= uc.getType().getMinAttackRange();
+            return UnitType.WOLF.attackRange >= minDistToUnit;
         }
 
         boolean canAttackBuilding() {
-            return uc.getType().getAttackRange() >= minDistToBuilding && minDistToBuilding >= uc.getType().getMinAttackRange();
+            return UnitType.WOLF.attackRange >= minDistToBuilding;
         }
 
         boolean isBetter(MicroInfo m) {
