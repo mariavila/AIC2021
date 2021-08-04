@@ -1,6 +1,7 @@
-package viperplayer;
+package extra3;
 
-import aic2021.user.*;
+import aic2021.user.Location;
+import aic2021.user.UnitController;
 
 public class Spearman extends MyUnit {
 
@@ -21,7 +22,7 @@ public class Spearman extends MyUnit {
         }
 
         round = uc.getRound();
-        //if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
+        if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
         senseEnemyBarracks();
         smokeSignals = tryReadSmoke();
         doSmokeStuff();

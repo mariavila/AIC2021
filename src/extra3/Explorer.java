@@ -1,6 +1,9 @@
-package viperplayer;
+package extra3;
 
-import aic2021.user.*;
+import aic2021.user.Location;
+import aic2021.user.UnitController;
+import aic2021.user.UnitInfo;
+import aic2021.user.UnitType;
 
 public class Explorer extends MyUnit {
 
