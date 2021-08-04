@@ -194,8 +194,6 @@ public class Worker extends MyUnit {
             lastDeer = null;
         }
 
-        //nearestResource = getNearestResource();
-        //if (nearestResource != null) resourceLocation = nearestResource.location;
         if (enemyBase != null && resourceLocation != null && resourceLocation.distanceSquared(enemyBase) <= baseRange) resourceLocation = null;
 
         if (resourceLocation == null) {
@@ -229,13 +227,13 @@ public class Worker extends MyUnit {
             }
 
             int[] gatheredResources = uc.getResourcesCarried();
-            int total_res = 0;
+            int maxRes = 0;
             for (int res: gatheredResources) {
-                total_res += res;
+                if(res > maxRes) maxRes = res;
             }
 
             if (uc.hasResearched(Technology.BOXES, myTeam)) {
-                if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+                if (maxRes >= GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
                     state = "DEPOSIT";
                     if (resources.length > 0) {
                         resourcesLeft = resources[0];
@@ -243,7 +241,7 @@ public class Worker extends MyUnit {
                     targetDeposit();
                 }
             }
-            else if (total_res >= GameConstants.MAX_RESOURCE_CAPACITY) {
+            else if (maxRes >= GameConstants.MAX_RESOURCE_CAPACITY) {
                 state = "DEPOSIT";
                 if (resources.length > 0) {
                     resourcesLeft = resources[0];
@@ -311,17 +309,6 @@ public class Worker extends MyUnit {
         if(closeResources < 350) return false;
 
         return true;
-    }
-
-    ResourceInfo getNearestResource() {
-        ResourceInfo nearest = null;
-        for(int i=0; i < resources.length; i++) {
-            if(uc.isAccessible(resources[i].location) && uc.senseUnitAtLocation(resources[i].location) != null) {
-                nearest = resources[0];
-                break;
-            }
-        }
-        return nearest;
     }
 
     private void tryBarracks(){
