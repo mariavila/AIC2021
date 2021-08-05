@@ -6,6 +6,7 @@ public class Wolf extends MyUnit {
 
     WolfPathfinder pathfinder;
     int roundAttack = 1950;
+    UnitInfo[] enemies;
 
     Wolf(UnitController uc){
         super(uc);
@@ -27,15 +28,17 @@ public class Wolf extends MyUnit {
             move.setEnemyBase(enemyBase);
         }
 
-        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        if (round > roundAttack) tryMove(true);
-        else tryMove(false);
-        attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+        enemies = uc.senseUnits(uc.getTeam().getOpponent());
+        attack.genericTryAttack(enemies);
+        if (round > roundAttack) tryMove(enemies, true);
+        else tryMove(enemies, false);
+        enemies = uc.senseUnits(uc.getTeam().getOpponent());
+        attack.genericTryAttack(enemies);
     }
 
-    void tryMove(boolean reckless) {
-        if (enemyBarracks != null) pathfinder.getNextLocationTarget(enemyBarracks, reckless);
-        else if (enemyBase != null) pathfinder.getNextLocationTarget(enemyBase, reckless);
-        else pathfinder.getNextLocationTarget(move.explore(), reckless);
+    void tryMove(UnitInfo[] enemies, boolean reckless) {
+        if (enemyBarracks != null) pathfinder.getNextLocationTarget(enemyBarracks, enemies, reckless);
+        else if (enemyBase != null) pathfinder.getNextLocationTarget(enemyBase, enemies, reckless);
+        else pathfinder.getNextLocationTarget(move.explore(), enemies, reckless);
     }
 }

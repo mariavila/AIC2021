@@ -34,7 +34,7 @@ public class WolfPathfinder {
         enemyBase = target;
     }
 
-    Boolean getNextLocationTarget(Location target, boolean reckless){
+    Boolean getNextLocationTarget(Location target, UnitInfo[] enemies, boolean reckless){
         if (!uc.canMove()) return false;
         if (target == null) return false;
         isEnemies = false;
@@ -59,7 +59,7 @@ public class WolfPathfinder {
 
         //I rotate clockwise or counterclockwise (depends on 'rotateRight'). If I try to go out of the map I change the orientation
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
-        doMicro();
+        doMicro(enemies);
 
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
@@ -106,8 +106,7 @@ public class WolfPathfinder {
         minDistToEnemy = INF;
     }
 
-    public void doMicro() {
-        enemies = uc.senseUnits(myTeam.getOpponent());
+    public void doMicro(UnitInfo[] enemies) {
         traps = uc.senseTraps();
         int length = Math.min(enemies.length, 10);
         for (int i = 0; i < 9; i++) {
