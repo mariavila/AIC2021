@@ -196,6 +196,12 @@ public class Base extends MyUnit {
 
     private void researchAdaptivePath(){
         if(techLevel >= 2) {
+            if(food > 6500 && !uc.hasResearched(Technology.POISON, myTeam)) {
+                uc.researchTechnology(Technology.POISON);
+            }
+            if(wood > 4500 && stone > 5250 && !uc.hasResearched(Technology.HOUSES, myTeam)) {
+                uc.researchTechnology(Technology.HOUSES);
+            }
             researchWheel();
         }
         if(techLevel >= 1) {
@@ -324,7 +330,7 @@ public class Base extends MyUnit {
         if(techLevel == 2) {
             if(food >= 5000 && wood >= 1500 && stone >= 1500) {
                 uc.researchTechnology(Technology.SCHOOLS);
-            } else if(food >= 3000 && wood >= 3000 && stone >= 3000) {
+            } else if((food >= 3000 || (food >= 1500 && uc.hasResearched(Technology.POISON, myTeam))) && wood >= 3000 && stone >= 3000) {
                 uc.researchTechnology(Technology.CRYSTALS);
                 uc.researchTechnology(Technology.COMBUSTION);
                 uc.researchTechnology(Technology.POISON);
@@ -332,12 +338,12 @@ public class Base extends MyUnit {
                 uc.researchTechnology(Technology.CRYSTALS);
                 uc.researchTechnology(Technology.COMBUSTION);
                 uc.researchTechnology(Technology.EXPERTISE);
-            } else if(food >= 2000 && wood >= 2750 && stone >= 4250) {
+            } else if((food >= 2000 && (wood >= 2750 && stone >= 4250)) || ((uc.hasResearched(Technology.HOUSES, myTeam) && wood >= 2000 && stone >= 3500))) {
                 uc.researchTechnology(Technology.CRYSTALS);
                 uc.researchTechnology(Technology.EXPERTISE);
                 uc.researchTechnology(Technology.HOUSES);
             } else if(food >= 1500) {
-                if(wood > 3750 && stone > 3750) {
+                if((wood > 3750 && stone > 3750) || (uc.hasResearched(Technology.HOUSES, myTeam) && wood >= 3000 && stone >= 3000)) {
                     uc.researchTechnology(Technology.CRYSTALS);
                     uc.researchTechnology(Technology.COMBUSTION);
                     uc.researchTechnology(Technology.HOUSES);
@@ -348,6 +354,7 @@ public class Base extends MyUnit {
                 }
             }
         }
+        techLevel = uc.getTechLevel(myTeam);
         if(techLevel == 3 && uc.canResearchTechnology(Technology.WHEEL)) uc.researchTechnology(Technology.WHEEL);
     }
 

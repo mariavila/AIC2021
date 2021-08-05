@@ -30,11 +30,11 @@ public class Settlement extends MyUnit {
 
     void broadCast(boolean justSpawned) {
         if (ecoMap) {
-            if ((round % 41 == 0 || justSpawned) && uc.canMakeSmokeSignal()) {
+            if ((round % 41 == 0 || justSpawned) && roundsAlive < 300 && uc.canMakeSmokeSignal()) {
                 uc.makeSmokeSignal(smoke.encode(constants.ECO_MAP, myLoc));
             }
         } else {
-            if ((round % 41 == 0 || justSpawned) && uc.canMakeSmokeSignal()) {
+            if ((round % 41 == 0 || justSpawned) && roundsAlive < 300 && uc.canMakeSmokeSignal()) {
                 uc.makeSmokeSignal(smoke.encode(constants.SETTLEMENT, myLoc));
             }
         }

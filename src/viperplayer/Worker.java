@@ -16,6 +16,7 @@ public class Worker extends MyUnit {
     boolean hasToSendSmokeBarracks = false;
     Location closeSettlement = null;
     ResourceInfo[] resources;
+    Resource bestResType;
     UnitInfo[] deers;
     Location targetDeposit = null;
 
@@ -37,6 +38,8 @@ public class Worker extends MyUnit {
 
         lightTorch();
         resources = uc.senseResources();
+        getResources();
+        getBestResType();
 
         smokeSignals = tryReadSmoke();
 
@@ -338,9 +341,14 @@ public class Worker extends MyUnit {
     private void tryEcoBuilding() {
         if(round < 1700 && uc.hasResearched(Technology.JOBS, myTeam)) {
             if(uc.getTechLevel(myTeam) < 3) {
-                spawnEmptySpaced(UnitType.FARM);
-                spawnEmptySpaced(UnitType.SAWMILL);
-                spawnEmptySpaced(UnitType.QUARRY);
+                if(bestResType == Resource.FOOD) spawnEmptySpaced(UnitType.FARM);
+                else if(bestResType == Resource.WOOD) spawnEmptySpaced(UnitType.SAWMILL);
+                else spawnEmptySpaced(UnitType.QUARRY);
+                getResources();
+                getBestResType();
+                if(bestResType == Resource.FOOD) spawnEmptySpaced(UnitType.FARM);
+                else if(bestResType == Resource.WOOD) spawnEmptySpaced(UnitType.SAWMILL);
+                else spawnEmptySpaced(UnitType.QUARRY);
             }
         }
     }
@@ -442,6 +450,16 @@ public class Worker extends MyUnit {
         }
         if (barracksBuilt != null && barracksSmokeTurn + 55 < round) {
             barracksBuilt = null;
+        }
+    }
+
+    void getBestResType() {
+        if (food <= wood && food <= stone) {
+            bestResType = Resource.FOOD;
+        } else if (wood <= food && wood <= stone) {
+            bestResType = Resource.WOOD;
+        } else if (stone <= food && stone <= wood) {
+            bestResType = Resource.STONE;
         }
     }
 }
