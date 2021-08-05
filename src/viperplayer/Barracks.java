@@ -83,14 +83,14 @@ public class Barracks extends MyUnit {
             Location spawn = null;
             if (round < constants.ROUND_CHECK_ATTACK) {
                 if (!wolves) spawn = spawnSafe(UnitType.SPEARMAN);
-                //if (spawn == null && 2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
+                if (spawn == null && 2 * wood < stone && stone >= 200) spawnSafe(UnitType.AXEMAN);
             }
             else if (round >= constants.ROUND_CHECK_ATTACK && round < constants.ROUND_STOP_SOLDIERS) {
                 if (uc.hasResearched(Technology.ROCK_ART, myTeam)) {
                     if (wood > stone && !wolves) {
                         spawnSafe(UnitType.SPEARMAN);
                     } else {
-                        //spawnSafe(UnitType.AXEMAN);
+                        spawnSafe(UnitType.AXEMAN);
                     }
                 }
             }
