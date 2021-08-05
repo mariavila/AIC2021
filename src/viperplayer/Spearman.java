@@ -21,26 +21,36 @@ public class Spearman extends MyUnit {
         }
 
         round = uc.getRound();
-        //if (enemyBase == null || uc.getLocation().distanceSquared(enemyBase) > 65) lightTorch();
         senseEnemyBarracks();
         smokeSignals = tryReadSmoke();
         doSmokeStuff();
 
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
-        if (round > roundAttack) tryMove(true);
-        else tryMove(false);
+        if (uc.canMove()) {
+            if (round > roundAttack) tryMove(true);
+            else tryMove(false);
+        }
         attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
     }
 
     void tryMove(boolean reckless) {
-        if (enemyBarracks != null) pathfinder.getNextLocationTarget(enemyBarracks, reckless);
-        else if (enemyBase != null) pathfinder.getNextLocationTarget(enemyBase, reckless);
-        else pathfinder.getNextLocationTarget(move.explore(), reckless);
+        pathfinder.fightMove();
+        if (enemyBarracks != null) {
+            if (!pathfinder.moveTo(enemyBarracks)) {
+                pathfinder.safeMove();
+            }
+        } else {
+            if (!pathfinder.moveTo(move.explore())) {
+                pathfinder.safeMove();
+            }
+        }
     }
 
     void doSmokeStuff() {
         if (enemyBase == null || needsToSend) {
             enemyBase = lookForEnemyBase();
+            pathfinder.setEnemyBase(enemyBase);
+            move.setEnemyBase(enemyBase);
             needsToSend = true;
             if (enemyBase != null && !enemyBaseSend && uc.canMakeSmokeSignal()) {
                 uc.makeSmokeSignal(smoke.encode(constants.ENEMY_BASE, enemyBase));
@@ -65,6 +75,7 @@ public class Spearman extends MyUnit {
                 }
             } else if (type == constants.ATTACK_BASE) {
                 enemyBase = loc;
+                pathfinder.setEnemyBase(enemyBase);
                 roundAttack = round;
             } else if (type == constants.ENEMY_BARRACKS) {
                 enemyBarracks = loc;

@@ -38,7 +38,6 @@ public class Wolf extends MyUnit {
 
     void tryMove(UnitInfo[] enemies, boolean reckless) {
         if (enemyBarracks != null) pathfinder.getNextLocationTarget(enemyBarracks, enemies, reckless);
-        else if (enemyBase != null) pathfinder.getNextLocationTarget(enemyBase, enemies, reckless);
         else pathfinder.getNextLocationTarget(move.explore(), enemies, reckless);
     }
 }
