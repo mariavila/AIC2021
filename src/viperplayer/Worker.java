@@ -19,13 +19,14 @@ public class Worker extends MyUnit {
     Resource bestResType;
     UnitInfo[] deers;
     Location targetDeposit = null;
-
+    int baseRange;
     String state = "INI";
 
     Worker(UnitController uc){
         super(uc);
 
         this.pathfinder = new WorkerPathfinder(uc);
+        this.baseRange = UnitType.BASE.getAttackRange();
     }
 
     void playRound(){
@@ -60,9 +61,6 @@ public class Worker extends MyUnit {
             attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
             attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
             tryEcoBuilding();
-
-            /*if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer))
-                attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));*/
         }
     }
 
@@ -102,29 +100,34 @@ public class Worker extends MyUnit {
     }
 
     private void explore(){
-        int baseRange = UnitType.BASE.getAttackRange();
-        deers = uc.senseUnits(Team.NEUTRAL);
-        checkForBestResource();
-        followingDeer = false;
-
-        for (UnitInfo deer: deers) {
-            Location deerLoc = deer.getLocation();
-            if (enemyBase != null && deerLoc.distanceSquared(enemyBase) <= baseRange) continue;
-            if (uc.isObstructed(deerLoc, uc.getLocation())) continue;
-
-            followingDeer = true;
-            lastDeer = deerLoc;
-            state = "GOTORESOURCE";
-            return;
-        }
-
         pathfinder.getNextLocationTarget(move.explore());
     }
 
     void checkForBestResource() {
-        int baseRange = UnitType.BASE.getAttackRange();
         Location myLoc = uc.getLocation();
-        resources = uc.senseResources();
+        int[] gatheredResources = uc.getResourcesCarried();
+        int maxRes = 0;
+        for (int res: gatheredResources) {
+            if(res > maxRes) maxRes = res;
+        }
+
+        if (uc.hasResearched(Technology.BOXES, myTeam)) {
+            if (maxRes >= GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
+                state = "DEPOSIT";
+                if (resources.length > 0) {
+                    resourcesLeft = resources[0];
+                } else resourcesLeft = null;
+                targetDeposit();
+                return;
+            }
+        } else if (maxRes >= GameConstants.MAX_RESOURCE_CAPACITY) {
+            state = "DEPOSIT";
+            if (resources.length > 0) {
+                resourcesLeft = resources[0];
+            } else resourcesLeft = null;
+            targetDeposit();
+            return;
+        }
 
         Location bestRes = null;
         Resource bestType = null;
@@ -156,32 +159,17 @@ public class Worker extends MyUnit {
         if (bestRes != null) {
             resourceLocation = bestRes;
             followingDeer = false;
-            if (uc.getLocation().isEqual(bestRes)) state = "GATHER";
-            else state = "GOTORESOURCE";
-        } else if (resourceLocation == null || (resourceLocation != null && uc.canSenseLocation(resourceLocation))) {
+            state = "GOTORESOURCE";
+            return;
+        } else if (resourceLocation != null && uc.canSenseLocation(resourceLocation)) {
             resourceLocation = null;
             state = "EXPLORE";
+            return;
         } else {
-            state = "GOTORESOURCE";
-        }
-    }
-
-    private void goToResource(){
-        int baseRange = UnitType.BASE.getAttackRange();
-        checkForBestResource();
-
-        if (resources.length > 0) {
-            if (uc.getLocation().isEqual(resourceLocation)) {
-                state = "GATHER";
-                return;
-            } else if (uc.senseUnitAtLocation(resourceLocation) != null) {
-                resourceLocation = null;
+            if (followingDeer) {
+                if (uc.canMove()) pathfinder.getNextLocationTarget(lastDeer);
+                else return;
             }
-        }
-
-        if (followingDeer){
-            if (uc.canMove()) pathfinder.getNextLocationTarget(lastDeer);
-            else return;
 
             deers = uc.senseUnits(Team.NEUTRAL);
 
@@ -190,71 +178,15 @@ public class Worker extends MyUnit {
                 if (enemyBase != null && deerLoc.distanceSquared(enemyBase) <= baseRange) continue;
                 if (uc.isObstructed(deerLoc, uc.getLocation())) continue;
 
+                followingDeer = true;
                 lastDeer = deerLoc;
+                state = "GOTORESOURCE";
                 return;
             }
 
             state = "EXPLORE";
             followingDeer = false;
             lastDeer = null;
-        }
-
-        if (enemyBase != null && resourceLocation != null && resourceLocation.distanceSquared(enemyBase) <= baseRange) resourceLocation = null;
-
-        if (resourceLocation == null) {
-            state = "EXPLORE";
-        } else {
-            UnitInfo unit;
-            if (uc.canSenseLocation(resourceLocation)) {
-                unit = uc.senseUnitAtLocation(resourceLocation);
-                if (unit != null && unit.getType() == UnitType.WORKER) {
-                    resourceLocation = null;
-                    followingDeer = false;
-                    state = "EXPLORE";
-                    return;
-                }
-            }
-            pathfinder.getNextLocationTarget(resourceLocation);
-            if (!followingDeer && resourceLocation.isEqual(uc.getLocation())){
-                state = "GATHER";
-            }
-        }
-    }
-
-    void gather(){
-        Location myLoc = uc.getLocation();
-        checkForBestResource();
-        resources = uc.senseResources();
-
-        if (resources.length > 0 && resources[0].getLocation().isEqual(myLoc)) {
-            if (uc.canGatherResources()){
-                uc.gatherResources();
-            }
-
-            int[] gatheredResources = uc.getResourcesCarried();
-            int maxRes = 0;
-            for (int res: gatheredResources) {
-                if(res > maxRes) maxRes = res;
-            }
-
-            if (uc.hasResearched(Technology.BOXES, myTeam)) {
-                if (maxRes >= GameConstants.MAX_RESOURCE_CAPACITY_BOXES){
-                    state = "DEPOSIT";
-                    if (resources.length > 0) {
-                        resourcesLeft = resources[0];
-                    } else resourcesLeft = null;
-                    targetDeposit();
-                }
-            }
-            else if (maxRes >= GameConstants.MAX_RESOURCE_CAPACITY) {
-                state = "DEPOSIT";
-                if (resources.length > 0) {
-                    resourcesLeft = resources[0];
-                } else resourcesLeft = null;
-                targetDeposit();
-            }
-        } else {
-            state = "EXPLORE";
         }
     }
 
@@ -394,12 +326,10 @@ public class Worker extends MyUnit {
         }
         if (state.equals("EXPLORE")){
             explore();
-        }
-        if (state.equals("GOTORESOURCE")){
-            goToResource();
-        }
-        if (state.equals("GATHER")){
-            gather();
+            checkForBestResource();
+        } else if (state.equals("GOTORESOURCE")){
+            if (resourceLocation != null) pathfinder.getNextLocationTarget(resourceLocation);
+            checkForBestResource();
         }
         if (state.equals("DEPOSIT")){
             deposit();
