@@ -117,7 +117,7 @@ public class SpearmanPathfinder {
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase) || !uc.canSenseLocation(enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {

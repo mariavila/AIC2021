@@ -43,7 +43,7 @@ public class Worker extends MyUnit {
 
         smokeSignals = tryReadSmoke();
 
-        if (round != 9 || smokeSignals.length > 0) {
+        if ((round != 10 && round != 9) || smokeSignals.length > 0) {
             refreshSettlement();
             tryBarracks();
             doSmokeStuffProducer();

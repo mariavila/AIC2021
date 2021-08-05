@@ -117,7 +117,7 @@ public class ExplorerPathfinder {
             microInfo[i] = new MicroInfo(target);
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase)) microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase) || !uc.canSenseLocation(enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {

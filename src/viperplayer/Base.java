@@ -149,7 +149,7 @@ public class Base extends MyUnit {
     }
 
     private void checkAttackRush(){
-        if (isBaseClose && round == 9 && uc.canMakeSmokeSignal()) {
+        if (isBaseClose && round == 10 && uc.canMakeSmokeSignal()) {
             int drawing = smoke.encode(constants.RUSH_ATTACK_ENCODING, enemyBase);
             uc.makeSmokeSignal(drawing);
         }
@@ -360,7 +360,8 @@ public class Base extends MyUnit {
 
     private void calcIdealWorkers() {
         if(round > 25) {
-            if (bigResources) {
+            if (hasWater && !uc.hasResearched(Technology.RAFTS, myTeam)) idealWorkers = 5;
+            else if (bigResources) {
                 idealWorkers = 12;
             } else if (ecoMap) {
                 idealWorkers = 8;
