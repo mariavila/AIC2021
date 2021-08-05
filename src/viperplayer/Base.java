@@ -44,6 +44,7 @@ public class Base extends MyUnit {
     boolean bigResources = false;
     boolean baseCorner = false;
     boolean smokeAttack = false;
+    boolean settlementBuilt = false;
 
     void playRound(){
         round = uc.getRound();
@@ -368,6 +369,9 @@ public class Base extends MyUnit {
             } else {
                 idealWorkers = 5;
             }
+            if (round > 75 && round % 40 == 0 && !settlementBuilt) {
+                idealWorkers += 2;
+            }
         }
     }
 
@@ -521,6 +525,10 @@ public class Base extends MyUnit {
                     barracksSmokeTurn = round;
                 } else if (type == constants.WATER) {
                     hasWater = true;
+                } else if (type == constants.ECO_MAP) {
+                    ecoMap = true;
+                } else if (type == constants.SETTLEMENT) {
+                    settlementBuilt = true;
                 }
             }
         }

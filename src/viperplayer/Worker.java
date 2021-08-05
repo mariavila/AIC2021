@@ -259,7 +259,15 @@ public class Worker extends MyUnit {
         }
 
         if (rushAttack && barracksBuilt == null && uc.canMakeSmokeSignal()) {
-            barracksBuilt = spawnEmpty(UnitType.BARRACKS);
+            UnitInfo[] allies = uc.senseUnits(myTeam);
+            boolean build = true;
+            for(UnitInfo ally: allies) {
+                if (ally.getType() == UnitType.BARRACKS) {
+                    build = false;
+                    break;
+                }
+            }
+            if (build) barracksBuilt = spawnEmpty(UnitType.BARRACKS);
             if (barracksBuilt != null) {
                 barracksSmokeTurn = round;
                 if(uc.canMakeSmokeSignal()) {
