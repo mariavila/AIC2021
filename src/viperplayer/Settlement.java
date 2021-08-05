@@ -43,9 +43,12 @@ public class Settlement extends MyUnit {
     private void trySpawn(){
         UnitInfo[] units = uc.senseUnits(myTeam);
         UnitInfo[] enemies = uc.senseUnits(myTeam.getOpponent());
+        ResourceInfo[] resources = uc.senseResources();
         int soldiers = 0;
         int enemySoldiers = 0;
         int nearbyWorkers = 0;
+        int nearbyEnemyWorkers = 0;
+
         for (UnitInfo unit: units) {
             UnitType myType = unit.getType();
             if (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN  || myType == UnitType.WOLF) soldiers++;
@@ -54,7 +57,8 @@ public class Settlement extends MyUnit {
 
         for (UnitInfo enemy: enemies) {
             UnitType myType = enemy.getType();
-            if (!uc.isObstructed(myLoc, enemy.getLocation()) && (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN || myType == UnitType.WOLF || myType == UnitType.WORKER)) enemySoldiers++;
+            if (!uc.isObstructed(myLoc, enemy.getLocation()) && (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN || myType == UnitType.WOLF)) enemySoldiers++;
+            if (myType == UnitType.WORKER) nearbyEnemyWorkers++;
         }
 
         if (soldiers < enemySoldiers) {
@@ -62,7 +66,7 @@ public class Settlement extends MyUnit {
         }
 
         Location workerSpawn;
-        if ((workers < 2 || ecoMap && workers < 3) && round < 1700) {
+        if ((enemySoldiers == 0 && nearbyEnemyWorkers != 0 && nearbyWorkers <= nearbyEnemyWorkers) || (workers < 2 || ecoMap && workers < 3) && round < 1700 && resources.length > 0) {
             workerSpawn = spawnEmpty(UnitType.WORKER);
             if(workerSpawn != null) workers++;
         }
