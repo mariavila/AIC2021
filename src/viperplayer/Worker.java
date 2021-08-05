@@ -16,7 +16,6 @@ public class Worker extends MyUnit {
     boolean hasToSendSmokeBarracks = false;
     Location closeSettlement = null;
     ResourceInfo[] resources;
-    ResourceInfo nearestResource;
     UnitInfo[] deers;
     Location targetDeposit = null;
 
@@ -59,14 +58,17 @@ public class Worker extends MyUnit {
             attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
             tryEcoBuilding();
 
-            if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer))
-                attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
+            /*if (state.equals("EXPLORE") || (state.equals("GOTORESOURCE") && followingDeer))
+                attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));*/
         }
     }
 
     private void tryGather() {
         if (uc.canGatherResources()){
             uc.gatherResources();
+        }
+        if (uc.canDeposit()){
+            uc.deposit();
         }
     }
 
