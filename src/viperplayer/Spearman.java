@@ -34,16 +34,9 @@ public class Spearman extends MyUnit {
     }
 
     void tryMove(boolean reckless) {
-        pathfinder.fightMove();
-        if (enemyBarracks != null) {
-            if (!pathfinder.moveTo(enemyBarracks)) {
-                pathfinder.safeMove();
-            }
-        } else {
-            if (!pathfinder.moveTo(move.explore())) {
-                pathfinder.safeMove();
-            }
-        }
+        if (enemyBarracks != null) pathfinder.getNextLocationTarget(enemyBarracks, reckless);
+        else if (enemyBase != null) pathfinder.getNextLocationTarget(enemyBase, reckless);
+        else pathfinder.getNextLocationTarget(move.explore(), reckless);
     }
 
     void doSmokeStuff() {
