@@ -1,4 +1,4 @@
-package viperplayer;
+package extra5;
 
 import aic2021.user.*;
 
@@ -37,8 +37,7 @@ public class Worker extends MyUnit {
             justSpawned = false;
         }
 
-        boolean waitForJobs = waitForJobs();
-        if (!waitForJobs) lightTorch();
+        lightTorch();
         resources = uc.senseResources();
         getResources();
         getBestResType();
@@ -63,13 +62,6 @@ public class Worker extends MyUnit {
             attack.genericTryAttack(uc.senseUnits(Team.NEUTRAL));
             tryEcoBuilding();
         }
-    }
-
-    boolean waitForJobs() {
-        if (!uc.hasResearched(Technology.JOBS, myTeam) && uc.getTechLevel(myTeam) >= 1 && food > 800 && wood < 200) {
-            return true;
-        }
-        return false;
     }
 
     private void tryGather() {
@@ -214,7 +206,7 @@ public class Worker extends MyUnit {
 
     void deposit(){
         Location myLoc = uc.getLocation();
-        if(canSpawnSettlement(myLoc) && !waitForJobs()) {
+        if(canSpawnSettlement(myLoc)) {
             spawnEmpty(UnitType.SETTLEMENT);
         }
         if (uc.canDeposit()) {
