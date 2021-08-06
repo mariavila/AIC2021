@@ -57,8 +57,10 @@ public class Settlement extends MyUnit {
 
         for (UnitInfo enemy: enemies) {
             UnitType myType = enemy.getType();
-            if (!uc.isObstructed(myLoc, enemy.getLocation()) && (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN || myType == UnitType.WOLF)) enemySoldiers++;
-            if (myType == UnitType.WORKER) nearbyEnemyWorkers++;
+            if (!uc.isObstructed(myLoc, enemy.getLocation())) {
+                if (myType == UnitType.AXEMAN || myType == UnitType.SPEARMAN || myType == UnitType.WOLF) enemySoldiers++;
+                if (myType == UnitType.WORKER) nearbyEnemyWorkers++;
+            }
         }
 
         if (soldiers < enemySoldiers || (nearbyEnemyWorkers > 0 && nearbyWorkers <= nearbyEnemyWorkers)) {
