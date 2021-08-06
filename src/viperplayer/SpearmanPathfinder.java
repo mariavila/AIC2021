@@ -117,12 +117,12 @@ public class SpearmanPathfinder {
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase) || !uc.canSenseLocation(enemyBase)) microInfo[i].numEnemies += 10;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase) || !uc.canSenseLocation(enemyBase)) microInfo[i].damage += 160;
             }
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
-                    microInfo[i].numEnemies += 100;
+                    microInfo[i].damage += 1000;
                     break;
                 }
             }
@@ -151,27 +151,33 @@ public class SpearmanPathfinder {
     }
 
     class MicroInfo {
-        int numEnemies;
+        int damage;
+        int softdamage;
         int minDistToEnemy;
         Location loc;
 
         public MicroInfo(Location loc) {
             this.loc = loc;
-            numEnemies = 0;
+            damage = 0;
+            softdamage = 0;
             minDistToEnemy = 100000;
         }
 
         void updateSafe(int distance, UnitType enemyType) {
-            if (enemyType == UnitType.WORKER) {
-                if (distance < 14) numEnemies++;
-            } else if (enemyType == UnitType.WOLF) {
-                if (distance < 9) numEnemies++;
+            if (enemyType == UnitType.WOLF) {
+                if (distance <= UnitType.WOLF.attackRange) damage += 8;
+                else if (distance < 9) softdamage += 8;
             } else if (enemyType == UnitType.SPEARMAN) {
-                if (distance < 33) numEnemies++;
+                if (distance <= UnitType.SPEARMAN.attackRange && distance >= UnitType.SPEARMAN.minAttackRange) damage += 10;
+                else if (distance < 33 && distance >= 5) softdamage += 10;
             } else if (enemyType == UnitType.AXEMAN) {
-                if (distance < 14) numEnemies++;
+                if (distance <= UnitType.AXEMAN.attackRange) damage += 15;
+                else if (distance < 14) softdamage += 15;
             } else if (enemyType == UnitType.BASE) {
-                if (distance < 19) numEnemies += 10;
+                if (distance <= UnitType.BASE.attackRange) damage += 160;
+            } else if (enemyType == UnitType.WORKER) {
+                if (distance <= UnitType.WORKER.attackRange) damage += 8;
+                else if (distance < 14) softdamage += 8;
             }
 
             if (distance < minDistToEnemy) minDistToEnemy = distance;
@@ -183,16 +189,15 @@ public class SpearmanPathfinder {
 
         boolean isBetter(MicroInfo m) {
             if (uc.canAttack()) {
-                if (canAttack()) {
+                if (canAttack() && damage <= 10) {
                     if (!m.canAttack()) return true;
-                    return minDistToEnemy > m.minDistToEnemy;
+                    return minDistToEnemy >= m.minDistToEnemy;
                 }
-                if (m.canAttack()) return false;
-                return minDistToEnemy < m.minDistToEnemy;
+                if (m.canAttack() && m.damage <= 10) return false;
             }
-            if(numEnemies < m.numEnemies) return true;
-            if(numEnemies > m.numEnemies) return false;
-            return minDistToEnemy > m.minDistToEnemy;
+            if (damage > m.damage) return false;
+            if (damage < m.damage) return true;
+            return softdamage <= m.softdamage;
         }
     }
 }

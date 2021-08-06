@@ -16,7 +16,6 @@ public class WolfPathfinder {
     Location enemyBase = null;
     Team myTeam;
     Location[] traps;
-    UnitInfo[] enemies;
     Direction microDir;
     Direction[] myDirs;
     MicroInfo[] microInfo = new MicroInfo[9];
@@ -108,7 +107,6 @@ public class WolfPathfinder {
 
     public void doMicro(UnitInfo[] enemies) {
         traps = uc.senseTraps();
-        int length = Math.min(enemies.length, 10);
         for (int i = 0; i < 9; i++) {
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
@@ -124,7 +122,7 @@ public class WolfPathfinder {
                 }
             }
 
-            for (int j = 0; j < length; j++) {
+            for (int j = 0; j < enemies.length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
                 if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
                 isEnemies = true;
