@@ -33,15 +33,14 @@ public class Explorer extends MyUnit {
         ResourceInfo[] resources = uc.senseResources();
         Location myLoc = uc.getLocation();
         int resAcrossWater = 0;
-        for(ResourceInfo resource: resources){
-            if(!uc.isAccessible(resource.location) && !uc.isObstructed(resource.location, myLoc)) {
-                resAcrossWater += resource.amount;
-                if(resAcrossWater >= 300) break;
-            } else {
-                Direction resDir = myLoc.directionTo(resource.location);
-                if(!uc.isAccessible(myLoc.add(resDir)) && !uc.hasMountain(myLoc.add(resDir))) {
-                    resAcrossWater += resource.amount;
-                    if(resAcrossWater >= 300) break;
+        if(waterTiles.length > 0) {
+            for(ResourceInfo resource: resources){
+                if(!uc.isObstructed(resource.location, myLoc)) {
+                    Direction resDir = myLoc.directionTo(resource.location);
+                    if(!uc.isAccessible(myLoc.add(resDir)) && !uc.hasMountain(myLoc.add(resDir))) {
+                        resAcrossWater += resource.amount;
+                        if(resAcrossWater >= 300) break;
+                    }
                 }
             }
         }
