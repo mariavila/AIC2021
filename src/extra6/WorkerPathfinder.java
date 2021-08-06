@@ -1,4 +1,4 @@
-package viperplayer;
+package extra6;
 
 import aic2021.user.*;
 
@@ -118,12 +118,12 @@ public class WorkerPathfinder {
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
             if (enemyBase != null && target.distanceSquared(enemyBase) <= baseRange) {
-                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase) || !uc.canSenseLocation(enemyBase)) microInfo[i].damage += 160;
+                if (uc.canSenseLocation(enemyBase) && !uc.isObstructed(target, enemyBase) || !uc.canSenseLocation(enemyBase)) microInfo[i].numEnemies += 10;
             }
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
-                    microInfo[i].damage = 1000;
+                    microInfo[i].numEnemies = 100;
                     break;
                 }
             }
@@ -153,33 +153,35 @@ public class WorkerPathfinder {
     }
 
     class MicroInfo {
-        int damage;
-        int softdamage;
+        int numEnemies;
         int minDistToEnemy;
         Location loc;
+        boolean noSoldiers = true;
 
         public MicroInfo(Location loc) {
             this.loc = loc;
-            damage = 0;
-            softdamage = 0;
+            numEnemies = 0;
             minDistToEnemy = 100000;
         }
 
         void updateSafe(int distance, UnitType enemyType) {
             if (enemyType == UnitType.WOLF) {
-                if (distance <= UnitType.WOLF.attackRange) damage += 8;
-                else if (distance < 9) softdamage += 8;
+                if (distance < 9) {
+                    numEnemies++;
+                    noSoldiers = false;
+                }
             } else if (enemyType == UnitType.SPEARMAN) {
-                if (distance <= UnitType.SPEARMAN.attackRange && distance >= UnitType.SPEARMAN.minAttackRange) damage += 10;
-                else if (distance < 33 && distance >= 5) softdamage += 10;
+                if (distance < 33) {
+                    numEnemies++;
+                    noSoldiers = false;
+                }
             } else if (enemyType == UnitType.AXEMAN) {
-                if (distance <= UnitType.AXEMAN.attackRange) damage += 15;
-                else if (distance < 14) softdamage += 15;
+                if (distance < 14) {
+                    numEnemies++;
+                    noSoldiers = false;
+                }
             } else if (enemyType == UnitType.BASE) {
-                if (distance <= UnitType.BASE.attackRange) damage += 160;
-            } else if (enemyType == UnitType.WORKER) {
-                if (distance <= UnitType.WORKER.attackRange) damage += 8;
-                else if (distance < 14) softdamage += 8;
+                if (distance < 19) numEnemies += 10;
             }
 
             if (distance < minDistToEnemy) minDistToEnemy = distance;
@@ -190,16 +192,16 @@ public class WorkerPathfinder {
         }
 
         boolean isBetter(MicroInfo m) {
-            if (uc.canAttack()) {
-                if (canAttack() && damage <= 8) {
-                    if (!m.canAttack()) return true;
-                    return minDistToEnemy >= m.minDistToEnemy;
-                }
-                if (m.canAttack() && m.damage <= 8) return false;
+            if (numEnemies > m.numEnemies) return false;
+            if (numEnemies < m.numEnemies) return true;
+            if (canAttack()) {
+                if (!m.canAttack()) return true;
+                return minDistToEnemy >= m.minDistToEnemy;
             }
-            if (damage > m.damage) return false;
-            if (damage < m.damage) return true;
-            return softdamage <= m.softdamage;
+            if (m.canAttack()) return false;
+            if (noSoldiers && !m.noSoldiers) return true;
+            if (!noSoldiers && m.noSoldiers) return false;
+            return minDistToEnemy <= m.minDistToEnemy;
         }
     }
 }
