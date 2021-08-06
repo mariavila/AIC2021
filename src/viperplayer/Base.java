@@ -263,7 +263,7 @@ public class Base extends MyUnit {
                     if (!uc.hasResearched(Technology.UTENSILS, myTeam)) {
                         if (uc.canResearchTechnology(Technology.UTENSILS)) uc.researchTechnology(Technology.UTENSILS);
                     }
-                    if (round > 300 && !uc.hasResearched(Technology.BOXES, myTeam)) {
+                    if (round > 300 && uc.hasResearched(Technology.UTENSILS, myTeam) && !uc.hasResearched(Technology.BOXES, myTeam)) {
                         if (uc.canResearchTechnology(Technology.BOXES)) uc.researchTechnology(Technology.BOXES);
                     }
                 }

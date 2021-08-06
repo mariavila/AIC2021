@@ -61,12 +61,13 @@ public class Settlement extends MyUnit {
             if (myType == UnitType.WORKER) nearbyEnemyWorkers++;
         }
 
-        if (soldiers < enemySoldiers) {
+        if (soldiers < enemySoldiers || (nearbyEnemyWorkers > 0 && nearbyWorkers <= nearbyEnemyWorkers)) {
             spawnSafe(UnitType.WOLF);
         }
 
         Location workerSpawn;
-        if ((enemySoldiers == 0 && nearbyEnemyWorkers != 0 && nearbyWorkers <= nearbyEnemyWorkers) || (workers < 2 || ecoMap && workers < 3) && round < 1700 && resources.length > 0) {
+        if ((enemySoldiers == 0 && nearbyEnemyWorkers != 0 && nearbyWorkers <= nearbyEnemyWorkers) ||
+                (workers < 2 || ecoMap && workers < 3) && round < 1700 && resources.length > 0) {
             workerSpawn = spawnEmpty(UnitType.WORKER);
             if(workerSpawn != null) workers++;
         }
