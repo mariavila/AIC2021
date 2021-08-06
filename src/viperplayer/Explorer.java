@@ -30,7 +30,22 @@ public class Explorer extends MyUnit {
 
     void senseWater() {
         Location[] waterTiles = uc.senseWater(uc.getType().getVisionRange());
-        if (waterTiles.length > 15 && uc.canMakeSmokeSignal()) {
+        ResourceInfo[] resources = uc.senseResources();
+        Location myLoc = uc.getLocation();
+        int resAcrossWater = 0;
+        for(ResourceInfo resource: resources){
+            if(!uc.isAccessible(resource.location) && !uc.isObstructed(resource.location, myLoc)) {
+                resAcrossWater += resource.amount;
+                if(resAcrossWater >= 300) break;
+            } else {
+                Direction resDir = myLoc.directionTo(resource.location);
+                if(!uc.isAccessible(myLoc.add(resDir)) && !uc.hasMountain(myLoc.add(resDir))) {
+                    resAcrossWater += resource.amount;
+                    if(resAcrossWater >= 300) break;
+                }
+            }
+        }
+        if ((waterTiles.length > 15 || resAcrossWater >= 300) && uc.canMakeSmokeSignal()) {
             hasWater = true;
             int drawing = smoke.encode(constants.WATER, uc.getLocation());
             uc.makeSmokeSignal(drawing);
