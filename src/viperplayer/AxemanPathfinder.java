@@ -55,7 +55,7 @@ public class AxemanPathfinder {
         if (lastObstacleFound != null) dir = myLoc.directionTo(lastObstacleFound);
 
         //This should not happen for a single unit, but whatever
-        if (uc.canMove(dir)) resetPathfinding();
+        if (uc.canMove(dir) && !uc.hasTrap(lastObstacleFound)) resetPathfinding();
 
         //I rotate clockwise or counterclockwise (depends on 'rotateRight'). If I try to go out of the map I change the orientation
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
@@ -65,7 +65,8 @@ public class AxemanPathfinder {
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {                        uc.move(dir);
+                    if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {
+                        uc.move(dir);
                         return true;
                     }
                     break;
@@ -86,7 +87,8 @@ public class AxemanPathfinder {
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
                 Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {                    uc.move(dir);
+                if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {
+                    uc.move(dir);
                     return true;
                 }
                 break;
@@ -109,8 +111,8 @@ public class AxemanPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
-        int length = enemies.length;
         for (int i = 0; i < 9; i++) {
+            if (!uc.canMove(myDirs[i])) continue;
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
@@ -125,7 +127,7 @@ public class AxemanPathfinder {
                 }
             }
 
-            for (int j = 0; j < length; j++) {
+            for (int j = 0; j < enemies.length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
                 if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
                 isEnemies = true;

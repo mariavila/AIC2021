@@ -55,7 +55,7 @@ public class WorkerPathfinder {
         if (lastObstacleFound != null) dir = myLoc.directionTo(lastObstacleFound);
 
         //This should not happen for a single unit, but whatever
-        if (uc.canMove(dir)) resetPathfinding();
+        if (uc.canMove(dir) && !uc.hasTrap(lastObstacleFound)) resetPathfinding();
 
         //I rotate clockwise or counterclockwise (depends on 'rotateRight'). If I try to go out of the map I change the orientation
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
@@ -65,7 +65,7 @@ public class WorkerPathfinder {
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
-                    if (uc.canMove(dir) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {                        uc.move(dir);
+                    if (uc.canMove(dir) && !uc.hasTrap(loc) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {
                         uc.move(dir);
                         return true;
                     }
@@ -87,7 +87,7 @@ public class WorkerPathfinder {
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
                 Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {                        uc.move(dir);
+                if (uc.canMove(dir) && !uc.hasTrap(loc) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {
                     uc.move(dir);
                     return true;
                 }
@@ -114,6 +114,7 @@ public class WorkerPathfinder {
         isEnemies = false;
         int length = enemies.length;
         for (int i = 0; i < 9; i++) {
+            if (!uc.canMove(myDirs[i])) continue;
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 

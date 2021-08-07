@@ -54,7 +54,7 @@ public class WolfPathfinder {
         if (lastObstacleFound != null) dir = myLoc.directionTo(lastObstacleFound);
 
         //This should not happen for a single unit, but whatever
-        if (uc.canMove(dir)) resetPathfinding();
+        if (uc.canMove(dir) && !uc.hasTrap(lastObstacleFound)) resetPathfinding();
 
         //I rotate clockwise or counterclockwise (depends on 'rotateRight'). If I try to go out of the map I change the orientation
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
@@ -63,7 +63,8 @@ public class WolfPathfinder {
         for (int i = 0; i < 16; ++i){
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
-                    if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
+                    Location loc = myLoc.add(dir);
+                    if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || loc.distanceSquared(enemyBase) > baseRange)) || reckless)) {
                         uc.move(dir);
                         return true;
                     }
@@ -84,7 +85,8 @@ public class WolfPathfinder {
 
         for (int j = 0; j < myDirs.length; j++) {
             if (myDirs[j] == dir) {
-                if (uc.canMove(dir) && ((!isEnemies && (enemyBase == null || myLoc.add(dir).distanceSquared(enemyBase) > baseRange)) || reckless)) {
+                Location loc = myLoc.add(dir);
+                if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || loc.distanceSquared(enemyBase) > baseRange)) || reckless)) {
                     uc.move(dir);
                     return true;
                 }
@@ -108,6 +110,7 @@ public class WolfPathfinder {
     public void doMicro(UnitInfo[] enemies) {
         traps = uc.senseTraps();
         for (int i = 0; i < 9; i++) {
+            if (!uc.canMove(myDirs[i])) continue;
             Location target = myLoc.add(myDirs[i]);
             microInfo[i] = new MicroInfo(myLoc.add(myDirs[i]));
 
