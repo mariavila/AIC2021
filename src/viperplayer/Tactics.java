@@ -11,6 +11,7 @@ public class Tactics {
 
     // Must receive an array of length > 0
     public UnitInfo getClosestDangerousEnemy(UnitInfo[] enemies, UnitType[] excluded) {
+        if(enemies == null) return null;
         UnitInfo closestEnemy = null;
         UnitInfo closestUnobstructed = null;
 
@@ -38,7 +39,7 @@ public class Tactics {
         }
 
         if (allEnemiesObstructed) {
-            return closestEnemy;
+            return null;
         } else {
             return closestUnobstructed;
         }

@@ -60,7 +60,33 @@ public class WolfPathfinder {
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         doMicro(enemies);
 
-        for (int i = 0; i < 16; ++i){
+        if (microDir != Direction.ZERO) {
+            uc.move(microDir);
+            return true;
+        } else if (!isEnemies) {
+            for (int i = 0; i < 16; ++i) {
+                for (int j = 0; j < myDirs.length; j++) {
+                    if (myDirs[j] == dir) {
+                        Location loc = myLoc.add(dir);
+                        if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || loc.distanceSquared(enemyBase) > baseRange)) || reckless)) {
+                            uc.move(dir);
+                            return true;
+                        }
+                        break;
+                    }
+                }
+                if (!rotate && myLoc.add(dir.rotateLeft()).distanceSquared(target) > myLoc.add(dir.rotateRight()).distanceSquared(target)) {
+                    rotateRight = true;
+                    rotate = true;
+                }
+                Location newLoc = myLoc.add(dir);
+                if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
+                    //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
+                else lastObstacleFound = myLoc.add(dir);
+                if (rotateRight) dir = dir.rotateRight();
+                else dir = dir.rotateLeft();
+            }
+
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
@@ -71,32 +97,6 @@ public class WolfPathfinder {
                     break;
                 }
             }
-            if (!rotate && myLoc.add(dir.rotateLeft()).distanceSquared(target) > myLoc.add(dir.rotateRight()).distanceSquared(target)) {
-                rotateRight = true;
-                rotate = true;
-            }
-            Location newLoc = myLoc.add(dir);
-            if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
-                //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
-            else lastObstacleFound = myLoc.add(dir);
-            if (rotateRight) dir = dir.rotateRight();
-            else dir = dir.rotateLeft();
-        }
-
-        for (int j = 0; j < myDirs.length; j++) {
-            if (myDirs[j] == dir) {
-                Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || loc.distanceSquared(enemyBase) > baseRange)) || reckless)) {
-                    uc.move(dir);
-                    return true;
-                }
-                break;
-            }
-        }
-
-        if (microDir != Direction.ZERO) {
-            uc.move(microDir);
-            return true;
         }
 
         return false;

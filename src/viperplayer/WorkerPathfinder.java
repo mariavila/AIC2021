@@ -61,43 +61,43 @@ public class WorkerPathfinder {
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         doMicro();
 
-        for (int i = 0; i < 16; ++i){
+        if (microDir != Direction.ZERO) {
+            uc.move(microDir);
+            return true;
+        } else if (!isEnemies) {
+            for (int i = 0; i < 16; ++i) {
+                for (int j = 0; j < myDirs.length; j++) {
+                    if (myDirs[j] == dir) {
+                        Location loc = myLoc.add(dir);
+                        if (uc.canMove(dir) && !uc.hasTrap(loc) && (microInfo[j].damage == 0 && microInfo[j].softdamage == 0 && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {
+                            uc.move(dir);
+                            return true;
+                        }
+                        break;
+                    }
+                }
+                if (!rotate && myLoc.add(dir.rotateLeft()).distanceSquared(target) > myLoc.add(dir.rotateRight()).distanceSquared(target)) {
+                    rotateRight = true;
+                    rotate = true;
+                }
+                Location newLoc = myLoc.add(dir);
+                if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
+                    //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
+                else lastObstacleFound = myLoc.add(dir);
+                if (rotateRight) dir = dir.rotateRight();
+                else dir = dir.rotateLeft();
+            }
+
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
-                    if (uc.canMove(dir) && !uc.hasTrap(loc) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {
+                    if (uc.canMove(dir) && !uc.hasTrap(loc) && (microInfo[j].damage == 0 && microInfo[j].softdamage == 0 && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {
                         uc.move(dir);
                         return true;
                     }
                     break;
                 }
             }
-            if (!rotate && myLoc.add(dir.rotateLeft()).distanceSquared(target) > myLoc.add(dir.rotateRight()).distanceSquared(target)) {
-                rotateRight = true;
-                rotate = true;
-            }
-            Location newLoc = myLoc.add(dir);
-            if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
-                //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
-            else lastObstacleFound = myLoc.add(dir);
-            if (rotateRight) dir = dir.rotateRight();
-            else dir = dir.rotateLeft();
-        }
-
-        for (int j = 0; j < myDirs.length; j++) {
-            if (myDirs[j] == dir) {
-                Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && !uc.hasTrap(loc) && (!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase))))) {
-                    uc.move(dir);
-                    return true;
-                }
-                break;
-            }
-        }
-
-        if (microDir != Direction.ZERO) {
-            uc.move(microDir);
-            return true;
         }
 
         return false;
@@ -111,7 +111,6 @@ public class WorkerPathfinder {
     public void doMicro() {
         enemies = uc.senseUnits(myTeam.getOpponent());
         traps = uc.senseTraps();
-        isEnemies = false;
         int length = enemies.length;
         for (int i = 0; i < 9; i++) {
             if (!uc.canMove(myDirs[i])) continue;
@@ -124,7 +123,7 @@ public class WorkerPathfinder {
 
             for(Location trap: traps) {
                 if(trap.isEqual(target)) {
-                    microInfo[i].damage = 1000;
+                    microInfo[i].damage += 1000;
                     break;
                 }
             }
@@ -132,8 +131,7 @@ public class WorkerPathfinder {
             for (int j = 0; j < length; j++) {
                 Location enemyLoc = enemies[j].getLocation();
                 if (uc.canSenseLocation(enemyLoc) && uc.canSenseLocation(target) && (uc.isObstructed(enemyLoc, target) || !uc.isAccessible(target))) continue;
-                UnitType type = enemies[j].getType();
-                if (type != UnitType.EXPLORER && type != UnitType.BASE) isEnemies = true;
+                isEnemies = true;
                 UnitInfo enemy = enemies[j];
                 UnitType enemyType = enemy.getType();
                 int distance = microInfo[i].loc.distanceSquared(enemy.getLocation());
@@ -148,9 +146,7 @@ public class WorkerPathfinder {
             if (!microInfo[bestIndex].isBetter(microInfo[i])) bestIndex = i;
         }
 
-        if (isEnemies) {
-            microDir = myDirs[bestIndex];
-        }
+        microDir = myDirs[bestIndex];
     }
 
     class MicroInfo {
@@ -193,13 +189,14 @@ public class WorkerPathfinder {
         boolean isBetter(MicroInfo m) {
             if (uc.canAttack()) {
                 if (canAttack() && damage <= 8) {
-                    if (!m.canAttack()) return true;
+                    if (!m.canAttack() || m.damage > 8) return true;
                     return minDistToEnemy >= m.minDistToEnemy;
                 }
                 if (m.canAttack() && m.damage <= 8) return false;
             }
             if (damage > m.damage) return false;
             if (damage < m.damage) return true;
+            if (softdamage == m.softdamage) return minDistToEnemy <= m.minDistToEnemy;
             return softdamage <= m.softdamage;
         }
     }

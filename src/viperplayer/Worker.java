@@ -1,5 +1,6 @@
 package viperplayer;
 
+import aic2021.engine.Unit;
 import aic2021.user.*;
 
 public class Worker extends MyUnit {
@@ -7,6 +8,7 @@ public class Worker extends MyUnit {
     WorkerPathfinder pathfinder;
 
     Team myTeam = uc.getTeam();
+    UnitType[] notDangerousTypes = {UnitType.EXPLORER, UnitType.TRAPPER};
 
     Location resourceLocation = null;
     ResourceInfo resourcesLeft = null;
@@ -45,9 +47,16 @@ public class Worker extends MyUnit {
 
         smokeSignals = tryReadSmoke();
 
+        if (enemyBase == null) {
+            enemyBase = lookForEnemyBase();
+            pathfinder.setEnemyBase(enemyBase);
+            move.setEnemyBase(enemyBase);
+        }
+
         if ((round != 10 && round != 9) || smokeSignals.length > 0) {
             refreshSettlement();
-            tryBarracks();
+            UnitInfo[] enemies = uc.senseUnits(uc.getTeam().getOpponent());
+            tryBarracks(enemies);
             doSmokeStuffProducer();
             Location readArt = tryReadArt();
             if (readArt != null) {
@@ -55,7 +64,7 @@ public class Worker extends MyUnit {
                 move.setEnemyBase(enemyBase);
                 pathfinder.setEnemyBase(enemyBase);
             }
-            attack.genericTryAttack(uc.senseUnits(uc.getTeam().getOpponent()));
+            attack.genericTryAttack(enemies);
             tryGather();
             tryMove();
             tryGather();
@@ -256,7 +265,7 @@ public class Worker extends MyUnit {
         return true;
     }
 
-    private void tryBarracks(){
+    private void tryBarracks(UnitInfo[] enemies){
         if (uc.hasResearched(Technology.JOBS, myTeam)) return;
         if (hasToSendSmokeBarracks) {
             if(uc.canMakeSmokeSignal()) {
@@ -275,7 +284,14 @@ public class Worker extends MyUnit {
                     break;
                 }
             }
-            if (build) barracksBuilt = spawnEmpty(UnitType.BARRACKS);
+
+            UnitInfo closestEnemy;
+            closestEnemy = tactics.getClosestDangerousEnemy(enemies, notDangerousTypes);
+            if(closestEnemy != null) {
+                if (build) barracksBuilt = spawnSafe(UnitType.BARRACKS, closestEnemy.getLocation().directionTo(uc.getLocation()));
+            } else {
+                if (build) barracksBuilt = spawnEmpty(UnitType.BARRACKS);
+            }
             if (barracksBuilt != null) {
                 barracksSmokeTurn = round;
                 if(uc.canMakeSmokeSignal()) {
@@ -407,5 +423,28 @@ public class Worker extends MyUnit {
         } else if (stone <= food && stone <= wood) {
             bestResType = Resource.STONE;
         }
+    }
+
+    Location spawnSafe(UnitType t, Direction safeDir) {
+        Location myLoc = uc.getLocation();
+        Location[] traps = uc.senseTraps(2);
+        Direction dir = safeDir;
+        outerloop:
+        for (int i=0; i<3; i++){
+            if(i==1) dir = safeDir.rotateLeft();
+            else if(i==2) dir = safeDir.rotateRight();
+            if (!uc.canSpawn(t, dir)) continue;
+
+            Location target = myLoc.add(dir);
+            for (Location trap: traps) {
+                if (target.isEqual(trap)) continue outerloop;
+            }
+
+            if (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()) {
+                uc.spawn(t, dir);
+                return myLoc.add(dir);
+            }
+        }
+        return null;
     }
 }

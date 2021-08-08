@@ -130,7 +130,7 @@ public abstract class MyUnit {
                 if (res[1] != null) hasResource = true;
                 if (res[2] != null) hasResource = true;
 
-                if (!hasResource && (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+4) && uc.canSpawn(t, dir)){
+                if (!hasResource && (enemyBase == null || target.distanceSquared(enemyBase) > UnitType.BASE.getAttackRange()+11) && uc.canSpawn(t, dir)){
                     uc.spawn(t, dir);
                     return myLoc.add(dir);
                 }
@@ -195,13 +195,19 @@ public abstract class MyUnit {
     void lightTorch(){
         if (torchTurn -1 == round) randomThrow();
 
-        UnitInfo[] units = uc.senseUnits(myTeam);
         UnitType myType = uc.getType();
-
-        if (UnitType.WORKER == myType || UnitType.EXPLORER == myType || units.length < 3) {
+        if (UnitType.WORKER == myType || UnitType.EXPLORER == myType) {
             if ((torchTurn == 0 || torchTurn -1 <= round) && uc.canLightTorch()) {
                 torchTurn = round + GameConstants.TORCH_DURATION;
                 uc.lightTorch();
+            }
+        } else if(UnitType.WOLF != myType) {
+            UnitInfo[] units = uc.senseUnits(myTeam);
+            if (units.length < 3) {
+                if ((torchTurn == 0 || torchTurn -1 <= round) && uc.canLightTorch()) {
+                    torchTurn = round + GameConstants.TORCH_DURATION;
+                    uc.lightTorch();
+                }
             }
         }
     }

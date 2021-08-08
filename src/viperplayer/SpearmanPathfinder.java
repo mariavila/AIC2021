@@ -62,7 +62,34 @@ public class SpearmanPathfinder {
         //Note that we have to try at most 16 times since we can switch orientation in the middle of the loop. (It can be done more efficiently)
         doMicro();
 
-        for (int i = 0; i < 16; ++i){
+        if (microDir != Direction.ZERO) {
+            uc.move(microDir);
+            return true;
+        }
+        else if (!isEnemies) {
+            for (int i = 0; i < 16; ++i) {
+                for (int j = 0; j < myDirs.length; j++) {
+                    if (myDirs[j] == dir) {
+                        Location loc = myLoc.add(dir);
+                        if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {
+                            uc.move(dir);
+                            return true;
+                        }
+                        break;
+                    }
+                }
+                if (!rotate && myLoc.add(dir.rotateLeft()).distanceSquared(target) > myLoc.add(dir.rotateRight()).distanceSquared(target)) {
+                    rotateRight = true;
+                    rotate = true;
+                }
+                Location newLoc = myLoc.add(dir);
+                if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
+                    //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
+                else lastObstacleFound = myLoc.add(dir);
+                if (rotateRight) dir = dir.rotateRight();
+                else dir = dir.rotateLeft();
+            }
+
             for (int j = 0; j < myDirs.length; j++) {
                 if (myDirs[j] == dir) {
                     Location loc = myLoc.add(dir);
@@ -73,32 +100,6 @@ public class SpearmanPathfinder {
                     break;
                 }
             }
-            if (!rotate && myLoc.add(dir.rotateLeft()).distanceSquared(target) > myLoc.add(dir.rotateRight()).distanceSquared(target)) {
-                rotateRight = true;
-                rotate = true;
-            }
-            Location newLoc = myLoc.add(dir);
-            if (uc.isOutOfMap(newLoc)) rotateRight = !rotateRight;
-                //If I could not go in that direction and it was not outside of the map, then this is the latest obstacle found
-            else lastObstacleFound = myLoc.add(dir);
-            if (rotateRight) dir = dir.rotateRight();
-            else dir = dir.rotateLeft();
-        }
-
-        for (int j = 0; j < myDirs.length; j++) {
-            if (myDirs[j] == dir) {
-                Location loc = myLoc.add(dir);
-                if (uc.canMove(dir) && !uc.hasTrap(loc) && ((!isEnemies && (enemyBase == null || (loc.distanceSquared(enemyBase) > baseRange) || (uc.canSenseLocation(enemyBase) && uc.isObstructed(loc, enemyBase)))) || reckless)) {
-                    uc.move(dir);
-                    return true;
-                }
-                break;
-            }
-        }
-
-        if (microDir != Direction.ZERO) {
-            uc.move(microDir);
-            return true;
         }
 
         return false;
@@ -191,13 +192,14 @@ public class SpearmanPathfinder {
         boolean isBetter(MicroInfo m) {
             if (uc.canAttack()) {
                 if (canAttack() && damage <= 10) {
-                    if (!m.canAttack()) return true;
+                    if (!m.canAttack() || m.damage > 10) return true;
                     return minDistToEnemy >= m.minDistToEnemy;
                 }
                 if (m.canAttack() && m.damage <= 10) return false;
             }
             if (damage > m.damage) return false;
             if (damage < m.damage) return true;
+            if (softdamage == m.softdamage) return minDistToEnemy <= m.minDistToEnemy;
             return softdamage <= m.softdamage;
         }
     }
