@@ -179,7 +179,7 @@ public class Base extends MyUnit {
                 }
             }
         }
-        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves)) {
+        if ((enemyAxemen+enemySpearmen+enemyWolves > allyWolves && enemyWolves + enemyAxemen < 5)) {
             spawnSafe(UnitType.WOLF);
             wolves++;
         }
@@ -271,6 +271,9 @@ public class Base extends MyUnit {
                 if(!uc.hasResearched(Technology.COIN, myTeam)) {
                     if(uc.canResearchTechnology(Technology.COIN)) uc.researchTechnology(Technology.COIN);
                 }
+            }
+            if(!uc.hasResearched(Technology.COIN, myTeam) && enemyWolves + enemyAxemen >= 4) {
+                if(uc.canResearchTechnology(Technology.COIN)) uc.researchTechnology(Technology.COIN);
             }
             if (techLevel == 0 && !rushAttack && !hasWater && !ecoMap && !normalAttack && food > 1000 && wood > 1000 && stone > 1000) {
                 uc.researchTechnology(Technology.MILITARY_TRAINING);
